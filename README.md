@@ -3,6 +3,10 @@ Description:
 
 This is a simple server that scrapes Citrix NetScaler (NS) stats and exports them via HTTP to Prometheus. Prometheus can then be added as a data source to Grafana to view the netscaler stats graphically.
 
+![exporter_diagram](https://user-images.githubusercontent.com/40210995/41329824-84c214fe-6eed-11e8-899c-3b9c73b52718.png)
+
+
+
 ![alt text](https://code.citrite.net/users/rakshithv/repos/exporter/browse/exporter-diagram.png?at=feature-try-except-3 "Example Setup")
 
    In the above diagram, blue boxes represent physical machines or VMs and grey boxes represent containers. 
