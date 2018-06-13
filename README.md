@@ -27,10 +27,10 @@ python ns-exporter:v1 [flags]
 ```
 where the flags are:
 
-flag &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;|    Description
+flag             |    Description
 -----------------|--------------------
 --target-nsip    |Used to specify the &lt;IP:port&gt; of the Netscalers to be monitored
---port	         |Used to specify which port to bind the exporter to. Agents like Prometheus will need to scrape this port of the container to access stats being exported
+--port	        |Used to specify which port to bind the exporter to. Agents like Prometheus will need to scrape this port of the container to access stats being exported
 -h               |Provides helper docs related to the exporter
 
 The exporter can be setup as given in the diagram using;
