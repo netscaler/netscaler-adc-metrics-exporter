@@ -1,5 +1,8 @@
-Description:
+Exporter for NetScaler Stats
 ===
+
+Description:
+---
 
 This is a simple server that scrapes Citrix NetScaler (NS) stats and exports them via HTTP to Prometheus. Prometheus can then be added as a data source to Grafana to view the netscaler stats graphically.
 
@@ -7,15 +10,15 @@ This is a simple server that scrapes Citrix NetScaler (NS) stats and exports the
 
    In the above diagram, blue boxes represent physical machines or VMs and grey boxes represent containers. 
 There are two physical/virual NetScaler instances present with IPs 10.0.0.1 and 10.0.0.2 and a NetScaler CPX (containerized NetScaler) with an IP 172.17.0.2.
-To monitor stats and counters of these NS instances, an exporter (172.17.0.3) is being run as a container. 
-The exporter is able to get NS stats such as http request rates, ssl encryption-decryption rate, total hits to a vserver, etc from the three NS instances and send them to the Prometheus containter 172.17.0.4.
-The Prometheus container then sends the stats acquired to Graphana which can plot them, set alarms, create heat maps, generate tables, etc as needed to analyse the NS stats. 
+To monitor stats and counters of these NetScaler instances, an exporter (172.17.0.3) is being run as a container. 
+The exporter is able to get NetScaler stats such as http request rates, ssl encryption-decryption rate, total hits to a vserver, etc from the three NetScaler instances and send them to the Prometheus containter 172.17.0.4.
+The Prometheus container then sends the stats acquired to Graphana which can plot them, set alarms, create heat maps, generate tables, etc as needed to analyse the NetScaler stats. 
 
    Details about setting up and working of the exporter is given below. 
 
 Usage:
-===
-The exporter can be run as container once built from the Dockerfile. The container can be build using ;
+---
+The exporter can be run as container once built from the Dockerfile. The container can be built using
 ```
 docker build -f Dockerfile -t ns-exporter:v1 ./
 ```
@@ -23,7 +26,7 @@ docker build -f Dockerfile -t ns-exporter:v1 ./
 
 Once built, the general structure of the command to run the exporter is:
 ```
-docker run -dt -p [host-port:container-port] --name NS-exporter ns-exporter:v1 [flags]
+docker run -dt -p [host-port:container-port] --name netscaler-exporter ns-exporter:v1 [flags]
 ```
 where the following flags can be supplied:
 
@@ -37,17 +40,13 @@ flag             |    Description
 To setup the exporter as given in the diagram, the following command can be used:
 
 ```
-docker run -dt -p 8888:8888 --name NS-exporter ns-exporter:v1 --target-nsip=10.0.0.1:80 --target-nsip=10.0.0.2:80 --target-nsip=172.17.0.2:80 --port 8888
+docker run -dt -p 8888:8888 --name netscaler-exporter ns-exporter:v1 --target-nsip=10.0.0.1:80 --target-nsip=10.0.0.2:80 --target-nsip=172.17.0.2:80 --port 8888
 ```
-This directs the exporter container to scrape the 10.0.0.1, 10.0.0.2, and 172.17.0.2, IPs on port 80, and the expose the stats it collects on port 8888.
+This directs the exporter container to scrape the 10.0.0.1, 10.0.0.2, and 172.17.0.2, IPs on port 80, and the expose the stats it collects on port 8888. 
+The user can then access the exported metrics directly thorugh port 8888 on the machine where the exporter is running, or Prometheus and Graphana can be setup to view the exported metrics though their GUI.
   
-
-GIVE PROM AND GRAPH setup steps also??
- 
-
-
 Stats Exported by Default:
-===
+---
 
 The exporter is configured to export some of the most commonly used stats for a Netscaler device. They are mentioned in the ```metrics.json``` file and summarized in the table below:
 
@@ -63,11 +62,15 @@ Sl. No. |     STATS 				| NS nitro name
 8	    | Service stats	            | "service"
 9		| Service group stats		| "services"
 
+
+Exporting Stats not Included by Default:
+---
+
 In this document, the term 'entity' has been used to refer to NetScaler entities such as HTTP, Interfaces, LB, etc. The term 'metrics' has been used to refer to the stats collected for these entities. For example,
 the entity ```lbvserver``` has metrics such as ```totalpktsent```, ```tothits```, ```requestsrate```, etc. These metrics are classified by Prometheus into two categories -- ```counters``` and ```guages``` as per this [link](https://prometheus.io/docs/concepts/metric_types/)
-Metrics whose value can only increase are counters and those which can increase or decrease are called guages. For the example of ```lbvserver```, ```totalpktsent``` and ```tothits``` are counters, while ```requestsrate``` is a guage. 
+Metrics whose value can only increase with time are called counters and those which can increase or decrease are called guages. For the example of ```lbvserver```, ```totalpktsent``` and ```tothits``` are counters, while ```requestsrate``` is a guage. 
 Accordingly, entities and their metrics have been provided in the ```metrics.json``` file. By modifying ```metrics.json```, new entities and their metrics which are not exported by default can be included. 
-For example, adding the lines given between the ```-.-.-.-``` lines below, directs the exporter to also export ```aaa``` stats.
+For example, to  export ```aaa``` stats, the lines given between ```-.-.-.-``` can be added as follows:
 
 
 ```
@@ -149,6 +152,6 @@ For example, adding the lines given between the ```-.-.-.-``` lines below, direc
 
 ```
 
-On a single NS, some entities such as lbvserver, csvserver, interfaces, etc can have multiple entities each having its own name. Such entities have an additional section structure in ```metrics.json``` called ```label```.
-A lable can be used along with such entities to differenciate stats based on name, ip, type as needed. Other entities such as http, tcp, ssl are present as a single global parameter for the NS, in which case the ```label```
-datastrcuture is not needed.
+On a given NetScaler, some entities such as lbvserver, csvserver, interfaces, etc can have multiple instances of that entity configured, each having its own name. Such entities have an additional structure in ```metrics.json``` called ```label```.
+A label is used for such entities to differenciate stats among different instances of that entity based on name, ip, type, or any other suitable characteristic of that entitiy. 
+Other entities such as http, tcp, ssl are present as a single global parameter for the NetScaler, and thus do not have a ```label``` section in ```metrics.json```.
