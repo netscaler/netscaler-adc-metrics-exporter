@@ -18,17 +18,14 @@ The Prometheus container then sends the stats acquired to Graphana which can plo
 
 Usage:
 ---
-The exporter can be run as container once built from the Dockerfile. The container can be built using
-```
-docker build -f Dockerfile -t ns-exporter:v1 ./
-```
+The exporter can be run as a standalone python script or built into a container.
 
-
-Once built, the general structure of the command to run the exporter is:
+### Usage as a Python Script:
+To use the exporter as a python script, the following command can be fired
 ```
-docker run -dt -p [host-port:container-port] --name netscaler-exporter ns-exporter:v1 [flags]
+python ns-exporter:v1 [flags]
 ```
-where the following flags can be supplied:
+where the flags are:
 
 flag             |    Description
 -----------------|--------------------
@@ -36,9 +33,23 @@ flag             |    Description
 --port	         |Used to specify which port to bind the exporter to. Agents like Prometheus will need to scrape this port of the container to access stats being exported
 -h               |Provides helper docs related to the exporter
 
+The exporter can be setup as given in the diagram using;
+```
+python exporter.py --target-nsip=10.0.0.1:80 --target-nsip=10.0.0.2:80 --target-nsip=172.17.0.2:80 --port 8888
+```
+This directs the exporter container to scrape the 10.0.0.1, 10.0.0.2, and 172.17.0.2, IPs on port 80, and the expose the stats it collects on port 8888. 
+The user can then access the exported metrics directly thorugh port 8888 on the machine where the exporter is running, or Prometheus and Graphana can be setup to view the exported metrics though their GUI.
 
+### Usage as a Container:
+In order to use the exporter as a container, it needs to be built into a container. This can be done as follows; 
+```
+docker build -f Dockerfile -t ns-exporter:v1 ./
+```
+Once built, the general structure of the command to run the exporter is:
+```
+docker run -dt -p [host-port:container-port] --name netscaler-exporter ns-exporter:v1 [flags]
+```
 To setup the exporter as given in the diagram, the following command can be used:
-
 ```
 docker run -dt -p 8888:8888 --name netscaler-exporter ns-exporter:v1 --target-nsip=10.0.0.1:80 --target-nsip=10.0.0.2:80 --target-nsip=172.17.0.2:80 --port 8888
 ```
@@ -155,3 +166,8 @@ For example, to  export ```aaa``` stats, the lines given between ```-.-.-.-``` c
 On a given NetScaler, some entities such as lbvserver, csvserver, interfaces, etc can have multiple instances of that entity configured, each having its own name. Such entities have an additional structure in ```metrics.json``` called ```label```.
 A label is used for such entities to differenciate stats among different instances of that entity based on name, ip, type, or any other suitable characteristic of that entitiy. 
 Other entities such as http, tcp, ssl are present as a single global parameter for the NetScaler, and thus do not have a ```label``` section in ```metrics.json```.
+
+Verification of Exporter Functionality
+---
+
+ADD
