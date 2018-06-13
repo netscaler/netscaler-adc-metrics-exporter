@@ -45,7 +45,7 @@ In order to use the exporter as a container, it needs to be built into a contain
 ```
 docker build -f Dockerfile -t ns-exporter:v1 ./
 ```
-Once built, the general structure of the command to run the exporter is:
+Once built, the general structure of the command to run the exporter is very similar to what was used while running it as a script:
 ```
 docker run -dt -p [host-port:container-port] --name netscaler-exporter ns-exporter:v1 [flags]
 ```
@@ -169,5 +169,10 @@ Other entities such as http, tcp, ssl are present as a single global parameter f
 
 Verification of Exporter Functionality
 ---
+To verify if the exporter is scraping and exporting stats from NetScaler instances, the following url can be opened on a web browser or curl command can be fired from CLI:
+```
+http://<hostIP>:<port>
+curl http://<hostIP>:<port>
+```
+where hostIP is the IP of the host on which the python script or container is running, and port is the value of the ```--port``` flag which had been provided (```8888``` as per the example).
 
-ADD
