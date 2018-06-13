@@ -5,10 +5,6 @@ This is a simple server that scrapes Citrix NetScaler (NS) stats and exports the
 
 ![exporter_diagram](https://user-images.githubusercontent.com/40210995/41329824-84c214fe-6eed-11e8-899c-3b9c73b52718.png)
 
-
-
-![alt text](https://code.citrite.net/users/rakshithv/repos/exporter/browse/exporter-diagram.png?at=feature-try-except-3 "Example Setup")
-
    In the above diagram, blue boxes represent physical machines or VMs and grey boxes represent containers. 
 There are two physical/virual NetScaler instances present with IPs 10.0.0.1 and 10.0.0.2 and a NetScaler CPX (containerized NetScaler) with an IP 172.17.0.2.
 To monitor stats and counters of these NS instances, an exporter (172.17.0.3) is being run as a container. 
