@@ -14,7 +14,7 @@ To monitor stats and counters of these NetScaler instances, an exporter (172.17.
 The exporter is able to get NetScaler stats such as http request rates, ssl encryption-decryption rate, total hits to a vserver, etc from the three NetScaler instances and send them to the Prometheus containter 172.17.0.4.
 The Prometheus container then sends the stats acquired to Graphana which can plot them, set alarms, create heat maps, generate tables, etc as needed to analyse the NetScaler stats. 
 
-   Details about setting up and working of the exporter is given below. 
+   Details about setting up the exporter to work in an environment as given in the figure is provided in the following sections. A note on which NetScaler entities/metrics the exporter scrapes by default and how to modify it is also explained.
 
 Usage:
 ---
