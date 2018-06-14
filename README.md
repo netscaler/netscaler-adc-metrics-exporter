@@ -6,7 +6,7 @@ Description:
 
 This is a simple server that scrapes Citrix NetScaler (NS) stats and exports them via HTTP to Prometheus. Prometheus can then be added as a data source to Grafana to view the netscaler stats graphically.
 
-![exporter_diagram](https://user-images.githubusercontent.com/40210995/41329824-84c214fe-6eed-11e8-899c-3b9c73b52718.png)
+![exporter_diagram](https://user-images.githubusercontent.com/40210995/41391720-f89ee57e-6fb9-11e8-9550-02dc60dcfa43.png)
 
    In the above diagram, blue boxes represent physical machines or VMs and grey boxes represent containers. 
 There are two physical/virual NetScaler instances present with IPs 10.0.0.1 and 10.0.0.2 and a NetScaler CPX (containerized NetScaler) with an IP 172.17.0.2.
