@@ -23,7 +23,7 @@ The exporter can be run as a standalone python script or built into a container.
 ### Usage as a Python Script:
 To use the exporter as a python script, the following command can be fired
 ```
-python ns-exporter:v1 [flags]
+python exporter.py [flags]
 ```
 where the flags are:
 
@@ -174,5 +174,50 @@ To verify if the exporter is scraping and exporting stats from NetScaler instanc
 http://<hostIP>:<port>
 curl http://<hostIP>:<port>
 ```
-where ```hostIP``` is the IP of the host on which the python script or container is running, and ```port``` is the value of the ```--port``` flag which had been provided (```8888``` as per the example).
-
+where ```hostIP``` is the IP of the host on which the python script or container is running, and ```port``` is the value of the ```--port``` flag which had been provided (```8888``` as per the example). All the stats for all the entities configured on the NetScaler and provided in ```metrics.json``` should appear along with their live values. An example response would be as follows;
+```
+# HELP netscaler_http_tot_rx_packets tcptotrxpkts
+# TYPE netscaler_http_tot_rx_packets counter
+netscaler_http_tot_rx_packets{nsip="10.0.0.1:80"} 2094931640.0
+# HELP netscaler_tcp_tot_rx_bytes tcptotrxbytes
+# TYPE netscaler_tcp_tot_rx_bytes counter
+netscaler_tcp_tot_rx_bytes{nsip="10.0.0.1:80"} 735872803514.0
+# HELP netscaler_tcp_tx_bytes tcptottxbytes
+# TYPE netscaler_tcp_tx_bytes counter
+netscaler_tcp_tx_bytes{nsip="10.0.0.1:80"} 249210838820.0
+# HELP netscaler_tcp_tot_tx_packets tcptottxpkts
+# TYPE netscaler_tcp_tot_tx_packets counter
+netscaler_tcp_tot_tx_packets{nsip="10.0.0.1:80"} 2082562915.0
+# HELP netscaler_tcp_tot_client_connections_opened tcptotclientconnopened
+# TYPE netscaler_tcp_tot_client_connections_opened counter
+netscaler_tcp_tot_client_connections_opened{nsip="10.0.0.1:80"} 35606929.0
+netscaler_ip_tot_bad_mac_addresses{nsip="10.0.0.1:80"} 0.0
+# HELP netscaler_ip_rx_packers_rate iprxpktsrate
+# TYPE netscaler_ip_rx_packers_rate gauge
+netscaler_ip_rx_packers_rate{nsip="10.0.0.1:80"} 17703.0
+# HELP netscaler_ip_rx_bytes_rate iprxbytesrate
+# TYPE netscaler_ip_rx_bytes_rate gauge
+netscaler_ip_rx_bytes_rate{nsip="10.0.0.1:80"} 5797562.0
+# HELP netscaler_ip_tx_packets_rate iptxpktsrate
+# TYPE netscaler_ip_tx_packets_rate gauge
+netscaler_ip_tx_packets_rate{nsip="10.0.0.1:80"} 18119.0
+# HELP netscaler_ip_bytes_rate iptxbytesrate
+# TYPE netscaler_ip_bytes_rate gauge
+netscaler_ip_bytes_rate{nsip="10.0.0.1:80"} 1038524.0
+# HELP netscaler_services_tot_requests totalrequests
+# TYPE netscaler_services_tot_requests counter
+netscaler_services_tot_requests{nsip="10.0.0.2:80",service_ip="20.0.0.56",servicegroup_name="svcgrp"} 10.0
+netscaler_services_tot_requests{nsip="10.0.0.2:80",service_ip="20.0.0.57",servicegroup_name="svcgrp"} 11.0
+netscaler_services_tot_requests{nsip="10.0.0.2:80",service_ip="20.0.0.60",servicegroup_name="svcgrp2"} 4.0
+# HELP netscaler_services_tot_response_bytes totalresponsebytes
+# TYPE netscaler_services_tot_response_bytes counter
+netscaler_services_tot_response_bytes{nsip="10.0.0.2:80",service_ip="20.0.0.56",servicegroup_name="svcgrp"} 2320.0
+netscaler_services_tot_response_bytes{nsip="10.0.0.2:80",service_ip="20.0.0.57",servicegroup_name="svcgrp"} 2552.0
+netscaler_services_tot_response_bytes{nsip="10.0.0.2:80",service_ip="20.0.0.60",servicegroup_name="svcgrp2"} 936.0
+# HELP netscaler_services_tot_request_bytes totalrequestbytes
+# TYPE netscaler_services_tot_request_bytes counter
+netscaler_services_tot_request_bytes{nsip="10.0.0.2:80",service_ip="20.0.0.56",servicegroup_name="svcgrp"} 860.0
+netscaler_services_tot_request_bytes{nsip="10.0.0.2:80",service_ip="20.0.0.57",servicegroup_name="svcgrp"} 946.0
+netscaler_services_tot_request_bytes{nsip="10.0.0.2:80",service_ip="20.0.0.60",servicegroup_name="svcgrp2"} 344.0
+```
+Stats (of counter and gugae type) for enities such as http, tcp, ip, and service_groups is seen in the example response given above.
