@@ -60,10 +60,10 @@ class NetscalerCollector(object):
 
         for entity_name, entity in self.metrics.items(): # Map NS stat name and Prometheus name and upload the stat as a counter or guage to Prometheus
             if('labels' in entity.keys()):
-            	label_names = [v[1] for v in entity['labels']]
-            	label_names.append('nsip')
+                label_names = [v[1] for v in entity['labels']]
+                label_names.append('nsip')
             else:
-            	label_names = []
+                label_names = []
                 label_names.append('nsip')
             
             for ns_metric_name, prom_metric_name in entity.get('counters', []): 
@@ -75,13 +75,13 @@ class NetscalerCollector(object):
                         entity_stats = [entity_stats]
                     
                     for data_item in entity_stats:
-                    	if('labels' in entity.keys()):
-                        	label_values = [data_item[key] for key in [v[0] for v in entity['labels']]]
-                        	label_values.append(nsip)
+                        if('labels' in entity.keys()):
+                            label_values = [data_item[key] for key in [v[0] for v in entity['labels']]]
+                            label_values.append(nsip)
                         else:
                             label_values = [nsip]
                         try:
-                        	c.add_metric(label_values, float(data_item[ns_metric_name]))
+                            c.add_metric(label_values, float(data_item[ns_metric_name]))
                         except Exception as e:
                             print('>>> Caught exception while adding counter %s to %s: %s' %(ns_metric_name, entity_name, str(e)))
                 yield c
@@ -96,13 +96,13 @@ class NetscalerCollector(object):
                         entity_stats = [entity_stats]
                     
                     for data_item in entity_stats:
-                    	if('labels' in entity.keys()):
-                    		label_values = [data_item[key] for key in [v[0] for v in entity['labels']]]
-                    		label_values.append(nsip)
-                    	else:
-                    	    label_values = [nsip]
+                        if('labels' in entity.keys()):
+                            label_values = [data_item[key] for key in [v[0] for v in entity['labels']]]
+                            label_values.append(nsip)
+                        else:
+                            label_values = [nsip]
                         try:
-                        	g.add_metric(label_values, float(data_item[ns_metric_name]))
+                            g.add_metric(label_values, float(data_item[ns_metric_name]))
                         except Exception as e:
                             print('>>> Caught exception while adding guage %s to %s: %s' %(ns_metric_name, entity_name, str(e)) )
                 yield g
