@@ -21,9 +21,13 @@ Usage:
 The exporter can be run as a standalone python script or built into a container.
 
 ### Usage as a Python Script:
-To use the exporter as a python script, the following command can be fired
+To use the exporter as a python script, the ```prometheus_client``` package needs to be installed. This can be done using 
 ```
-python exporter.py [flags]
+pip install prometheus_client
+```
+Now, the following command can be used to run the exporter as a python script;
+```
+nohup python exporter.py [flags] &
 ```
 where the flags are:
 
