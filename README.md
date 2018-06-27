@@ -12,7 +12,7 @@ This is a simple server that scrapes Citrix NetScaler (NS) stats and exports the
 There are two physical/virual NetScaler instances present with IPs 10.0.0.1 and 10.0.0.2 and a NetScaler CPX (containerized NetScaler) with an IP 172.17.0.2.
 To monitor stats and counters of these NetScaler instances, an exporter (172.17.0.3) is being run as a container. 
 The exporter is able to get NetScaler stats such as http request rates, ssl encryption-decryption rate, total hits to a vserver, etc from the three NetScaler instances and send them to the Prometheus containter 172.17.0.4.
-The Prometheus container then sends the stats acquired to Graphana which can plot them, set alarms, create heat maps, generate tables, etc as needed to analyse the NetScaler stats. 
+The Prometheus container then sends the stats acquired to Grafana which can plot them, set alarms, create heat maps, generate tables, etc as needed to analyse the NetScaler stats. 
 
    Details about setting up the exporter to work in an environment as given in the figure is provided in the following sections. A note on which NetScaler entities/metrics the exporter scrapes by default and how to modify it is also explained.
 
@@ -42,7 +42,7 @@ The exporter can be setup as given in the diagram using;
 nohup python exporter.py --target-nsip=10.0.0.1:80 --target-nsip=10.0.0.2:80 --target-nsip=172.17.0.2:80 --port 8888 &
 ```
 This directs the exporter container to scrape the 10.0.0.1, 10.0.0.2, and 172.17.0.2, IPs on port 80, and the expose the stats it collects on port 8888. 
-The user can then access the exported metrics directly thorugh port 8888 on the machine where the exporter is running, or Prometheus and Graphana can be setup to view the exported metrics though their GUI.
+The user can then access the exported metrics directly thorugh port 8888 on the machine where the exporter is running, or Prometheus and Grafana can be setup to view the exported metrics though their GUI.
 
 ### Usage as a Container:
 In order to use the exporter as a container, it needs to be built into a container. This can be done as follows; 
@@ -58,7 +58,7 @@ To setup the exporter as given in the diagram, the following command can be used
 docker run -dt -p 8888:8888 --name netscaler-exporter ns-exporter:v1 --target-nsip=10.0.0.1:80 --target-nsip=10.0.0.2:80 --target-nsip=172.17.0.2:80 --port 8888
 ```
 This directs the exporter container to scrape the 10.0.0.1, 10.0.0.2, and 172.17.0.2, IPs on port 80, and the expose the stats it collects on port 8888. 
-The user can then access the exported metrics directly thorugh port 8888 on the machine where the exporter is running, or Prometheus and Graphana can be setup to view the exported metrics though their GUI.
+The user can then access the exported metrics directly thorugh port 8888 on the machine where the exporter is running, or Prometheus and Grafana can be setup to view the exported metrics though their GUI.
   
 Stats Exported by Default:
 ---
