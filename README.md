@@ -78,7 +78,7 @@ Sl. No. |     STATS 				| NS nitro name
 9		| Service group stats		| "services"
 
 
-Exporting Stats not Included by Default:
+Exporting Additional Stats which are not Included by Default:
 ---
 
 In this document, the term 'entity' has been used to refer to NetScaler entities such as HTTP, Interfaces, LB, etc. The term 'metrics' has been used to refer to the stats collected for these entities. For example,
