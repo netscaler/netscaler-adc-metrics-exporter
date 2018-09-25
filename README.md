@@ -10,20 +10,22 @@ This is a simple server that scrapes Citrix NetScaler (NS) stats and exports the
 
    In the above diagram, blue boxes represent physical machines or VMs and grey boxes represent containers. 
 There are two physical/virual NetScaler instances present with IPs 10.0.0.1 and 10.0.0.2 and a NetScaler CPX (containerized NetScaler) with an IP 172.17.0.2.
-To monitor stats and counters of these NetScaler instances, an exporter (172.17.0.3) is being run as a container. 
-The exporter is able to get NetScaler stats such as http request rates, ssl encryption-decryption rate, total hits to a vserver, etc from the three NetScaler instances and send them to the Prometheus containter 172.17.0.4.
-The Prometheus container then sends the stats acquired to Grafana which can plot them, set alarms, create heat maps, generate tables, etc as needed to analyse the NetScaler stats. 
+To monitor stats and counters of these NetScaler instances, an exporter (172.17.0.3) is being run as a container. It collects NetScaler stats such as total hits to a vserver, http request rate, ssl encryption-decryption rate, etc from the three NetScaler instances and holds them until the Prometheus containter 172.17.0.4 pulls the stats for storage as a time series. Grafana can then be pointed to the Prometheus container to fetch the stats, plot them, set alarms, create heat maps, generate tables, etc as needed to analyse the NetScaler stats. 
 
    Details about setting up the exporter to work in an environment as given in the figure is provided in the following sections. A note on which NetScaler entities/metrics the exporter scrapes by default and how to modify it is also explained.
 
 Usage:
 ---
-The exporter can be run as a standalone python script or built into a container.
+The exporter can be run as a standalone python script, built into a container or run as a pod in Kubernetes. The corresponding drop-downs explain how to deploy it in each of the manners.
 
-### Usage as a Python Script:
-To use the exporter as a python script, the ```prometheus_client``` package needs to be installed. This can be done using 
+<details>
+<summary>Usage as a Python Script</summary>
+<br>
+
+To use the exporter as a python script, the ```prometheus_client``` and ```requests``` package needs to be installed. This can be done using 
 ```
 pip install prometheus_client
+pip install requests
 ```
 Now, the following command can be used to run the exporter as a python script;
 ```
@@ -31,20 +33,29 @@ nohup python exporter.py [flags] &
 ```
 where the flags are:
 
-flag             |    Description
+flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description
 -----------------|--------------------
---target-nsip    |Used to specify the &lt;IP:port&gt; of the Netscalers to be monitored
---port	        |Used to specify which port to bind the exporter to. Agents like Prometheus will need to scrape this port of the container to access stats being exported
+--target-nsip    |Provide the &lt;IP:port&gt; of the Netscalers to be monitored
+--port	        |Specify on which port the stats collected by the exporter should be exposed. Agents like Prometheus will need to scrape this port of the container to access stats being exported
+--username       |Provide the username of the NetScaler to be monitored. Default: 'nsroot'
+--password       |Provide the password of the NetScaler to be monitored. Default: 'nsroot'
+--secure         |Option 'yes' can be provided to run stat collection from NetScalers over TLS. Default: 'no'.
 -h               |Provides helper docs related to the exporter
 
 The exporter can be setup as given in the diagram using;
 ```
-nohup python exporter.py --target-nsip=10.0.0.1:80 --target-nsip=10.0.0.2:80 --target-nsip=172.17.0.2:80 --port 8888 &
+nohup python exporter.py --target-nsip=10.0.0.1:80 --target-nsip=10.0.0.2:80 --target-nsip=172.17.0.2:80 --port 8080 &
 ```
-This directs the exporter container to scrape the 10.0.0.1, 10.0.0.2, and 172.17.0.2, IPs on port 80, and the expose the stats it collects on port 8888. 
+This directs the exporter container to scrape the 10.0.0.1, 10.0.0.2, and 172.17.0.2, IPs on port 80, and the expose the stats it collects on port 8080. 
 The user can then access the exported metrics directly thorugh port 8888 on the machine where the exporter is running, or Prometheus and Grafana can be setup to view the exported metrics though their GUI.
+</details>
 
-### Usage as a Container:
+
+
+<details>
+<summary>Usage as a Container</summary>
+<br>
+
 In order to use the exporter as a container, it needs to be built into a container. This can be done as follows; 
 ```
 docker build -f Dockerfile -t ns-exporter:v1 ./
@@ -53,13 +64,79 @@ Once built, the general structure of the command to run the exporter is very sim
 ```
 docker run -dt -p [host-port:container-port] --name netscaler-exporter ns-exporter:v1 [flags]
 ```
+where the flags are:
+
+flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description
+-----------------|--------------------
+--target-nsip    |Provide the &lt;IP:port&gt; of the Netscalers to be monitored
+--port	        |Specify on which port the stats collected by the exporter should be exposed. Agents like Prometheus will need to scrape this port of the container to access stats being exported
+--username       |Provide the username of the NetScaler to be monitored. Default: 'nsroot'
+--password       |Provide the password of the NetScaler to be monitored. Default: 'nsroot'
+--secure         |Option 'yes' can be provided to run stat collection from NetScalers over TLS. Default: 'no'.
+
 To setup the exporter as given in the diagram, the following command can be used:
 ```
-docker run -dt -p 8888:8888 --name netscaler-exporter ns-exporter:v1 --target-nsip=10.0.0.1:80 --target-nsip=10.0.0.2:80 --target-nsip=172.17.0.2:80 --port 8888
+docker run -dt -p 8080:8080 --name netscaler-exporter ns-exporter:v1 --target-nsip=10.0.0.1:80 --target-nsip=10.0.0.2:80 --target-nsip=172.17.0.2:80 --port 8080
 ```
-This directs the exporter container to scrape the 10.0.0.1, 10.0.0.2, and 172.17.0.2, IPs on port 80, and the expose the stats it collects on port 8888. 
-The user can then access the exported metrics directly thorugh port 8888 on the machine where the exporter is running, or Prometheus and Grafana can be setup to view the exported metrics though their GUI.
-  
+This directs the exporter container to scrape the 10.0.0.1, 10.0.0.2, and 172.17.0.2, IPs on port 80, and the expose the stats it collects on port 8080. 
+The user can then access the exported metrics directly thorugh port 8080 on the machine where the exporter is running, or Prometheus and Grafana can be setup to view the exported metrics though their GUI.
+</details>
+
+
+<details>
+<summary>Usage as a Pod in Kubernetes</summary>
+<br>
+
+Once the docker image is built using ```docker build -f Dockerfile -t ns-exporter:v1 ./```, the following yaml file can be used to deploy the exporter as a pod in Kuberenetes and expose it as a service. Here, the necessary flags are provided as a list in the ```args:``` section of the yaml file.
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: exp
+  labels:
+    app: exp
+spec:
+  containers:
+    - name: exp
+      image: ns-exporter:v1
+      args:
+        - "--target-nsip=10.0.0.1:80"
+        - "--target-nsip=10.0.0.2:80"
+        - "--target-nsip=10.0.0.3:80"
+        - "--port=8080"
+      imagePullPolicy: IfNotPresent
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: exp
+  labels:
+    app: exp
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8080
+    targetPort: 8080
+    name: exp-port
+  selector:
+    app: exp
+```
+Flags which can be provided to the exporter in the ```args:``` section are:
+
+flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description
+-----------------|--------------------
+--target-nsip    |Provide the &lt;IP:port&gt; of the Netscalers to be monitored
+--port	        |Specify on which port the stats collected by the exporter should be exposed. Agents like Prometheus will need to scrape this port of the container to access stats being exported
+--username       |Provide the username of the NetScaler to be monitored. Default: 'nsroot'
+--password       |Provide the password of the NetScaler to be monitored. Default: 'nsroot'
+--secure         |Option 'yes' can be provided to run stat collection from NetScalers over TLS. Default: 'no'.
+
+</details>
+
+<br />
+
+**NOTE:**  If TLS is being used by providing the --secure='yes' option, then it is recommended to create a new user on the NetScaler having only read permission. Documentation on creating new users with required permission can be found here. <ADD LINK>
+
 Stats Exported by Default:
 ---
 
@@ -82,7 +159,8 @@ Exporting Additional Stats which are not Included by Default:
 ---
 
 In this document, the term 'entity' has been used to refer to NetScaler entities such as HTTP, Interfaces, LB, etc. The term 'metrics' has been used to refer to the stats collected for these entities. For example,
-the entity ```lbvserver``` has metrics such as ```totalpktsent```, ```tothits```, ```requestsrate```, etc. These metrics are classified by Prometheus into two categories -- ```counters``` and ```guages``` as per this [link](https://prometheus.io/docs/concepts/metric_types/)
+the entity ```lbvserver``` has metrics such as ```totalpktsent```, ```tothits```, ```requestsrate```, etc. These metrics are classified by Prometheus into two categories -- ```counters``` and ```guages``` as per this [link](https://prometheus.io/docs/concepts/metric_types/).   
+
 Metrics whose value can only increase with time are called counters and those which can increase or decrease are called guages. For the example of ```lbvserver```, ```totalpktsent``` and ```tothits``` are counters, while ```requestsrate``` is a guage. 
 Accordingly, entities and their metrics have been provided in the ```metrics.json``` file. By modifying ```metrics.json```, new entities and their metrics which are not exported by default can be included. 
 For example, to  export ```aaa``` stats, the lines given between ```-.-.-.-``` can be added as follows:
@@ -178,7 +256,7 @@ To verify if the exporter is scraping and exporting stats from NetScaler instanc
 http://<hostIP>:<port>
 curl http://<hostIP>:<port>
 ```
-where ```hostIP``` is the IP of the host on which the python script or container is running, and ```port``` is the value of the ```--port``` flag which had been provided (```8888``` as per the example). All the stats for all the entities configured on the NetScaler and provided in ```metrics.json``` should appear along with their live values. An example response would be as follows;
+where ```hostIP``` is the IP of the host on which the python script or container is running, and ```port``` is the value of the ```--port``` flag which had been provided (```8080``` as per the example). All the stats for all the entities configured on the NetScaler and provided in ```metrics.json``` should appear along with their live values. An example response would be as follows;
 ```
 # HELP netscaler_http_tot_rx_packets tcptotrxpkts
 # TYPE netscaler_http_tot_rx_packets counter
@@ -224,4 +302,4 @@ netscaler_services_tot_request_bytes{nsip="10.0.0.2:80",service_ip="20.0.0.56",s
 netscaler_services_tot_request_bytes{nsip="10.0.0.2:80",service_ip="20.0.0.57",servicegroup_name="svcgrp"} 946.0
 netscaler_services_tot_request_bytes{nsip="10.0.0.2:80",service_ip="20.0.0.60",servicegroup_name="svcgrp2"} 344.0
 ```
-Stats (of counter and gugae type) for enities such as http, tcp, ip, and service_groups is seen in the example response given above.
+Stats (of counter and guage type) for enities such as http, tcp, ip, and service_groups is seen in the example response given above. Labels attached to each stat appear in the curly braces ```{}``` next to the stat name.
