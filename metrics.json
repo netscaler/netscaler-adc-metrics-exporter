@@ -6,6 +6,7 @@
 
         "gauges": [
             ["cpuusagepcnt", "netscaler_cpu_usage_percent"],
+            ["memusagepcnt", "netscaler_memory_usage_percent"],
             ["mgmtcpuusagepcnt", "netscaler_cpu_management_cpu_usage_percent"],
             ["pktcpuusagepcnt", "netscaler_cpu_packet_cpu_usage_percent"],
             ["rescpuusagepcnt", "netscaler_cpu_res_cpu_usage_percent"]
