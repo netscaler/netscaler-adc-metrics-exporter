@@ -26,21 +26,21 @@ def collect_data(nsip, entity, username, password, secure):
     
     if (entity != 'services'):  # nitro command to fire for all entities except 'services' (ie. servicegroups)
         url = '%s://%s/nitro/v1/stat/%s' % (protocol, nsip, entity)
-        r = requests.get(url, headers=headers, verify=False)
+        r = requests.get(url, headers=headers, verify=False, timeout=5)
         data = r.json()
         if data['errorcode'] == 0:
             return data[entity]
     
     else:                       # nitro command to fire for 'services' entity (ie. servicegroups)
         url = '%s://%s/nitro/v1/stat/servicegroup?statbindings=yes'%(protocol, nsip)
-        r = requests.get(url, headers=headers, verify=False) # get dict with all servicegroups
+        r = requests.get(url, headers=headers, verify=False, timeout=5) # get dict with all servicegroups
         servicegroup_list_ds = r.json()
         if servicegroup_list_ds['errorcode'] == 0:
             servicegroup_data = []
             for servicegroups_ds in servicegroup_list_ds['servicegroup']:
                 _manual_servicegroup_name = servicegroups_ds['servicegroupname']
                 url = '%s://%s/nitro/v1/stat/servicegroup/%s?statbindings=yes'%(protocol, nsip, _manual_servicegroup_name)
-                r = requests.get(url, headers=headers, verify=False) # get dict with stats of all services bound to a particular servicegroup 
+                r = requests.get(url, headers=headers, verify=False, timeout=5) # get dict with stats of all services bound to a particular servicegroup 
                 data_tmp = r.json()
                 if data_tmp['errorcode'] == 0:
                     for individual_servicebinding_data in data_tmp['servicegroup'][0]['servicegroupmember']: # create a list with stats of all services bound to NS of all servicegroups (to generalize code-flow which comes later on)
