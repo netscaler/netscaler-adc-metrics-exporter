@@ -44,9 +44,9 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 
 The exporter can be setup as given in the diagram using;
 ```
-nohup python exporter.py --target-nsip=10.0.0.1:80 --target-nsip=10.0.0.2:80 --target-nsip=172.17.0.2:80 --port 8080 &
+nohup python exporter.py --target-nsip=10.0.0.1:80 --target-nsip=10.0.0.2:80 --target-nsip=172.17.0.2:80 --port 8888 &
 ```
-This directs the exporter container to scrape the 10.0.0.1, 10.0.0.2, and 172.17.0.2, IPs on port 80, and the expose the stats it collects on port 8080. 
+This directs the exporter container to scrape the 10.0.0.1, 10.0.0.2, and 172.17.0.2, IPs on port 80, and the expose the stats it collects on port 8888. 
 The user can then access the exported metrics directly thorugh port 8888 on the machine where the exporter is running, or Prometheus and Grafana can be setup to view the exported metrics though their GUI.
 </details>
 
@@ -76,10 +76,9 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 
 To setup the exporter as given in the diagram, the following command can be used:
 ```
-docker run -dt -p 8080:8080 --name netscaler-exporter ns-exporter:v1 --target-nsip=10.0.0.1:80 --target-nsip=10.0.0.2:80 --target-nsip=172.17.0.2:80 --port 8080
+docker run -dt -p 8888:8888 --name netscaler-exporter ns-exporter:v1 --target-nsip=10.0.0.1:80 --target-nsip=10.0.0.2:80 --target-nsip=172.17.0.2:80 --port 8888
 ```
-This directs the exporter container to scrape the 10.0.0.1, 10.0.0.2, and 172.17.0.2, IPs on port 80, and the expose the stats it collects on port 8080. 
-The user can then access the exported metrics directly thorugh port 8080 on the machine where the exporter is running, or Prometheus and Grafana can be setup to view the exported metrics though their GUI.
+This directs the exporter container to scrape the 10.0.0.1, 10.0.0.2, and 172.17.0.2, IPs on port 80, and the expose the stats it collects on port 8888. The user can then access the exported metrics directly thorugh port 8888 on the machine where the exporter is running, or Prometheus and Grafana can be setup to view the exported metrics though their GUI.
 </details>
 
 
@@ -103,7 +102,7 @@ spec:
         - "--target-nsip=10.0.0.1:80"
         - "--target-nsip=10.0.0.2:80"
         - "--target-nsip=10.0.0.3:80"
-        - "--port=8080"
+        - "--port=8888"
       imagePullPolicy: IfNotPresent
 ---
 apiVersion: v1
@@ -115,8 +114,8 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: 8080
-    targetPort: 8080
+  - port: 8888
+    targetPort: 8888
     name: exp-port
   selector:
     app: exp
@@ -165,6 +164,9 @@ Metrics whose value can only increase with time are called counters and those wh
 Accordingly, entities and their metrics have been provided in the ```metrics.json``` file. By modifying ```metrics.json```, new entities and their metrics which are not exported by default can be included. 
 For example, to  export ```aaa``` stats, the lines given between ```-.-.-.-``` can be added as follows:
 
+<details>
+<summary>metrics.json</summary>
+<br>
 
 ```
 {
@@ -245,6 +247,10 @@ For example, to  export ```aaa``` stats, the lines given between ```-.-.-.-``` c
 
 ```
 
+</details>
+<br>
+
+
 On a given NetScaler, some entities such as lbvserver, csvserver, interfaces, etc can have multiple instances of that entity configured, each having its own name. Such entities have an additional structure in ```metrics.json``` called ```label```.
 A label is used for such entities to differenciate stats among different instances of that entity based on name, ip, type, or any other suitable characteristic of that entitiy. 
 Other entities such as http, tcp, ssl are present as a single global parameter for the NetScaler, and thus do not have a ```label``` section in ```metrics.json```.
@@ -256,7 +262,12 @@ To verify if the exporter is scraping and exporting stats from NetScaler instanc
 http://<hostIP>:<port>
 curl http://<hostIP>:<port>
 ```
-where ```hostIP``` is the IP of the host on which the python script or container is running, and ```port``` is the value of the ```--port``` flag which had been provided (```8080``` as per the example). All the stats for all the entities configured on the NetScaler and provided in ```metrics.json``` should appear along with their live values. An example response would be as follows;
+where ```hostIP``` is the IP of the host on which the python script or container is running, and ```port``` is the value of the ```--port``` flag which had been provided (```8888``` as per the example). All the stats for all the entities configured on the NetScaler and provided in ```metrics.json``` should appear along with their live values. An example response would be as follows;
+
+<details>
+<summary>Sample Output</summary>
+<br>
+
 ```
 # HELP netscaler_http_tot_rx_packets tcptotrxpkts
 # TYPE netscaler_http_tot_rx_packets counter
@@ -302,4 +313,75 @@ netscaler_services_tot_request_bytes{nsip="10.0.0.2:80",service_ip="20.0.0.56",s
 netscaler_services_tot_request_bytes{nsip="10.0.0.2:80",service_ip="20.0.0.57",servicegroup_name="svcgrp"} 946.0
 netscaler_services_tot_request_bytes{nsip="10.0.0.2:80",service_ip="20.0.0.60",servicegroup_name="svcgrp2"} 344.0
 ```
+
+</details>
+<br>
+
 Stats (of counter and guage type) for enities such as http, tcp, ip, and service_groups is seen in the example response given above. Labels attached to each stat appear in the curly braces ```{}``` next to the stat name.
+
+
+Prometheus and Grafana Integration
+---
+This section describes how to bring up basic Prometheus and Grafana containers to provide an end to end data collection and visualization setup. 
+
+
+<details>
+<summary>Setup of Prometheus</summary>
+<br>
+
+These steps can be followed to setup a Prometheus container:
+1. Pull the docker image: ```docker pull prom/prometheus```.
+
+2. Create the ```prometheus.cfg``` file as given below, and providie the Exporter's IP and Port in the place of ```<EXPORTER_IP>``` and ```<EXPORTER_PORT>```. For example, the targets line might read ```- targets: ['10.100.200.3:8888']```.
+```
+global:
+  scrape_interval: 15s
+  scrape_timeout:  10s
+
+  external_labels:
+    monitor: 'prometheus-monitor'
+
+scrape_configs:
+- job_name: prometheus
+
+  static_configs:
+  - targets: ['<EXPORTER_IP>:<EXPORTER_PORT>']
+```
+
+3. Run the Prometheus container while providing the location of the ```prometheus.cfg``` file created in the above step: <br> 
+```docker run -dt -p 9090:9090 -v /path/to/prometheus.cfg:/etc/prometheus/prometheus.cfg prom/prometheus:latest --config.file=/etc/prometheus/prometheus.cfg```
+
+4. VERIFICATION: Go to the Prometheus web page and under the "Status" dropdown select "Targets". The exporter should appear as a target and in a few minutes time, must come up in ```UP``` state. This means that Prometheus is able to collect stats from the Exporter.
+
+</details>
+<br>
+
+
+<details>
+<summary>Setup of Grafana</summary>
+<br>
+
+The steps bellow can be followed to setup up a Grafana container with a sample dashboard.
+
+1. Pull grafana image: ```docker pull grafana/grafana:latest```
+
+2. Run grafana container: ```docker run -dt 3000:3000 grafana/grafana:latest```
+
+3. Import the sample grafana dashboard file: Login to Grafana using admin:admin, from the column on the left select the ```+``` symbol, select "Import", and select "upload .json file". Now, navigate to and upload ```sample_grafana_dashboard.json```.
+
+<img src="https://user-images.githubusercontent.com/39149385/47292375-5e0ee000-d624-11e8-9410-77d46417e358.png" width="200">
+
+4. This will import a sample template which displays CPU Utilization, Memory Utilization, Total LB vserver Hits, LB vserver Hits Rate, and HTTP Hits Rate. 
+
+5. To start seeing graphs and values in the dashboard, add the Prometheus datasource(s) to Grafana. While adding the datasource, ensure the name of the Prometheus datasource starts with the word "prometheus" (eg. prometheus_datasource1). Once added, datasources starting with the word "prometheus" will automatically get detected in the dropdown filters of the dashboard. 
+
+<img src="https://user-images.githubusercontent.com/39149385/47292394-6a933880-d624-11e8-9e4d-69140af36512.png" width="200">
+<img src="https://user-images.githubusercontent.com/39149385/47292411-77179100-d624-11e8-97b6-28ee99b94873.png" width="300">
+
+6. Usage of Dashboard: By default the dashboard shows CPU utilization percentage, memory utilization percentage, total hits to lbvservers, lbvserver hit rate, and http hit rate. The dashboard can be expanded to include graphs of any other stats which the exporter is collecting. For more information on modifying the Grafana dashboard, please take a look at their [documentation](http://docs.grafana.org/) or demo [videos](https://www.youtube.com/watch?v=mgcJPREl3CU).
+<img src="https://user-images.githubusercontent.com/39149385/47292484-be058680-d624-11e8-9f8b-33f4ea482903.png" width="800">
+
+**NOTE:** Data being plotted on the graphs can be filtered based on lbvservers or datasources using the blue dropdown buttons at the top of the dashboard.
+
+</details>
+<br>
