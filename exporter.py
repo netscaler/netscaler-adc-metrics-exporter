@@ -148,7 +148,7 @@ if __name__ == '__main__':
         ns_password = args.password
     
     # Load the metrics file specifying stats to be collected
-    f = open('metrics.json', 'r')
+    f = open('/exporter/metrics.json', 'r')
     metrics_json = json.load(f)
 
     # Register the exporter as a stat collector.
