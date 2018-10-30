@@ -54,7 +54,6 @@
         "gauges": [
             ["httprequestsrate", "netscaler_http_requests_rate"],
             ["spdystreamsrate", "netscaler_http_spdy_streams_rate"],
-            ["httprequestsrate", "netscaler_http_requests_rate"],
             ["httpresponsesrate", "netscaler_http_responses_rate"],
             ["httppostsrate", "netscaler_http_posts_rate"],
             ["httpgetsrate", "netscaler_http_gets_rate"],
@@ -231,7 +230,6 @@
             ["errdroppedtxpktsrate", "netscaler_interface_err_dropped_tx_packets_rate"],
             ["rxpktsrate", "netscaler_interface_rx_packets_rate"],
             ["errifindiscardsrate", "netscaler_interface_err_ifin_discards_rate"],
-            ["errpktrxrate", "netscaler_interface_err_packets_rx_rate"],
             ["nicerrifoutdiscardsrate", "netscaler_interface_err_if_out_discards_rate"],
             ["macmovedrate", "netscaler_interface_mac_moved_rate"],
             ["rxcrcerrorsrate", "netscaler_interface_rx_crc_errors_rate"],
