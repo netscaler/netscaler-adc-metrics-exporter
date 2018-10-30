@@ -126,7 +126,7 @@
             ["iptotinvalidheadersz", "netscaler_ip_tot_invalid_header_size"],
             ["iptotinvalidpacketsize", "netscaler_ip_tot_invalid_packet_size"],
             ["iptottruncatedpackets", "netscaler_ip_tot_truncated_packets"],
-            ["noniptottruncatedpackets", "netscaler_ip_tot_truncated_packets"],
+            ["noniptottruncatedpackets", "netscaler_non_ip_tot_truncated_packets"],
             ["iptotbadmacaddrs", "netscaler_ip_tot_bad_mac_addresses"]
         ],
 
