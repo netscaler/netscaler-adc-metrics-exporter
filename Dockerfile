@@ -3,7 +3,9 @@ RUN apk update
 RUN apk add python py-pip
 RUN apk add curl
 RUN pip install prometheus_client requests
-COPY exporter.py /
-COPY metrics.json /
+COPY version/VERSION /exporter/
+COPY exporter.py /exporter/
+COPY metrics.json /exporter/
 
-ENTRYPOINT ["python", "/exporter.py" ]
+
+ENTRYPOINT ["python", "/exporter/exporter.py" ]
