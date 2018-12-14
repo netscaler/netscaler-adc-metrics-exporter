@@ -6,11 +6,11 @@ Description:
 
 This is a simple server that scrapes Citrix NetScaler (NS) stats and exports them via HTTP to Prometheus. Prometheus can then be added as a data source to Grafana to view the netscaler stats graphically.
 
-![exporter_diagram](https://user-images.githubusercontent.com/40210995/41391720-f89ee57e-6fb9-11e8-9550-02dc60dcfa43.png)
+![exporter_diagram](images/exporter-prometheus-grafana.png)
 
    In the above diagram, blue boxes represent physical machines or VMs and grey boxes represent containers. 
-There are two physical/virual NetScaler instances present with IPs 10.0.0.1 and 10.0.0.2 and a NetScaler CPX (containerized NetScaler) with an IP 172.17.0.2.
-To monitor stats and counters of these NetScaler instances, an exporter (172.17.0.3) is being run as a container. It collects NetScaler stats such as total hits to a vserver, http request rate, ssl encryption-decryption rate, etc from the three NetScaler instances and holds them until the Prometheus containter 172.17.0.4 pulls the stats for storage as a time series. Grafana can then be pointed to the Prometheus container to fetch the stats, plot them, set alarms, create heat maps, generate tables, etc as needed to analyse the NetScaler stats. 
+There are two MPX/VPX instances present with IPs 10.0.0.1 and 10.0.0.2 and a NetScaler CPX (containerized NetScaler) with an IP 172.17.0.2.
+To monitor stats and counters of these NetScaler instances, an exporter (172.17.0.3) is being run as a container. It collects NetScaler stats such as total hits to a vserver, http request rate, ssl encryption-decryption rate, etc from the three NetScaler instances and holds them until the Prometheus containter 172.17.0.4 pulls the stats and stores them with a timestamp. Grafana can then be pointed to the Prometheus container to fetch the stats, plot them, set alarms, create heat maps, generate tables, etc as needed to analyse the NetScaler stats. 
 
    Details about setting up the exporter to work in an environment as given in the figure is provided in the following sections. A note on which NetScaler entities/metrics the exporter scrapes by default and how to modify it is also explained.
 
@@ -27,7 +27,8 @@ To use the exporter as a python script, the ```prometheus_client``` and ```reque
 pip install prometheus_client
 pip install requests
 ```
-Now, the following command can be used to run the exporter as a python script;
+Now, create a folder ```/exporter``` and copy the ```metrics.json``` file to the folder. 
+Finally, the exporter can be run as a python script using;
 ```
 nohup python exporter.py [flags] &
 ```
@@ -35,12 +36,14 @@ where the flags are:
 
 flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description
 -----------------|--------------------
---target-nsip    |Provide the &lt;IP:port&gt; of the Netscalers to be monitored
---port	        |Specify on which port the stats collected by the exporter should be exposed. Agents like Prometheus will need to scrape this port of the container to access stats being exported
---username       |Provide the username of the NetScaler to be monitored. Default: 'nsroot'
---password       |Provide the password of the NetScaler to be monitored. Default: 'nsroot'
---secure         |Option 'yes' can be provided to run stat collection from NetScalers over TLS. Default: 'no'.
--h               |Provides helper docs related to the exporter
+--target-nsip    | Provide the &lt;IP:port&gt; of the Netscalers to be monitored
+--port	         | Specify on which port metrics collected by the exporter should be exposed. Agents like Prometheus will need to scrape this port of the container to collected metrics
+--metric         | Provide a specific metric to load from metrics.json file (eg: 'lbvserver', 'protocolhttp', etc). If not provided, all metric entities from metrics.json will be loaded
+--secure         | Option 'yes' can be provided to collect metrics from NetScalers over TLS. Default: 'no'.
+--username       | Provide the username of the NetScaler to be monitored. Default: 'nsroot'
+--password       | Provide the password of the NetScaler to be monitored. Default: 'nsroot'
+--start-delay    | Specify time for which exporter should sleep before starting metric collection. Default: 10s
+--timeout        | Specify timeout period for exporter to obtain response from target NetScalers. Default: 15s
 
 The exporter can be setup as given in the diagram using;
 ```
@@ -48,6 +51,9 @@ nohup python exporter.py --target-nsip=10.0.0.1:80 --target-nsip=10.0.0.2:80 --t
 ```
 This directs the exporter container to scrape the 10.0.0.1, 10.0.0.2, and 172.17.0.2, IPs on port 80, and the expose the stats it collects on port 8888. 
 The user can then access the exported metrics directly thorugh port 8888 on the machine where the exporter is running, or Prometheus and Grafana can be setup to view the exported metrics though their GUI.
+
+**NOTE:**  If TLS is being used by providing the --secure='yes' option, then it is recommended to create a new user on the NetScaler having only read permission. Documentation on creating new users with required permission can be found [here](ADD_LINK).
+
 </details>
 
 
@@ -56,29 +62,39 @@ The user can then access the exported metrics directly thorugh port 8888 on the 
 <summary>Usage as a Container</summary>
 <br>
 
-In order to use the exporter as a container, it needs to be built into a container. This can be done as follows; 
+In order to use the exporter as a container, the image ```quay.io/citrix/netscaler-metrics-exporter:latest``` will need to be pulled using;
 ```
-docker build -f Dockerfile -t ns-exporter:v1 ./
+docker pull quay.io/citrix/netscaler-metrics-exporter:latest
 ```
-Once built, the general structure of the command to run the exporter is very similar to what was used while running it as a script:
+**NOTE:** It can also be build locally using ```docker build -f Dockerfile -t <image_name>:<tag> ./```
+
+Now, the exporter can be run using:
 ```
-docker run -dt -p [host-port:container-port] --name netscaler-exporter ns-exporter:v1 [flags]
+docker run -dt -p <host_port>:<container_port> quay.io/citrix/netscaler-metrics-exporter:latest [flags]
 ```
 where the flags are:
 
 flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description
 -----------------|--------------------
---target-nsip    |Provide the &lt;IP:port&gt; of the Netscalers to be monitored
---port	        |Specify on which port the stats collected by the exporter should be exposed. Agents like Prometheus will need to scrape this port of the container to access stats being exported
---username       |Provide the username of the NetScaler to be monitored. Default: 'nsroot'
---password       |Provide the password of the NetScaler to be monitored. Default: 'nsroot'
---secure         |Option 'yes' can be provided to run stat collection from NetScalers over TLS. Default: 'no'.
+--target-nsip    | Provide the &lt;IP:port&gt; of the Netscalers to be monitored
+--port	         | Specify on which port metrics collected by the exporter should be exposed. Agents like Prometheus will need to scrape this port of the container to collected metrics
+--metric         | Provide a specific metric to load from metrics.json file (eg: 'lbvserver', 'protocolhttp', etc). If not provided, all metric entities from metrics.json will be loaded
+--secure         | Option 'yes' can be provided to collect metrics from NetScalers over TLS. Default: 'no'.
+--username       | Provide the username of the NetScaler to be monitored. Default: 'nsroot'
+--password       | Provide the password of the NetScaler to be monitored. Default: 'nsroot'
+--start-delay    | Specify time for which exporter should sleep before starting metric collection. Default: 10s
+--timeout        | Specify timeout period for exporter to obtain response from target NetScalers. Default: 15s
 
 To setup the exporter as given in the diagram, the following command can be used:
 ```
 docker run -dt -p 8888:8888 --name netscaler-exporter ns-exporter:v1 --target-nsip=10.0.0.1:80 --target-nsip=10.0.0.2:80 --target-nsip=172.17.0.2:80 --port 8888
 ```
 This directs the exporter container to scrape the 10.0.0.1, 10.0.0.2, and 172.17.0.2, IPs on port 80, and the expose the stats it collects on port 8888. The user can then access the exported metrics directly thorugh port 8888 on the machine where the exporter is running, or Prometheus and Grafana can be setup to view the exported metrics though their GUI.
+
+**NOTE:** In the command above, the value of the ```--port``` flag should be the same as the ```container_port```.
+
+**NOTE:**  If TLS is being used by providing the --secure='yes' option, then it is recommended to create a new user on the NetScaler having only read permission. Documentation on creating new users with required permission can be found [here](ADD_LINK).
+
 </details>
 
 
@@ -86,72 +102,76 @@ This directs the exporter container to scrape the 10.0.0.1, 10.0.0.2, and 172.17
 <summary>Usage as a Pod in Kubernetes</summary>
 <br>
 
-Once the docker image is built using ```docker build -f Dockerfile -t ns-exporter:v1 ./```, the following yaml file can be used to deploy the exporter as a pod in Kuberenetes and expose it as a service. Here, the necessary flags are provided as a list in the ```args:``` section of the yaml file.
+The following yaml file can be used to deploy the exporter as a pod in Kuberenetes and expose it as a service. Here, the necessary flags are provided as a list in the ```args:``` section of the yaml file.
 ```
 apiVersion: v1
 kind: Pod
 metadata:
-  name: exp
+  name: exporter
   labels:
-    app: exp
+    app: exporter
 spec:
   containers:
-    - name: exp
-      image: ns-exporter:v1
+    - name: exporter
+      image: quay.io/citrix/netscaler-metrics-exporter:latest
       args:
         - "--target-nsip=10.0.0.1:80"
         - "--target-nsip=10.0.0.2:80"
         - "--target-nsip=10.0.0.3:80"
         - "--port=8888"
-      imagePullPolicy: IfNotPresent
+      imagePullPolicy: Always
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: exp
+  name: exporter
   labels:
-    app: exp
+    app: exporter
 spec:
   type: ClusterIP
   ports:
   - port: 8888
     targetPort: 8888
-    name: exp-port
+    name: exporter-port
   selector:
-    app: exp
+    app: exporter
 ```
 Flags which can be provided to the exporter in the ```args:``` section are:
 
 flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description
 -----------------|--------------------
---target-nsip    |Provide the &lt;IP:port&gt; of the Netscalers to be monitored
---port	        |Specify on which port the stats collected by the exporter should be exposed. Agents like Prometheus will need to scrape this port of the container to access stats being exported
---username       |Provide the username of the NetScaler to be monitored. Default: 'nsroot'
---password       |Provide the password of the NetScaler to be monitored. Default: 'nsroot'
---secure         |Option 'yes' can be provided to run stat collection from NetScalers over TLS. Default: 'no'.
+--target-nsip    | Provide the &lt;IP:port&gt; of the Netscalers to be monitored
+--port	         | Specify on which port metrics collected by the exporter should be exposed. Agents like Prometheus will need to scrape this port of the container to collected metrics
+--metric         | Provide a specific metric to load from metrics.json file (eg: 'lbvserver', 'protocolhttp', etc). If not provided, all metric entities from metrics.json will be loaded
+--secure         | Option 'yes' can be provided to collect metrics from NetScalers over TLS. Default: 'no'.
+--username       | Provide the username of the NetScaler to be monitored. Default: 'nsroot'
+--password       | Provide the password of the NetScaler to be monitored. Default: 'nsroot'
+--start-delay    | Specify time for which exporter should sleep before starting metric collection. Default: 10s
+--timeout        | Specify timeout period for exporter to obtain response from target NetScalers. Default: 15s
+
+**NOTE:**  If TLS is being used by providing the --secure='yes' option, then it is recommended to create a new user on the NetScaler having only read permission. Documentation on creating new users with required permission can be found [here](ADD_LINK).
 
 </details>
 
 <br />
 
-**NOTE:**  If TLS is being used by providing the --secure='yes' option, then it is recommended to create a new user on the NetScaler having only read permission. Documentation on creating new users with required permission can be found here. <ADD LINK>
 
 Stats Exported by Default:
 ---
 
 The exporter is configured to export some of the most commonly used stats for a Netscaler device. They are mentioned in the ```metrics.json``` file and summarized in the table below:
 
-Sl. No. |     STATS 				| NS nitro name
+Sl. No. |     STATS                 | NS nitro name
 --------|---------------------------|--------------
 1       | LB vserver stats          | "lbvserver"
-2	    | CS vserver stats          | "csvserver"
-3	    | HTTP stats                | "protocolhttp"
-4	    | TCP stats                 | "protocoltcp"
-5	    | IP stats	                | "protocolip"
-6	    | SSL stats                 | "ssl"
-7	    | Interface stats	        | "Interface" (capital 'i')
-8	    | Service stats	            | "service"
-9		| Service group stats		| "services"
+2       | CS vserver stats          | "csvserver"
+3       | HTTP stats                | "protocolhttp"
+4       | TCP stats                 | "protocoltcp"
+5       | IP stats                  | "protocolip"
+6       | SSL stats                 | "ssl"
+7       | Interface stats           | "Interface" (capital 'i')
+8       | Service stats             | "service"
+9       | Service group stats       | "services"
 
 
 Exporting Additional Stats which are not Included by Default:
@@ -369,17 +389,17 @@ The steps bellow can be followed to setup up a Grafana container with a sample d
 
 3. Import the sample grafana dashboard file: Login to Grafana using admin:admin, from the column on the left select the ```+``` symbol, select "Import", and select "upload .json file". Now, navigate to and upload ```sample_grafana_dashboard.json```.
 
-<img src="https://user-images.githubusercontent.com/39149385/47292375-5e0ee000-d624-11e8-9410-77d46417e358.png" width="200">
+<img src="images/grafana-import-json.png" width="200">
 
 4. This will import a sample template which displays CPU Utilization, Memory Utilization, Total LB vserver Hits, LB vserver Hits Rate, and HTTP Hits Rate. 
 
 5. To start seeing graphs and values in the dashboard, add the Prometheus datasource(s) to Grafana. While adding the datasource, ensure the name of the Prometheus datasource starts with the word "prometheus" (eg. prometheus_datasource1). Once added, datasources starting with the word "prometheus" will automatically get detected in the dropdown filters of the dashboard. 
 
-<img src="https://user-images.githubusercontent.com/39149385/47292394-6a933880-d624-11e8-9e4d-69140af36512.png" width="200">
-<img src="https://user-images.githubusercontent.com/39149385/47292411-77179100-d624-11e8-97b6-28ee99b94873.png" width="300">
+<img src="images/grafana-datasource-1.png" width="200">
+<img src="images/grafana-datasource-2.png" width="300">
 
 6. Usage of Dashboard: By default the dashboard shows CPU utilization percentage, memory utilization percentage, total hits to lbvservers, lbvserver hit rate, and http hit rate. The dashboard can be expanded to include graphs of any other stats which the exporter is collecting. For more information on modifying the Grafana dashboard, please take a look at their [documentation](http://docs.grafana.org/) or demo [videos](https://www.youtube.com/watch?v=mgcJPREl3CU).
-<img src="https://user-images.githubusercontent.com/39149385/47292484-be058680-d624-11e8-9f8b-33f4ea482903.png" width="800">
+<img src="images/grafana-dashboard.png" width="800">
 
 **NOTE:** Data being plotted on the graphs can be filtered based on lbvservers or datasources using the blue dropdown buttons at the top of the dashboard.
 
