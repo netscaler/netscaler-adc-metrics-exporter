@@ -44,6 +44,7 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 --password       | Provide the password of the NetScaler to be monitored. Default: 'nsroot'
 --start-delay    | Specify time for which exporter should sleep before starting metric collection. Default: 10s
 --timeout        | Specify timeout period for exporter to obtain response from target NetScalers. Default: 15s
+--metrics-file   | The location of metrics.json file. Default: /exporter/metrics.json
 --log-file       | The location of exporter.log file. Default: /exporter/exporter.log
 --log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: ERROR
 
@@ -86,6 +87,7 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 --password       | Provide the password of the NetScaler to be monitored. Default: 'nsroot'
 --start-delay    | Specify time for which exporter should sleep before starting metric collection. Default: 10s
 --timeout        | Specify timeout period for exporter to obtain response from target NetScalers. Default: 15s
+--metrics-file   | The location of metrics.json file. Default: /exporter/metrics.json
 --log-file       | The location of exporter.log file. Default: /exporter/exporter.log
 --log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: ERROR
 
@@ -152,6 +154,7 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 --password       | Provide the password of the NetScaler to be monitored. Default: 'nsroot'
 --start-delay    | Specify time for which exporter should sleep before starting metric collection. Default: 10s
 --timeout        | Specify timeout period for exporter to obtain response from target NetScalers. Default: 15s
+--metrics-file   | The location of metrics.json file. Default: /exporter/metrics.json
 --log-file       | The location of exporter.log file. Default: /exporter/exporter.log
 --log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: ERROR
 
