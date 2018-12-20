@@ -157,6 +157,8 @@ if __name__ == '__main__':
         start_http_server(args.port)
     except Exception as e:
         logger.error('Error while opening port::%s', e)
+        print(e)
+        sys.exit()
 
     # Get username and password of NetScalers.
     ns_user = os.environ.get("NS_USER")
