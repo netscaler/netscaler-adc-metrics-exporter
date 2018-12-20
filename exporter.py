@@ -18,7 +18,7 @@ def collect_data(nsip, entity, username, password, secure, nitro_timeout):
     if secure == 'yes':
         protocol = 'https'
     else:
-        protocol = 'http' 
+        protocol = 'http'
 
     # nitro call for all entities except 'services' (ie. servicegroups)
     if (entity != 'services'):
@@ -37,7 +37,7 @@ def collect_data(nsip, entity, username, password, secure, nitro_timeout):
             for servicegroups_ds in servicegroup_list_ds['servicegroup']:
                 _manual_servicegroup_name = servicegroups_ds['servicegroupname']
                 url = '%s://%s/nitro/v1/stat/servicegroup/%s?statbindings=yes'%(protocol, nsip, _manual_servicegroup_name)
-                r = requests.get(url, headers=headers, verify=False, timeout=nitro_timeout) # get dict with stats of all services bound to a particular servicegroup 
+                r = requests.get(url, headers=headers, verify=False, timeout=nitro_timeout) # get dict with stats of all services bound to a particular servicegroup
                 data_tmp = r.json()
                 if data_tmp['errorcode'] == 0:
                     for individual_servicebinding_data in data_tmp['servicegroup'][0]['servicegroupmember']: # create a list with stats of all services bound to NS of all servicegroups
@@ -59,7 +59,7 @@ class NetscalerCollector(object):
     def collect(self):
         data = {}
         for nsip in self.nsips:
-            data[nsip] = {}    
+            data[nsip] = {}
             for entity in self.metrics.keys():
                 logger.info('Collecting metric %s for %s' % (entity, nsip))
                 try:
@@ -77,13 +77,13 @@ class NetscalerCollector(object):
                 label_names.append('nsip')
 
             # Provide collected metric to Prometheus as a counter
-            for ns_metric_name, prom_metric_name in entity.get('counters', []): 
+            for ns_metric_name, prom_metric_name in entity.get('counters', []):
                 c = CounterMetricFamily(prom_metric_name, ns_metric_name, labels=label_names)
                 for nsip in self.nsips:
                     entity_stats = data[nsip].get(entity_name, [])
                     if( type(entity_stats) is not list):
                         entity_stats = [entity_stats]
-                    
+
                     for data_item in entity_stats:
                         if('labels' in entity.keys()):
                             label_values = [data_item[key] for key in [v[0] for v in entity['labels']]]
@@ -103,7 +103,7 @@ class NetscalerCollector(object):
                     entity_stats = data[nsip].get(entity_name, [])
                     if(type(entity_stats) is not list):
                         entity_stats = [entity_stats]
-                    
+
                     for data_item in entity_stats:
                         if('labels' in entity.keys()):
                             label_values = [data_item[key] for key in [v[0] for v in entity['labels']]]
@@ -115,7 +115,7 @@ class NetscalerCollector(object):
                         except Exception as e:
                             logger.error('Caught exception while adding gauge %s to %s: %s' %(ns_metric_name, entity_name, str(e)))
                 yield g
-        
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--target-nsip', required=True, action='append')
@@ -143,7 +143,7 @@ if __name__ == '__main__':
         start_http_server(args.port)
     except Exception as e:
         logger.error('Error while opening port::%s', e)
-    
+
     # Get username and password of NetScalers.
     ns_user = os.environ.get("NS_USER")
     if ns_user == None:
@@ -151,7 +151,7 @@ if __name__ == '__main__':
     ns_password = os.environ.get("NS_PASSWORD")
     if ns_password == None:
         ns_password = args.password
-    
+
     # Load the metrics file specifying stats to be collected
     f = open('/exporter/metrics.json', 'r')
     try:
