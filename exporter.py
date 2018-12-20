@@ -126,9 +126,17 @@ if __name__ == '__main__':
     parser.add_argument('--password', default='nsroot', type=str)
     parser.add_argument('--secure', default='no', type=str)
     parser.add_argument('--timeout', default=15, type=float)
+    parser.add_argument('--log-level', required=False, default='ERROR', type=str, choices=['DEBUG', 'INFO', 'WARN', 'ERROR', 'CRITICAL', 'debug', 'info', 'warn', 'error', 'critical'])
     args = parser.parse_args()
 
-    logging.basicConfig(filename='/exporter/exporter.log', level=logging.DEBUG)
+    logging.basicConfig(filename='/exporter/exporter.log', level= {
+        'DEBUG': logging.DEBUG,
+        'INFO': logging.INFO,
+        'WARN': logging.WARN,
+        'ERROR': logging.ERROR,
+        'CRITICAL': logging.CRITICAL,
+    }[args.log_level.upper()])
+
     logging.getLogger("requests").setLevel(logging.WARNING)
     logging.getLogger("urllib3").setLevel(logging.WARNING)
     logger = logging.getLogger('netscaler_metrics_exporter')

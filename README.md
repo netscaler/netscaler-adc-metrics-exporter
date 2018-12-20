@@ -44,6 +44,8 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 --password       | Provide the password of the NetScaler to be monitored. Default: 'nsroot'
 --start-delay    | Specify time for which exporter should sleep before starting metric collection. Default: 10s
 --timeout        | Specify timeout period for exporter to obtain response from target NetScalers. Default: 15s
+--log-file       | The location of exporter.log file. Default: /exporter/exporter.log
+--log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: ERROR
 
 The exporter can be setup as given in the diagram using;
 ```
@@ -84,6 +86,8 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 --password       | Provide the password of the NetScaler to be monitored. Default: 'nsroot'
 --start-delay    | Specify time for which exporter should sleep before starting metric collection. Default: 10s
 --timeout        | Specify timeout period for exporter to obtain response from target NetScalers. Default: 15s
+--log-file       | The location of exporter.log file. Default: /exporter/exporter.log
+--log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: ERROR
 
 To setup the exporter as given in the diagram, the following command can be used:
 ```
@@ -148,6 +152,8 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 --password       | Provide the password of the NetScaler to be monitored. Default: 'nsroot'
 --start-delay    | Specify time for which exporter should sleep before starting metric collection. Default: 10s
 --timeout        | Specify timeout period for exporter to obtain response from target NetScalers. Default: 15s
+--log-file       | The location of exporter.log file. Default: /exporter/exporter.log
+--log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: ERROR
 
 **NOTE:**  If TLS is being used by providing the --secure='yes' option, then it is recommended to create a new user on the NetScaler having only read permission. Documentation on creating new users with required permission can be found [here](ADD_LINK).
 
