@@ -126,10 +126,11 @@ if __name__ == '__main__':
     parser.add_argument('--password', default='nsroot', type=str)
     parser.add_argument('--secure', default='no', type=str)
     parser.add_argument('--timeout', default=15, type=float)
+    parser.add_argument('--log-file', required=False, default='/exporter/exporter.log', type=str)
     parser.add_argument('--log-level', required=False, default='ERROR', type=str, choices=['DEBUG', 'INFO', 'WARN', 'ERROR', 'CRITICAL', 'debug', 'info', 'warn', 'error', 'critical'])
     args = parser.parse_args()
 
-    logging.basicConfig(filename='/exporter/exporter.log', level= {
+    logging.basicConfig(filename=args.log_file, level= {
         'DEBUG': logging.DEBUG,
         'INFO': logging.INFO,
         'WARN': logging.WARN,
