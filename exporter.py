@@ -155,12 +155,16 @@ if __name__ == '__main__':
         logger.error('Error while opening port::%s', e)
 
     # Get username and password of NetScalers.
-    ns_user = os.environ.get("NS_USER")
+    ns_user = args.username
     if ns_user == None:
-        ns_user = args.username
-    ns_password = os.environ.get("NS_PASSWORD")
+        ns_user = os.environ.get("NS_USER")
+        if ns_user == None:
+            logger.critical('Fatal Error no username defined on command line or via NS_USER environment variable')
+    ns_password = args.password
     if ns_password == None:
-        ns_password = args.password
+        ns_password = os.environ.get("NS_PASSWORD")
+        if ns_password == None:
+            logger.critical('Fatal Error no password defined on command line or via NS_PASSWORD environment variable')
 
     # Load the metrics file specifying stats to be collected
     f = open(args.metrics_file, 'r')
