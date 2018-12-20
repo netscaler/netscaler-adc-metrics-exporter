@@ -96,7 +96,7 @@ class NetscalerCollector(object):
                             logger.error('Caught exception while adding counter %s to %s: %s' %(ns_metric_name, entity_name, str(e)))
                 yield c
 
-            # Provide collected metric to Prometheus as a guage
+            # Provide collected metric to Prometheus as a gauge
             for ns_metric_name, prom_metric_name in entity.get('gauges', []):
                 g = GaugeMetricFamily(prom_metric_name, ns_metric_name, labels=label_names)
                 for nsip in self.nsips:
@@ -113,7 +113,7 @@ class NetscalerCollector(object):
                         try:
                             g.add_metric(label_values, float(data_item[ns_metric_name]))
                         except Exception as e:
-                            logger.error('Caught exception while adding guage %s to %s: %s' %(ns_metric_name, entity_name, str(e)))
+                            logger.error('Caught exception while adding gauge %s to %s: %s' %(ns_metric_name, entity_name, str(e)))
                 yield g
         
 if __name__ == '__main__':
