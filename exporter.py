@@ -126,8 +126,8 @@ if __name__ == '__main__':
     parser.add_argument('--password', default='nsroot', type=str, help='The password used to access the Netscaler or NS_PASSWORD env var. Default: nsroot')
     parser.add_argument('--secure', default='no', type=str, help='yes: Use HTTPS, no: Use HTTP. Default: no')
     parser.add_argument('--timeout', default=15, type=float, help='Timeout for Nitro calls.')
-    parser.add_argument('--metrics-file', required=False, default='/exporter/metrics.json', type=str)
-    parser.add_argument('--log-file', required=False, default='/exporter/exporter.log', type=str)
+    parser.add_argument('--metrics-file', required=False, default='/exporter/metrics.json', type=str, help='Location of metrics.json file. Default: /exporter/metrics.json')
+    parser.add_argument('--log-file', required=False, default='/exporter/exporter.log', type=str, help='Location of exporter.log file. Default: /exporter/exporter.log')
     parser.add_argument('--log-level', required=False, default='ERROR', type=str, choices=['DEBUG', 'INFO', 'WARN', 'ERROR', 'CRITICAL', 'debug', 'info', 'warn', 'error', 'critical'])
     args = parser.parse_args()
 
@@ -167,8 +167,8 @@ if __name__ == '__main__':
         ns_password = args.password
 
     # Load the metrics file specifying stats to be collected
-    f = open(args.metrics_file, 'r')
     try:
+        f = open(args.metrics_file, 'r')
         # collect selected metrics only
         if args.metric:
             metrics_data = json.load(f)
