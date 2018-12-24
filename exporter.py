@@ -131,18 +131,20 @@ if __name__ == '__main__':
     parser.add_argument('--log-level', required=False, default='ERROR', type=str, choices=['DEBUG', 'INFO', 'WARN', 'ERROR', 'CRITICAL', 'debug', 'info', 'warn', 'error', 'critical'])
     args = parser.parse_args()
 
-    logging.basicConfig(
-        filename=args.log_file,
-        format='%(asctime)s %(levelname)-8s %(message)s',
-        datefmt='%FT%T%z',
-        level= {
-            'DEBUG': logging.DEBUG,
-            'INFO': logging.INFO,
-            'WARN': logging.WARN,
-            'ERROR': logging.ERROR,
-            'CRITICAL': logging.CRITICAL,
-        }[args.log_level.upper()])
-
+    try:
+        logging.basicConfig(
+            filename=args.log_file,
+            format='%(asctime)s %(levelname)-8s %(message)s',
+            datefmt='%FT%T%z',
+            level= {
+                'DEBUG': logging.DEBUG,
+                'INFO': logging.INFO,
+                'WARN': logging.WARN,
+                'ERROR': logging.ERROR,
+                'CRITICAL': logging.CRITICAL,
+            }[args.log_level.upper()])
+    except Exception as e:
+        print('Error while setting logger configs::%s', e)
     logging.getLogger("requests").setLevel(logging.WARNING)
     logging.getLogger("urllib3").setLevel(logging.WARNING)
     logger = logging.getLogger('netscaler_metrics_exporter')
