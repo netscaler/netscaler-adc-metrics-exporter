@@ -11,6 +11,22 @@ from prometheus_client import start_http_server
 from prometheus_client.core import GaugeMetricFamily, CounterMetricFamily, REGISTRY
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
+def parseConfig(args):
+    try:
+        nse = {}
+        with open(args.config_file, 'r') as stream:
+            config = yaml.load(stream)
+            for key, value in vars(args).items():
+                cfgkey = key.replace('_', '-')
+                nse[key]=config[cfgkey] if cfgkey in config else value
+
+    except Exception as e:
+        print(e)
+        sys.exit()
+
+    return nse
+
+
 # Function to fire nitro commands and collect data from NS
 def collect_data(nsip, entity, username, password, secure, nitro_timeout):
 
@@ -131,7 +147,14 @@ if __name__ == '__main__':
     parser.add_argument('--metrics-file', required=False, default='/exporter/metrics.json', type=str)
     parser.add_argument('--log-file', required=False, default='/exporter/exporter.log', type=str)
     parser.add_argument('--log-level', required=False, default='ERROR', type=str, choices=['DEBUG', 'INFO', 'WARN', 'ERROR', 'CRITICAL', 'debug', 'info', 'warn', 'error', 'critical'])
+    parser.add_argument('--config-file', required=False, default='./config.yaml', type=str)
     args = parser.parse_args()
+
+    if args.config_file:
+        args = parseConfig(args)
+
+    print(args)
+    exit()
 
     logging.basicConfig(
         filename=args.log_file,
@@ -169,6 +192,8 @@ if __name__ == '__main__':
     ns_password = os.environ.get("NS_PASSWORD")
     if ns_password == None:
         ns_password = args.password
+    else:
+      logger.warning('Using NS_PASSWORD Environment variable is insecure. Consider using config.yaml file and --config-file option to define password')
 
     # Load the metrics file specifying stats to be collected
     f = open(args.metrics_file, 'r')
