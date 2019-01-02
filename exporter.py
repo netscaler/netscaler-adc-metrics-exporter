@@ -1,4 +1,6 @@
 import os
+import sys
+import yaml
 import json
 import time
 import signal
@@ -124,7 +126,7 @@ if __name__ == '__main__':
     parser.add_argument('--metric', required=False, action='append', type=str, help='Collect only the metrics specified here, may be used multiple times.')
     parser.add_argument('--username', default='nsroot', type=str, help='The username used to access the Netscaler or NS_USER env var. Default: nsroot')
     parser.add_argument('--password', default='nsroot', type=str, help='The password used to access the Netscaler or NS_PASSWORD env var. Default: nsroot')
-    parser.add_argument('--secure', default='no', type=str, help='yes: Use HTTPS, no: Use HTTP. Default: no')
+    parser.add_argument('--secure', default='no', type=str, help='yes: Use HTTPS, no: Use HTTP. Default: no', choices=['yes', 'no'])
     parser.add_argument('--timeout', default=15, type=float, help='Timeout for Nitro calls.')
     parser.add_argument('--metrics-file', required=False, default='/exporter/metrics.json', type=str)
     parser.add_argument('--log-file', required=False, default='/exporter/exporter.log', type=str)
