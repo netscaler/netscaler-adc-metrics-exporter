@@ -144,8 +144,8 @@ if __name__ == '__main__':
     parser.add_argument('--password', default='nsroot', type=str, help='The password used to access the Netscaler or NS_PASSWORD env var. Default: nsroot')
     parser.add_argument('--secure', default='no', type=str, help='yes: Use HTTPS, no: Use HTTP. Default: no', choices=['yes', 'no'])
     parser.add_argument('--timeout', default=15, type=float, help='Timeout for Nitro calls.')
-    parser.add_argument('--metrics-file', required=False, default='/exporter/metrics.json', type=str)
-    parser.add_argument('--log-file', required=False, default='/exporter/exporter.log', type=str)
+    parser.add_argument('--metrics-file', required=False, default='/exporter/metrics.json', type=str, help='Location of metrics.json file. Default: /exporter/metrics.json')
+    parser.add_argument('--log-file', required=False, default='/exporter/exporter.log', type=str, help='Location of exporter.log file. Default: /exporter/exporter.log')
     parser.add_argument('--log-level', required=False, default='ERROR', type=str, choices=['DEBUG', 'INFO', 'WARN', 'ERROR', 'CRITICAL', 'debug', 'info', 'warn', 'error', 'critical'])
     parser.add_argument('--config-file', required=False, default='./config.yaml', type=str)
     args = parser.parse_args()
@@ -153,20 +153,20 @@ if __name__ == '__main__':
     if args.config_file:
         args = parseConfig(args)
 
-    print(args)
-    exit()
-
-    logging.basicConfig(
-        filename=args.log_file,
-        format='%(asctime)s %(levelname)-8s %(message)s',
-        datefmt='%FT%T%z',
-        level= {
-            'DEBUG': logging.DEBUG,
-            'INFO': logging.INFO,
-            'WARN': logging.WARN,
-            'ERROR': logging.ERROR,
-            'CRITICAL': logging.CRITICAL,
-        }[args.log_level.upper()])
+    try:
+        logging.basicConfig(
+            filename=args.log_file,
+            format='%(asctime)s %(levelname)-8s %(message)s',
+            datefmt='%FT%T%z',
+            level= {
+                'DEBUG': logging.DEBUG,
+                'INFO': logging.INFO,
+                'WARN': logging.WARN,
+                'ERROR': logging.ERROR,
+                'CRITICAL': logging.CRITICAL,
+            }[args.log_level.upper()])
+    except Exception as e:
+        print('Error while setting logger configs::%s', e)
 
     logging.getLogger("requests").setLevel(logging.WARNING)
     logging.getLogger("urllib3").setLevel(logging.WARNING)
@@ -196,8 +196,8 @@ if __name__ == '__main__':
       logger.warning('Using NS_PASSWORD Environment variable is insecure. Consider using config.yaml file and --config-file option to define password')
 
     # Load the metrics file specifying stats to be collected
-    f = open(args.metrics_file, 'r')
     try:
+        f = open(args.metrics_file, 'r')
         # collect selected metrics only
         if args.metric:
             metrics_data = json.load(f)
