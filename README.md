@@ -414,3 +414,56 @@ The steps bellow can be followed to setup up a Grafana container with a sample d
 
 </details>
 <br>
+
+
+Debugging Common Issues:
+---
+
+<details>
+<summary>1. Grafana dashboard has no plots</summary>
+<br>
+
+If the graphs on the Grafana dashboards do not have any values plotted (not even a flat '0' value line), this means that Grafana is unable to obtain stats from its datasource. The following can be done:
+
+		
+i. Check if the prometheus datasource is saved and working properly. On saving the datasource after providing the Name and IP, a "Data source is working" message should appear in green indicating the datasource is reachable and detected.
+		
+ii. If the dashboard was created using ```sample_grafana_dashboard.json```, ensure the name given to the Prometheus datasource begins with the word "prometheus", with all lowercase letters.
+		
+iii. Check the Targets page of prometheus to see if the requried target exporter is in ```DOWN``` state.
+
+</details>
+<br>
+
+<details>
+<summary>2. DOWN: Context deadline exceeded</summary>
+<br>
+
+If this appears against any of the exporter target of Prometheus, this means that Prometheus is unable to connect to that exporter, or is unable to fetch all the metrics from that exporter within the given ```scrape_timeout```.
+
+
+i. If Prometheus Operator is being used ```scrape_timeout``` is usually adjusted automatically and such an error means that the exporter itself is not reachable
+		
+ii. If a standalone Promtheus container/pod is being used, try increasing the ```scrape_interval``` and ```scrape_timeout``` in the ```/etc/prometheus/prometheus.cfg``` file to allow for more time to collect the metrics.
+		
+
+</details>
+<br>
+      
+
+<details>
+<summary>3. Empty values next to metric names</summary>
+<br>
+
+It may be observed that some metrics are being received by Prometheus but have no value associated with them. This means that that the exporter is unable to collect that particular metric from the NetScaler. It could be either becuase:
+
+	
+i. The device provided as a ```--target-nsip``` is reachable on the IP and port but is not a NetScaler, or
+	
+ii. The metric being fetched does not exist in the NetScaler. Possibly due to it being an invalid metric name.
+		
+</details>
+<br>
+		
+
+**NOTE:** The exporter is designed to catch and handle all exceptions that could arise duriing its operation. This is a requirement for the [Citrix Ingress Controller's](https://github.com/citrix/citrix-k8s-ingress-controller) [metrics-visualizer](https://github.com/citrix/citrix-k8s-ingress-controller/tree/master/metrics-visualizer). To debug errors the exporter might have run into, provide the --log-level=DEBUG flag.
