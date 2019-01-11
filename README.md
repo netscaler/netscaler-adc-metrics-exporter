@@ -416,7 +416,7 @@ The steps bellow can be followed to setup up a Grafana container with a sample d
 <br>
 
 
-Debugging Common Issues:
+Troubleshooting:
 ---
 
 <details>
@@ -466,4 +466,4 @@ ii. The metric being fetched does not exist in the NetScaler. Possibly due to it
 <br>
 		
 
-**NOTE:** The exporter is designed to catch and handle all exceptions that could arise duriing its operation. This is a requirement for the [Citrix Ingress Controller's](https://github.com/citrix/citrix-k8s-ingress-controller) [metrics-visualizer](https://github.com/citrix/citrix-k8s-ingress-controller/tree/master/metrics-visualizer). To debug errors the exporter might have run into, provide the --log-level=DEBUG flag.
+**NOTE:** The exporter is designed to catch and handle all exceptions that could arise duriing its operation. This is a requirement for the [Citrix Ingress Controller's](https://github.com/citrix/citrix-k8s-ingress-controller) [metrics-visualizer](https://github.com/citrix/citrix-k8s-ingress-controller/tree/master/metrics-visualizer). To debug errors the exporter might have run into, provide the ```--log-level=DEBUG``` flag.
