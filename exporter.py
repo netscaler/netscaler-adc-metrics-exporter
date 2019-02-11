@@ -13,19 +13,14 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 def parseConfig(args):
     try:
-        nse = {}
         with open(args.config_file, 'r') as stream:
             config = yaml.load(stream)
-            for key, value in vars(args).items():
-                cfgkey = key.replace('_', '-')
-                nse[key]=config[cfgkey] if cfgkey in config else value
-
+            for key in config.keys():
+                args.__setattr__(key.replace('-', '_'), config[key])
     except Exception as e:
+        logger.error('Error while reading config file::%s', e)
         print(e)
-        sys.exit()
-
-    return nse
-
+    return args
 
 # Function to fire nitro commands and collect data from NS
 def collect_data(nsip, entity, username, password, secure, nitro_timeout):
@@ -134,7 +129,9 @@ class NetscalerCollector(object):
                             logger.error('Caught exception while adding gauge %s to %s: %s' %(ns_metric_name, entity_name, str(e)))
                 yield g
 
+
 if __name__ == '__main__':
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--target-nsip', required=True, action='append', help='The IP of the Netscaler to gather metrics from. Required')
     parser.add_argument('--start-delay', default=10, type=float, help='Start the exporter running after a delay to allow other containers to start. Default: 10s')
@@ -150,9 +147,6 @@ if __name__ == '__main__':
     parser.add_argument('--config-file', required=False, default='./config.yaml', type=str)
     args = parser.parse_args()
 
-    if args.config_file:
-        args = parseConfig(args)
-
     try:
         logging.basicConfig(
             filename=args.log_file,
@@ -167,10 +161,12 @@ if __name__ == '__main__':
             }[args.log_level.upper()])
     except Exception as e:
         print('Error while setting logger configs::%s', e)
-
     logging.getLogger("requests").setLevel(logging.WARNING)
     logging.getLogger("urllib3").setLevel(logging.WARNING)
     logger = logging.getLogger('netscaler_metrics_exporter')
+
+    if args.config_file:
+        args = parseConfig(args)
 
     # Wait for other containers to start.
     logger.info('Sleeping for %s seconds.' % args.start_delay)
@@ -180,10 +176,10 @@ if __name__ == '__main__':
     logger.info('Starting the exporter on port %s.' % args.port)
     try:
         start_http_server(args.port)
+        print("Exporter is running...")
     except Exception as e:
-        logger.error('Error while opening port::%s', e)
+        logger.critical('Error while opening port::%s', e)
         print(e)
-        sys.exit()
 
     # Get username and password of NetScalers.
     ns_user = os.environ.get("NS_USER")
