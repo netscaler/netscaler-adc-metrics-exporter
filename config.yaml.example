@@ -1,7 +1,7 @@
 # Example configuration file so that you can pass passwords securely
 # To use, rename to config.yaml and use --config-file=....  CLI option
 # username: "nsroot"
-# password: "TEST"
+# password: "nsroot"
 # log-level: "DEBUG"
 # secure: "yes"
 # start-delay: 0
