@@ -143,7 +143,7 @@ if __name__ == '__main__':
     parser.add_argument('--metrics-file', required=False, default='/exporter/metrics.json', type=str, help='Location of metrics.json file. Default: /exporter/metrics.json')
     parser.add_argument('--log-file', required=False, default='/exporter/exporter.log', type=str, help='Location of exporter.log file. Default: /exporter/exporter.log')
     parser.add_argument('--log-level', required=False, default='ERROR', type=str, choices=['DEBUG', 'INFO', 'WARN', 'ERROR', 'CRITICAL', 'debug', 'info', 'warn', 'error', 'critical'])
-    parser.add_argument('--config-file', required=False, default='./config.yaml', type=str)
+    parser.add_argument('--config-file', required=False, type=str)
     args = parser.parse_args()
 
     try:
