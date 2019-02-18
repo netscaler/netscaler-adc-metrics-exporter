@@ -1,4 +1,6 @@
 import os
+import sys
+import yaml
 import json
 import time
 import signal
@@ -8,6 +10,17 @@ import argparse
 from prometheus_client import start_http_server
 from prometheus_client.core import GaugeMetricFamily, CounterMetricFamily, REGISTRY
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
+
+def parseConfig(args):
+    try:
+        with open(args.config_file, 'r') as stream:
+            config = yaml.load(stream)
+            for key in config.keys():
+                args.__setattr__(key.replace('-', '_'), config[key])
+    except Exception as e:
+        logger.error('Error while reading config file::%s', e)
+        print(e)
+    return args
 
 # Function to fire nitro commands and collect data from NS
 def collect_data(nsip, entity, username, password, secure, nitro_timeout):
@@ -116,7 +129,9 @@ class NetscalerCollector(object):
                             logger.error('Caught exception while adding gauge %s to %s: %s' %(ns_metric_name, entity_name, str(e)))
                 yield g
 
+
 if __name__ == '__main__':
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--target-nsip', required=True, action='append', help='The IP of the Netscaler to gather metrics from. Required')
     parser.add_argument('--start-delay', default=10, type=float, help='Start the exporter running after a delay to allow other containers to start. Default: 10s')
@@ -124,11 +139,12 @@ if __name__ == '__main__':
     parser.add_argument('--metric', required=False, action='append', type=str, help='Collect only the metrics specified here, may be used multiple times.')
     parser.add_argument('--username', default='nsroot', type=str, help='The username used to access the Netscaler or NS_USER env var. Default: nsroot')
     parser.add_argument('--password', default='nsroot', type=str, help='The password used to access the Netscaler or NS_PASSWORD env var. Default: nsroot')
-    parser.add_argument('--secure', default='no', type=str, help='yes: Use HTTPS, no: Use HTTP. Default: no')
+    parser.add_argument('--secure', default='no', type=str, help='yes: Use HTTPS, no: Use HTTP. Default: no', choices=['yes', 'no'])
     parser.add_argument('--timeout', default=15, type=float, help='Timeout for Nitro calls.')
     parser.add_argument('--metrics-file', required=False, default='/exporter/metrics.json', type=str, help='Location of metrics.json file. Default: /exporter/metrics.json')
     parser.add_argument('--log-file', required=False, default='/exporter/exporter.log', type=str, help='Location of exporter.log file. Default: /exporter/exporter.log')
     parser.add_argument('--log-level', required=False, default='ERROR', type=str, choices=['DEBUG', 'INFO', 'WARN', 'ERROR', 'CRITICAL', 'debug', 'info', 'warn', 'error', 'critical'])
+    parser.add_argument('--config-file', required=False, default='./config.yaml', type=str)
     args = parser.parse_args()
 
     try:
@@ -149,6 +165,9 @@ if __name__ == '__main__':
     logging.getLogger("urllib3").setLevel(logging.WARNING)
     logger = logging.getLogger('netscaler_metrics_exporter')
 
+    if args.config_file:
+        args = parseConfig(args)
+
     # Wait for other containers to start.
     logger.info('Sleeping for %s seconds.' % args.start_delay)
     time.sleep(args.start_delay)
@@ -157,8 +176,10 @@ if __name__ == '__main__':
     logger.info('Starting the exporter on port %s.' % args.port)
     try:
         start_http_server(args.port)
+        print("Exporter is running...")
     except Exception as e:
-        logger.error('Error while opening port::%s', e)
+        logger.critical('Error while opening port::%s', e)
+        print(e)
 
     # Get username and password of NetScalers.
     ns_user = os.environ.get("NS_USER")
@@ -167,6 +188,8 @@ if __name__ == '__main__':
     ns_password = os.environ.get("NS_PASSWORD")
     if ns_password == None:
         ns_password = args.password
+    else:
+      logger.warning('Using NS_PASSWORD Environment variable is insecure. Consider using config.yaml file and --config-file option to define password')
 
     # Load the metrics file specifying stats to be collected
     try:
