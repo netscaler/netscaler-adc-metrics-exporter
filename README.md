@@ -165,8 +165,21 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 
 </details>
 
-<br />
+Netscaler configuration:
+---
+It is preferable to create specific user for data scraping from Netscaler with permissions to stats data only.
 
+```
+# Create a new Command Policy which is only allowed to run the stat command
+add system cmdPolicy stats-policy ALLOW (^stat.*|show ns license|show serviceGroup)
+
+# Create a new user  
+# Change the 'password' in accordance with your password policy
+add system user stats-user "password" -externalAuth DISABLED 
+
+# Bind the local user account to the created Command Policy
+bind system user stats-user stats-policy 100
+```
 
 Stats Exported by Default:
 ---
