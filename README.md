@@ -6,11 +6,9 @@ Description:
 
 This is a simple server that scrapes Citrix NetScaler (NS) stats and exports them via HTTP to Prometheus. Prometheus can then be added as a data source to Grafana to view the netscaler stats graphically.
 
-![exporter_diagram](images/exporter-prometheus-grafana.png)
-
-   In the above diagram, blue boxes represent physical machines or VMs and grey boxes represent containers. 
-There are two MPX/VPX instances present with IPs 10.0.0.1 and 10.0.0.2 and a NetScaler CPX (containerized NetScaler) with an IP 172.17.0.2.
-To monitor stats and counters of these NetScaler instances, an exporter (172.17.0.3) is being run as a container. It collects NetScaler stats such as total hits to a vserver, http request rate, ssl encryption-decryption rate, etc from the three NetScaler instances and holds them until the Prometheus containter 172.17.0.4 pulls the stats and stores them with a timestamp. Grafana can then be pointed to the Prometheus container to fetch the stats, plot them, set alarms, create heat maps, generate tables, etc as needed to analyse the NetScaler stats. 
+![exporter_diagram](images/Netscaler-exporter-workflow.png)
+ 
+To monitor stats and counters of NetScaler instances, netscaler-metric-exporter is being run as a container or script. It collects NetScaler stats such as total hits to a vserver, http request rate, ssl encryption-decryption rate, etc from the NetScaler instances and holds them until the Prometheus server pulls the stats and stores them with a timestamp. Grafana can then be pointed to the Prometheus server to fetch the stats, plot them, set alarms, create heat maps, generate tables, etc as needed to analyse the NetScaler stats. 
 
    Details about setting up the exporter to work in an environment as given in the figure is provided in the following sections. A note on which NetScaler entities/metrics the exporter scrapes by default and how to modify it is also explained.
 
@@ -165,8 +163,26 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 
 </details>
 
-<br />
+Netscaler configuration:
+---
+It is preferable to create specific user for data scraping from Netscaler with permissions to stats data only.
 
+<details>
+<summary>Netscaler config example</summary>
+
+```
+# Create a new Command Policy which is only allowed to run the stat command
+add system cmdPolicy stats-policy ALLOW (^stat.*|show ns license|show serviceGroup)
+
+# Create a new user  
+# Change the 'password' in accordance with your password policy
+add system user stats-user "password" -externalAuth DISABLED 
+
+# Bind the local user account to the created Command Policy
+bind system user stats-user stats-policy 100
+```
+
+</details>
 
 Stats Exported by Default:
 ---
