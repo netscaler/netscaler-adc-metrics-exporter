@@ -6,6 +6,7 @@ import signal
 import logging
 import requests
 import argparse
+import sys
 from prometheus_client import start_http_server
 from prometheus_client.core import GaugeMetricFamily, CounterMetricFamily, REGISTRY
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
@@ -142,7 +143,7 @@ if __name__ == '__main__':
     parser.add_argument('--timeout', default=15, type=float, help='Timeout for Nitro calls.')
     parser.add_argument('--metrics-file', required=False, default='/exporter/metrics.json', type=str, help='Location of metrics.json file. Default: /exporter/metrics.json')
     parser.add_argument('--log-file', required=False, default='/exporter/exporter.log', type=str, help='Location of exporter.log file. Default: /exporter/exporter.log')
-    parser.add_argument('--log-level', required=False, default='ERROR', type=str, choices=['DEBUG', 'INFO', 'WARN', 'ERROR', 'CRITICAL', 'debug', 'info', 'warn', 'error', 'critical'])
+    parser.add_argument('--log-level', required=False, default='DEBUG', type=str, choices=['DEBUG', 'INFO', 'WARN', 'ERROR', 'CRITICAL', 'debug', 'info', 'warn', 'error', 'critical'])
     parser.add_argument('--config-file', required=False, type=str)
     args = parser.parse_args()
 
@@ -208,7 +209,8 @@ if __name__ == '__main__':
     try:
         REGISTRY.register(NetscalerCollector(nsips=args.target_nsip, metrics=metrics_json, username=ns_user, password=ns_password, secure=args.secure.lower(), nitro_timeout=args.timeout))
     except Exception as e:
-        logger.error('Could not register collector for %s::%s', (args.target_nsip, e))
+        logger.error('Exiting: invalid arguments! could not register collector for {}::{}'.format(args.target_nsip, e))
+        sys.exit()
 
     # Forever
     while True:
