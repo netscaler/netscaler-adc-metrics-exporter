@@ -413,7 +413,7 @@ The steps bellow can be followed to setup up a Grafana container with a sample d
 
 1. Pull grafana image: ```docker pull grafana/grafana:latest```
 
-2. Run grafana container: ```docker run -dt 3000:3000 grafana/grafana:latest```
+2. Run grafana container: ```docker run -dt -p 3000:3000 grafana/grafana:latest```
 
 3. Import the sample grafana dashboard file: Login to Grafana using admin:admin, from the column on the left select the ```+``` symbol, select "Import", and select "upload .json file". Now, navigate to and upload ```sample_grafana_dashboard.json```.
 

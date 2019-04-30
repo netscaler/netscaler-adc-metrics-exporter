@@ -32,6 +32,18 @@ def collect_data(nsip, entity, username, password, secure, nitro_timeout):
         protocol = 'https'
     else:
         protocol = 'http'
+ 
+    #Validate login crednetials for netscalar
+    url = '%s://%s/nitro/v1/config/' % (protocol, nsip)
+    try:
+       response = requests.get(url, verify=False, auth=HTTPBasicAuth(username, password))
+       response.raise_for_status()
+    except requests.exceptions.HTTPError as errh:
+       logger.error('Invalid username or password!, HTTP Error : %s', errh)
+       sys.exit()
+    except requests.exceptions.RequestException as err:
+       logger.error('Unable to connect to netscalar : %s', err)
+       sys.exit()
 
     # nitro call for all entities except 'services' (ie. servicegroups)
     if (entity != 'services'):
@@ -106,7 +118,7 @@ class NetscalerCollector(object):
                         try:
                             c.add_metric(label_values, float(data_item[ns_metric_name]))
                         except Exception as e:
-                            logger.error('Caught exception while adding counter %s to %s: %s' %(ns_metric_name, entity_name, str(e)))
+                            logger.warning('Counter stats for %s not enabled in netscalar, so could not add to %s' %(ns_metric_name, entity_name))
                 yield c
 
             # Provide collected metric to Prometheus as a gauge
@@ -126,7 +138,7 @@ class NetscalerCollector(object):
                         try:
                             g.add_metric(label_values, float(data_item[ns_metric_name]))
                         except Exception as e:
-                            logger.error('Caught exception while adding gauge %s to %s: %s' %(ns_metric_name, entity_name, str(e)))
+                            logger.warning('Gauge stats for %s not enabled in netscalar, so could not add to %s' %(ns_metric_name, entity_name))
                 yield g
 
 
