@@ -235,7 +235,7 @@ if __name__ == '__main__':
     for nsip in args.target_nsip:
         res = validate_ns_session(ns_protocol, nsip, ns_user, ns_password)
         if res == False:
-	   logger.error('Exising since NS access test failed for nsip {}'.format(nsip) )
+	   logger.error('Exiting since NS access test failed for nsip {}'.format(nsip) )
            sys.exit()
 
 
