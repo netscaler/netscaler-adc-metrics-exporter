@@ -10,6 +10,7 @@ import sys
 from prometheus_client import start_http_server
 from prometheus_client.core import GaugeMetricFamily, CounterMetricFamily, REGISTRY
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
+from requests.auth import HTTPBasicAuth
 
 def parseConfig(args):
     try:
@@ -22,29 +23,23 @@ def parseConfig(args):
         print(e)
     return args
 
+def validate_ns_session(protocol, nsip, username, password):
+    url = '%s://%s/nitro/v1/config/' % (protocol, nsip)
+    try:
+        response = requests.get(url, verify=False, auth=HTTPBasicAuth(username, password))
+        if (response.status_code == requests.status_codes.codes.unauthorized):
+            logger.error('Invalid username or password!, Unaurthorized Err : {}'.format(response.status_code))
+            return False	    
+    except requests.exceptions.RequestException as err:
+        logger.error('{}'.format(err))
+        return False
+    return True
+    
 # Function to fire nitro commands and collect data from NS
-def collect_data(nsip, entity, username, password, secure, nitro_timeout):
+def collect_data(nsip, entity, username, password, protocol, nitro_timeout):
 
     #Login credentials
     headers = {'X-NITRO-USER': username, 'X-NITRO-PASS': password}
-    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-    if secure == 'yes':
-        protocol = 'https'
-    else:
-        protocol = 'http'
- 
-    #Validate login crednetials for netscalar
-    url = '%s://%s/nitro/v1/config/' % (protocol, nsip)
-    try:
-       response = requests.get(url, verify=False, auth=HTTPBasicAuth(username, password))
-       response.raise_for_status()
-    except requests.exceptions.HTTPError as errh:
-       logger.error('Invalid username or password!, HTTP Error : %s', errh)
-       sys.exit()
-    except requests.exceptions.RequestException as err:
-       logger.error('Unable to connect to netscalar : %s', err)
-       sys.exit()
-
     # nitro call for all entities except 'services' (ie. servicegroups)
     if (entity != 'services'):
         url = '%s://%s/nitro/v1/stat/%s' % (protocol, nsip, entity)
@@ -52,6 +47,7 @@ def collect_data(nsip, entity, username, password, secure, nitro_timeout):
         data = r.json()
         if data['errorcode'] == 0:
             return data[entity]
+
     # nitro call for 'services' entity (ie. servicegroups)
     else:
         url = '%s://%s/nitro/v1/stat/servicegroup?statbindings=yes'%(protocol, nsip)
@@ -72,12 +68,12 @@ def collect_data(nsip, entity, username, password, secure, nitro_timeout):
 
 class NetscalerCollector(object):
 
-    def __init__(self, nsips, metrics, username, password, secure, nitro_timeout):
+    def __init__(self, nsips, metrics, username, password, protocol, nitro_timeout):
         self.nsips = nsips
         self.metrics = metrics
         self.username = username
         self.password = password
-        self.secure = secure
+        self.protocol = protocol
         self.nitro_timeout = nitro_timeout
 
     # Collect metrics from NetScalers
@@ -88,7 +84,7 @@ class NetscalerCollector(object):
             for entity in self.metrics.keys():
                 logger.info('Collecting metric %s for %s' % (entity, nsip))
                 try:
-                    data[nsip][entity] = collect_data(nsip, entity, self.username, self.password, self.secure, self.nitro_timeout)
+                    data[nsip][entity] = collect_data(nsip, entity, self.username, self.password, self.protocol, self.nitro_timeout)
                 except Exception as e:
                     logger.warning('Could not collect metric: ' + str(e))
 
@@ -110,6 +106,10 @@ class NetscalerCollector(object):
                         entity_stats = [entity_stats]
 
                     for data_item in entity_stats:
+                        if not ns_metric_name in data_item.keys():
+                            logger.warning('Counter stats for %s not enabled in netscalar %s, so could not add to %s' %(ns_metric_name, nsip, entity_name))
+                            break
+
                         if('labels' in entity.keys()):
                             label_values = [data_item[key] for key in [v[0] for v in entity['labels']]]
                             label_values.append(nsip)
@@ -118,8 +118,10 @@ class NetscalerCollector(object):
                         try:
                             c.add_metric(label_values, float(data_item[ns_metric_name]))
                         except Exception as e:
-                            logger.warning('Counter stats for %s not enabled in netscalar, so could not add to %s' %(ns_metric_name, entity_name))
-                yield c
+                           logger.error('Caught exception while adding counter %s to %s: %s' %(ns_metric_name, entity_name, str(e)))
+
+                yield c 
+
 
             # Provide collected metric to Prometheus as a gauge
             for ns_metric_name, prom_metric_name in entity.get('gauges', []):
@@ -130,6 +132,10 @@ class NetscalerCollector(object):
                         entity_stats = [entity_stats]
 
                     for data_item in entity_stats:
+                        if not ns_metric_name in data_item.keys():
+                            logger.warning('Gauge stats for %s not enabled in netscalar %s, so could not add to %s' %(ns_metric_name, nsip, entity_name))
+                            break
+
                         if('labels' in entity.keys()):
                             label_values = [data_item[key] for key in [v[0] for v in entity['labels']]]
                             label_values.append(nsip)
@@ -138,7 +144,8 @@ class NetscalerCollector(object):
                         try:
                             g.add_metric(label_values, float(data_item[ns_metric_name]))
                         except Exception as e:
-                            logger.warning('Gauge stats for %s not enabled in netscalar, so could not add to %s' %(ns_metric_name, entity_name))
+                           logger.error('Caught exception while adding counter %s to %s: %s' %(ns_metric_name, entity_name, str(e)))
+
                 yield g
 
 
@@ -216,10 +223,26 @@ if __name__ == '__main__':
     except Exception as e:
         logger.error('Error while loading metrics::%s', e)
 
+
+    #validating netscalar access
+    secure = args.secure.lower() 
+    if secure == 'yes':
+        ns_protocol = 'https'
+    else:
+        ns_protocol = 'http'
+
+    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+    for nsip in args.target_nsip:
+        res = validate_ns_session(ns_protocol, nsip, ns_user, ns_password)
+        if res == False:
+	   logger.error('Exising since NS access test failed for nsip {}'.format(nsip) )
+           sys.exit()
+
+
     # Register the exporter as a stat collector
     logger.info('Registering collector for %s' % args.target_nsip)
     try:
-        REGISTRY.register(NetscalerCollector(nsips=args.target_nsip, metrics=metrics_json, username=ns_user, password=ns_password, secure=args.secure.lower(), nitro_timeout=args.timeout))
+        REGISTRY.register(NetscalerCollector(nsips=args.target_nsip, metrics=metrics_json, username=ns_user, password=ns_password, protocol=ns_protocol, nitro_timeout=args.timeout))
     except Exception as e:
         logger.error('Exiting: invalid arguments! could not register collector for {}::{}'.format(args.target_nsip, e))
         sys.exit()
