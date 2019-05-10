@@ -269,8 +269,7 @@
             ["toleratingttlbtransactions", "netscaler_lb_vserver_tolerable_transactions_total"],
             ["totvserverdownbackuphits", "netscaler_lb_vserver_backup_server_divert_count_total"],
             ["totalresponsebytes", "netscaler_lb_vserver_response_bytes_received_total"],
-            ["totalsvrbusyerr", "netscaler_lb_vserver_busy_error_total"],
-            ["totalvserverflaps", "netscaler_lb_vserver_flaps_total"]
+            ["totalsvrbusyerr", "netscaler_lb_vserver_busy_error_total"]
         ],
 
         "gauges": [
