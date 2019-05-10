@@ -268,7 +268,8 @@
             ["frustratingttlbtransactions", "netscaler_lb_vserver_frustrating_transactions_total"],
             ["toleratingttlbtransactions", "netscaler_lb_vserver_tolerable_transactions_total"],
             ["totvserverdownbackuphits", "netscaler_lb_vserver_backup_server_divert_count_total"],
-            ["totalresponsebytes", "netscaler_lb_vserver_response_bytes_received_total"]
+            ["totalresponsebytes", "netscaler_lb_vserver_response_bytes_received_total"],
+            ["totalsvrbusyerr", "netscaler_lb_vserver_busy_error_total"]
         ],
 
         "gauges": [
@@ -294,7 +295,8 @@
             ["hitsrate", "netscaler_lb_vserver_hits_rate"],
             ["establishedconn", "netscaler_lb_vserver_established_connections_count"],
             ["responsebytesrate", "netscaler_lb_vserver_response_bytes_received_rate"],
-            ["inactsvcs", "netscaler_lb_vserver_inactive_services_count"]
+            ["inactsvcs", "netscaler_lb_vserver_inactive_services_count"],
+            ["svrbusyerrrate", "netscaler_lb_vserver_busy_error_rate"]
         ],
 
         "labels": [
