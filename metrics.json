@@ -1,164 +1,164 @@
 {
     "system": {
         "counters": [
-            ["numcpus", "netscaler_cpu_number"]
+            ["numcpus", "cpu_number"]
         ],
 
         "gauges": [
-            ["cpuusagepcnt", "netscaler_cpu_usage_percent"],
-            ["memusagepcnt", "netscaler_memory_usage_percent"],
-            ["mgmtcpuusagepcnt", "netscaler_cpu_management_cpu_usage_percent"],
-            ["pktcpuusagepcnt", "netscaler_cpu_packet_cpu_usage_percent"],
-            ["rescpuusagepcnt", "netscaler_cpu_res_cpu_usage_percent"]
+            ["cpuusagepcnt", "cpu_usage_percent"],
+            ["memusagepcnt", "memory_usage_percent"],
+            ["mgmtcpuusagepcnt", "cpu_management_cpu_usage_percent"],
+            ["pktcpuusagepcnt", "cpu_packet_cpu_usage_percent"],
+            ["rescpuusagepcnt", "cpu_res_cpu_usage_percent"]
         ]
     },
 
     "ssl": {
         "counters": [
-            ["ssltottlsv11sessions", "netscaler_ssl_tot_tlsv11_sessions"],
-            ["ssltotsslv2sessions", "netscaler_ssl_tot_v2_sessions"],
-            ["ssltotsessions", "netscaler_ssl_tot_sessions"],
-            ["ssltotsslv2handshakes", "netscaler_ssl_tot_v2_handshakes"],
-            ["ssltotenc", "netscaler_ssl_tot_encode"],
-            ["sslcryptoutilizationstat", "netscaler_ssl_crypto_untilization_stat"], 
-            ["ssltotnewsessions", "netscaler_ssl_tot_new_sessions"]
+            ["ssltottlsv11sessions", "ssl_tot_tlsv11_sessions"],
+            ["ssltotsslv2sessions", "ssl_tot_v2_sessions"],
+            ["ssltotsessions", "ssl_tot_sessions"],
+            ["ssltotsslv2handshakes", "ssl_tot_v2_handshakes"],
+            ["ssltotenc", "ssl_tot_encode"],
+            ["sslcryptoutilizationstat", "ssl_crypto_untilization_stat"], 
+            ["ssltotnewsessions", "ssl_tot_new_sessions"]
 
         ],
 
         "gauges": [
-            ["sslsessionsrate", "netscaler_ssl_session_rate"],
-            ["ssldecrate", "netscaler_ssl_dec_rate"],
-            ["sslencrate", "netscaler_ssl_encode_rate"],
-            ["sslsslv2handshakesrate", "netscaler_ssl_v2_handshakes_rate"],
-            ["sslnewsessionsrate", "netscaler_new_sessions_rate"]
+            ["sslsessionsrate", "ssl_session_rate"],
+            ["ssldecrate", "ssl_dec_rate"],
+            ["sslencrate", "ssl_encode_rate"],
+            ["sslsslv2handshakesrate", "ssl_v2_handshakes_rate"],
+            ["sslnewsessionsrate", "new_sessions_rate"]
         ]
     },
 
     "protocolhttp": {
         "counters": [
-            ["httptotrequests", "netscaler_http_tot_requests"],
-            ["httptotresponses", "netscaler_http_tot_responses"],
-            ["httptotposts", "netscaler_http_tot_posts"],
-            ["httptotgets", "netscaler_http_tot_gets"],
-            ["httptotothers", "netscaler_http_tot_others"],
-            ["spdytotstreams", "netscaler_http_tot_spdy_streams"],
-            ["spdyv2totstreams", "netscaler_http_spdy_v2_streams"],
-            ["spdyv3totstreams", "netscaler_http_spdy_v3_streams"],
-            ["httptotrxrequestbytes", "netscaler_http_tot_rx_request_bytes"],
-            ["httptotrxresponsebytes", "netscaler_http_tot_rx_resposnse_bytes"],
-            ["httptot10requests", "netscaler_http_tot_10_requests"],
-            ["httptot11requests", "netscaler_http_tot_11_requests"],
-            ["httptotchunkedrequests", "netscaler_http_tot_chunked_requests"]
+            ["httptotrequests", "http_tot_requests"],
+            ["httptotresponses", "http_tot_responses"],
+            ["httptotposts", "http_tot_posts"],
+            ["httptotgets", "http_tot_gets"],
+            ["httptotothers", "http_tot_others"],
+            ["spdytotstreams", "http_tot_spdy_streams"],
+            ["spdyv2totstreams", "http_spdy_v2_streams"],
+            ["spdyv3totstreams", "http_spdy_v3_streams"],
+            ["httptotrxrequestbytes", "http_tot_rx_request_bytes"],
+            ["httptotrxresponsebytes", "http_tot_rx_resposnse_bytes"],
+            ["httptot10requests", "http_tot_10_requests"],
+            ["httptot11requests", "http_tot_11_requests"],
+            ["httptotchunkedrequests", "http_tot_chunked_requests"]
         ],
 
         "gauges": [
-            ["httprequestsrate", "netscaler_http_requests_rate"],
-            ["spdystreamsrate", "netscaler_http_spdy_streams_rate"],
-            ["httpresponsesrate", "netscaler_http_responses_rate"],
-            ["httppostsrate", "netscaler_http_posts_rate"],
-            ["httpgetsrate", "netscaler_http_gets_rate"],
-            ["httpothersrate", "netscaler_http_others_rate"],
-            ["httpchunkedresponsesrate", "netscaler_http_chunked_responses_rate"],
-            ["httpchunkedrequestsrate", "netscaler_http_chunked_requests_rate"],
-            ["http10responsesrate", "netscaler_http_10_responses_rate"],
-            ["http11responsesrate", "netscaler_http_11_responses_rate"]
+            ["httprequestsrate", "http_requests_rate"],
+            ["spdystreamsrate", "http_spdy_streams_rate"],
+            ["httpresponsesrate", "http_responses_rate"],
+            ["httppostsrate", "http_posts_rate"],
+            ["httpgetsrate", "http_gets_rate"],
+            ["httpothersrate", "http_others_rate"],
+            ["httpchunkedresponsesrate", "http_chunked_responses_rate"],
+            ["httpchunkedrequestsrate", "http_chunked_requests_rate"],
+            ["http10responsesrate", "http_10_responses_rate"],
+            ["http11responsesrate", "http_11_responses_rate"]
         ]
     },
 
     "protocoltcp": {
         "counters": [
-            ["tcptotrxpkts", "netscaler_http_tot_rx_packets"],
-            ["tcptotrxbytes", "netscaler_tcp_tot_rx_bytes"],
-            ["tcptottxbytes", "netscaler_tcp_tx_bytes"],
-            ["tcptottxpkts", "netscaler_tcp_tot_tx_packets"],
-            ["tcptotclientconnopened", "netscaler_tcp_tot_client_connections_opened"],
-            ["tcptotserverconnopened", "netscaler_tcp_tot_server_connections_opened"],
-            ["tcptotsyn", "netscaler_tcp_tot_syn"],
-            ["tcptotsynprobe", "netscaler_tcp_tot_syn_probe"],
-            ["tcptotsvrfin", "netscaler_tcp_tot_server_fin"],
-            ["tcptotcltfin", "netscaler_tcp_tot_client_fin"]
+            ["tcptotrxpkts", "tcp_tot_rx_packets"],
+            ["tcptotrxbytes", "tcp_tot_rx_bytes"],
+            ["tcptottxbytes", "tcp_tx_bytes"],
+            ["tcptottxpkts", "tcp_tot_tx_packets"],
+            ["tcptotclientconnopened", "tcp_tot_client_connections_opened"],
+            ["tcptotserverconnopened", "tcp_tot_server_connections_opened"],
+            ["tcptotsyn", "tcp_tot_syn"],
+            ["tcptotsynprobe", "tcp_tot_syn_probe"],
+            ["tcptotsvrfin", "tcp_tot_server_fin"],
+            ["tcptotcltfin", "tcp_tot_client_fin"]
         ],
 
         "gauges": [
-            ["tcpactiveserverconn", "netscaler_tcp_active_server_connection"],
-            ["tcpcurclientconnestablished", "netscaler_tcp_current_client_connections_est"],
-            ["tcpcurserverconnestablished", "netscaler_tcp_current_server_connections_est"],
-            ["tcprxpktsrate", "netscaler_tcp_rx_packets_rate"],
-            ["tcptxpktsrate", "netscaler_tcp_tx_packets_rate"],
-            ["tcptxbytesrate", "netscaler_tcp_tx_bytes_rate"],
-            ["tcpclientconnopenedrate", "netscaler_tcp_client_connection_opened_rate"],
-            ["tcperrbadchecksum", "netscaler_tcp_err_badchecksum"],
-            ["tcperrbadchecksumrate", "netscaler_tcp_err_badchecksum_rate"],
-            ["tcperranyportfail", "netscaler_tcp_err_any_port_fail"],
-            ["tcperripportfail", "netscaler_tcp_err_ip_port_fail"],
-            ["tcperrbadstateconn", "netscaler_tcp_err_bad_connection_state"],
-            ["tcperrrstthreshold", "netscaler_tcp_err_reset_threshold"],
-            ["tcpsynrate", "netscaler_tcp_syn_rate"],
-            ["tcpsynproberate", "netscaler_tcp_syn_probe_rate"]
+            ["tcpactiveserverconn", "tcp_active_server_connection"],
+            ["tcpcurclientconnestablished", "tcp_current_client_connections_est"],
+            ["tcpcurserverconnestablished", "tcp_current_server_connections_est"],
+            ["tcprxpktsrate", "tcp_rx_packets_rate"],
+            ["tcptxpktsrate", "tcp_tx_packets_rate"],
+            ["tcptxbytesrate", "tcp_tx_bytes_rate"],
+            ["tcpclientconnopenedrate", "tcp_client_connection_opened_rate"],
+            ["tcperrbadchecksum", "tcp_err_badchecksum"],
+            ["tcperrbadchecksumrate", "tcp_err_badchecksum_rate"],
+            ["tcperranyportfail", "tcp_err_any_port_fail"],
+            ["tcperripportfail", "tcp_err_ip_port_fail"],
+            ["tcperrbadstateconn", "tcp_err_bad_connection_state"],
+            ["tcperrrstthreshold", "tcp_err_reset_threshold"],
+            ["tcpsynrate", "tcp_syn_rate"],
+            ["tcpsynproberate", "tcp_syn_probe_rate"]
         ]
     },
 
     "protocolip": {
         "counters": [
-            ["iptotrxpkts", "netscaler_ip_tot_rx_packets"],
-            ["iptotrxbytes", "netscaler_ip_tot_rx_bytes"],
-            ["iptottxpkts", "netscaler_ip_tx_packets"],
-            ["iptottxbytes", "netscaler_ip_tx_bytes"],
-            ["iptotrxmbits", "netscaler_ip_rx_mbits"],
-            ["iptottxmbits", "netscaler_ip_tx_mbits"],
-            ["iptotroutedpkts", "netscaler_ip_tot_routed_packets"],
-            ["iptotroutedmbits", "netscaler_ip_tot_routed_mbits"],
-            ["iptotfragments", "netscaler_ip_tot_fragments"],
-            ["iptotsuccreassembly", "netscaler_ip_tot_successful_assembly"],
-            ["iptotaddrlookup", "netscaler_ip_tot_address_lookup"],
-            ["iptotaddrlookupfail", "netscaler_ip_tot_address_lookup_fail"],
-            ["iptotudpfragmentsfwd", "netscaler_ip_tot_udp_fragments_forwarded"],
-            ["iptottcpfragmentsfwd", "netscaler_ip_tot_tcp_fragments_forwarded"],
-            ["iptotbadchecksums", "netscaler_ip_tot_bad_checksums"],
-            ["iptotunsuccreassembly", "netscaler_ip_tot_unsuccessful_assembly"],
-            ["iptottoobig", "netscaler_ip_tot_too_big"],
-            ["iptotdupfragments", "netscaler_ip_tot_udp_fragments"],
-            ["iptotoutoforderfrag", "netscaler_ip_tot_out_of_order_fragments"],
-            ["iptotvipdown", "netscaler_ip_tot_vipo_down"],
-            ["iptotttlexpired", "netscaler_ip__tot_ttl_expired"],
-            ["iptotmaxclients", "netscaler_ip_tot_max_clients"],
-            ["iptotunknownsvcs", "netscaler_ip_tot_unkown_services"],
-            ["iptotinvalidheadersz", "netscaler_ip_tot_invalid_header_size"],
-            ["iptotinvalidpacketsize", "netscaler_ip_tot_invalid_packet_size"],
-            ["iptottruncatedpackets", "netscaler_ip_tot_truncated_packets"],
-            ["noniptottruncatedpackets", "netscaler_non_ip_tot_truncated_packets"],
-            ["iptotbadmacaddrs", "netscaler_ip_tot_bad_mac_addresses"]
+            ["iptotrxpkts", "ip_tot_rx_packets"],
+            ["iptotrxbytes", "ip_tot_rx_bytes"],
+            ["iptottxpkts", "ip_tx_packets"],
+            ["iptottxbytes", "ip_tx_bytes"],
+            ["iptotrxmbits", "ip_rx_mbits"],
+            ["iptottxmbits", "ip_tx_mbits"],
+            ["iptotroutedpkts", "ip_tot_routed_packets"],
+            ["iptotroutedmbits", "ip_tot_routed_mbits"],
+            ["iptotfragments", "ip_tot_fragments"],
+            ["iptotsuccreassembly", "ip_tot_successful_assembly"],
+            ["iptotaddrlookup", "ip_tot_address_lookup"],
+            ["iptotaddrlookupfail", "ip_tot_address_lookup_fail"],
+            ["iptotudpfragmentsfwd", "ip_tot_udp_fragments_forwarded"],
+            ["iptottcpfragmentsfwd", "ip_tot_tcp_fragments_forwarded"],
+            ["iptotbadchecksums", "ip_tot_bad_checksums"],
+            ["iptotunsuccreassembly", "ip_tot_unsuccessful_assembly"],
+            ["iptottoobig", "ip_tot_too_big"],
+            ["iptotdupfragments", "ip_tot_udp_fragments"],
+            ["iptotoutoforderfrag", "ip_tot_out_of_order_fragments"],
+            ["iptotvipdown", "ip_tot_vipo_down"],
+            ["iptotttlexpired", "ip__tot_ttl_expired"],
+            ["iptotmaxclients", "ip_tot_max_clients"],
+            ["iptotunknownsvcs", "ip_tot_unkown_services"],
+            ["iptotinvalidheadersz", "ip_tot_invalid_header_size"],
+            ["iptotinvalidpacketsize", "ip_tot_invalid_packet_size"],
+            ["iptottruncatedpackets", "ip_tot_truncated_packets"],
+            ["noniptottruncatedpackets", "non_ip_tot_truncated_packets"],
+            ["iptotbadmacaddrs", "ip_tot_bad_mac_addresses"]
         ],
 
         "gauges": [
-            ["iprxpktsrate", "netscaler_ip_rx_packers_rate"],
-            ["iprxbytesrate", "netscaler_ip_rx_bytes_rate"],
-            ["iptxpktsrate", "netscaler_ip_tx_packets_rate"],
-            ["iptxbytesrate", "netscaler_ip_bytes_rate"],
-            ["iprxmbitsrate", "netscaler_ip_rx_mbits_rate"],
-            ["iptxmbitsrate", "netscaler_ip_tx_mbits_rate"],
-            ["iproutedpktsrate", "netscaler_ip_routed_packets_rate"],
-            ["iproutedmbitsrate", "netscaler_ip_routed_mbits_rate"]
+            ["iprxpktsrate", "ip_rx_packers_rate"],
+            ["iprxbytesrate", "ip_rx_bytes_rate"],
+            ["iptxpktsrate", "ip_tx_packets_rate"],
+            ["iptxbytesrate", "ip_bytes_rate"],
+            ["iprxmbitsrate", "ip_rx_mbits_rate"],
+            ["iptxmbitsrate", "ip_tx_mbits_rate"],
+            ["iproutedpktsrate", "ip_routed_packets_rate"],
+            ["iproutedmbitsrate", "ip_routed_mbits_rate"]
         ]
     },
 
     "services": {
         "counters": [
-            ["totalresponses", "netscaler_services_tot_responses"],
-            ["totsvrttlbtransactions", "netscaler_services_tot_srv_ttlb_transactions"],
-            ["totalrequests", "netscaler_services_tot_requests"],
-            ["totalresponsebytes", "netscaler_services_tot_response_bytes"],
-            ["totalrequestbytes", "netscaler_services_tot_request_bytes"]
+            ["totalresponses", "services_tot_responses"],
+            ["totsvrttlbtransactions", "services_tot_srv_ttlb_transactions"],
+            ["totalrequests", "services_tot_requests"],
+            ["totalresponsebytes", "services_tot_response_bytes"],
+            ["totalrequestbytes", "services_tot_request_bytes"]
         ],
 
         "gauges": [
-            ["avgsvrttfb", "netscaler_services_avg_server_ttfb"],
-            ["requestsrate", "netscaler_services_requests_rate"],
-            ["cursrvrconnections", "netscaler_services_current_server_connections"],
-            ["responsesrate", "netscaler_services_responses_rate"],
-            ["toleratingttlbtransactions", "netscaler_services_tolerating_ttlb_transactions"],
-            ["responsebytesrate", "netscaler_services_response_bytes_rate"],
-            ["requestbytesrate", "netscaler_services_request_bytes_rate"]
+            ["avgsvrttfb", "services_avg_server_ttfb"],
+            ["requestsrate", "services_requests_rate"],
+            ["cursrvrconnections", "services_current_server_connections"],
+            ["responsesrate", "services_responses_rate"],
+            ["toleratingttlbtransactions", "services_tolerating_ttlb_transactions"],
+            ["responsebytesrate", "services_response_bytes_rate"],
+            ["requestbytesrate", "services_request_bytes_rate"]
         ],
 
         "labels": [
@@ -169,30 +169,30 @@
 
     "service": {
         "counters": [
-            ["throughput", "netscaler_service_throughput"],
-            ["totalrequests", "netscaler_service_tot_requests"],
-            ["totalresponses", "netscaler_service_tot_responses"],
-            ["totalrequestbytes", "netscaler_service_tot_request_bytes"],
-            ["totalresponsebytes", "netscaler_service_tot_response_bytes"],
-            ["surgecount", "netscaler_service_surge_count"],
-            ["svrestablishedconn", "netscaler_service_server_established_connections"],
-            ["maxclients", "netscaler_service_max_clients"],
-            ["vsvrservicehits", "netscaler_service_vsvr_hits"]
+            ["throughput", "service_throughput"],
+            ["totalrequests", "service_tot_requests"],
+            ["totalresponses", "service_tot_responses"],
+            ["totalrequestbytes", "service_tot_request_bytes"],
+            ["totalresponsebytes", "service_tot_response_bytes"],
+            ["surgecount", "service_surge_count"],
+            ["svrestablishedconn", "service_server_established_connections"],
+            ["maxclients", "service_max_clients"],
+            ["vsvrservicehits", "service_vsvr_hits"]
         ],
 
         "gauges": [
-            ["throughputrate", "netscaler_service_throughput_rate"],
-            ["avgsvrttfb", "netscaler_service_average_server_ttfb"],
-            ["responsesrate", "netscaler_service_responses_rate"],
-            ["requestbytesrate", "netscaler_service_request_bytes_rate"],
-            ["responsebytesrate", "netscaler_service_response_bytes_rate"],
-            ["curclntconnections", "netscaler_service_current_client_connections"],
-            ["cursrvrconnections", "netscaler_service_current_server_connections"],
-            ["curreusepool", "netscaler_service_current_pool_use"],
-            ["curload", "netscaler_service_curent_load"],
-            ["curtflags", "netscaler_service_current_flags"],
-            ["vsvrservicehitsrate", "netscaler_service_vsvr_hits_rate"],
-            ["activetransactions", "netscaler_service_active_transactions"]
+            ["throughputrate", "service_throughput_rate"],
+            ["avgsvrttfb", "service_average_server_ttfb"],
+            ["responsesrate", "service_responses_rate"],
+            ["requestbytesrate", "service_request_bytes_rate"],
+            ["responsebytesrate", "service_response_bytes_rate"],
+            ["curclntconnections", "service_current_client_connections"],
+            ["cursrvrconnections", "service_current_server_connections"],
+            ["curreusepool", "service_current_pool_use"],
+            ["curload", "service_curent_load"],
+            ["curtflags", "service_current_flags"],
+            ["vsvrservicehitsrate", "service_vsvr_hits_rate"],
+            ["activetransactions", "service_active_transactions"]
         ],
 
         "labels": [
@@ -203,46 +203,46 @@
 
     "Interface": {
         "counters": [
-            ["nictotmulticastpkts", "netscaler_interface_tot_multicast_packets"],
-            ["rxcrcerrors", "netscaler_interface_rx_crc_errors"],
-            ["totmacmoved", "netscaler_interface_tot_mac_moved"],
-            ["trunkpktstransmitted", "netscaler_interface_trunk_packets_transmitted"],
-            ["errdroppedrxpkts", "netscaler_interface_err_dropped_rx_packets"],
-            ["linkreinits", "netscaler_interface_link_reinitializations"],
-            ["errifindiscards", "netscaler_interface_err_ifin_discards"],
-            ["errdroppedtxpkts", "netscaler_interface_err_dropped_tx_packets"],
-            ["tottxbytes", "netscaler_interface_tot_tx_bytes"],
-            ["jumbopktstransmitted", "netscaler_interface_jumbo_packets_transmitted"],
-            ["totnetscalerpkts", "netscaler_interface_tot_netscaler_packets"],
-            ["errpkttx", "netscaler_interface_err_tx_packets"],
-            ["totrxbytes", "netscaler_interface_tot_rx_bytes"],
-            ["trunkpktsreceived", "netscaler_interface_trunk_packets_received"],
-            ["errpktrx", "netscaler_interface_err_rx_packets"],
-            ["txlacpdu", "netscaler_interface_tx_lacpdu"],
-            ["jumbopktsreceived", "netscaler_interface_jumbo_packets_received"],
-            ["totrxpkts", "netscaler_interface_tot_rx_packets"],
-            ["tottxpkts", "netscaler_interface_tot_tx_packets"]
+            ["nictotmulticastpkts", "interface_tot_multicast_packets"],
+            ["rxcrcerrors", "interface_rx_crc_errors"],
+            ["totmacmoved", "interface_tot_mac_moved"],
+            ["trunkpktstransmitted", "interface_trunk_packets_transmitted"],
+            ["errdroppedrxpkts", "interface_err_dropped_rx_packets"],
+            ["linkreinits", "interface_link_reinitializations"],
+            ["errifindiscards", "interface_err_ifin_discards"],
+            ["errdroppedtxpkts", "interface_err_dropped_tx_packets"],
+            ["tottxbytes", "interface_tot_tx_bytes"],
+            ["jumbopktstransmitted", "interface_jumbo_packets_transmitted"],
+            ["totnetscalerpkts", "interface_tot_netscaler_packets"],
+            ["errpkttx", "interface_err_tx_packets"],
+            ["totrxbytes", "interface_tot_rx_bytes"],
+            ["trunkpktsreceived", "interface_trunk_packets_received"],
+            ["errpktrx", "interface_err_rx_packets"],
+            ["txlacpdu", "interface_tx_lacpdu"],
+            ["jumbopktsreceived", "interface_jumbo_packets_received"],
+            ["totrxpkts", "interface_tot_rx_packets"],
+            ["tottxpkts", "interface_tot_tx_packets"]
         ],
 
         "gauges": [
-            ["errpktrxrate", "netscaler_interface_err_packets_rx_rate"],
-            ["rxlacpdurate", "netscaler_interface_rx_lacpdu_rate"],
-            ["errdroppedtxpktsrate", "netscaler_interface_err_dropped_tx_packets_rate"],
-            ["rxpktsrate", "netscaler_interface_rx_packets_rate"],
-            ["errifindiscardsrate", "netscaler_interface_err_ifin_discards_rate"],
-            ["nicerrifoutdiscardsrate", "netscaler_interface_err_if_out_discards_rate"],
-            ["macmovedrate", "netscaler_interface_mac_moved_rate"],
-            ["rxcrcerrorsrate", "netscaler_interface_rx_crc_errors_rate"],
-            ["jumbopktstransmittedrate", "netscaler_interface_jumbo_packets_transmitted_rate"],
-            ["jumbopktsreceivedrate", "netscaler_interface_jumbo_packets_received_rate"],
-            ["rxbytesrate", "netscaler_interface_rx_bytes_rate"],
-            ["errdroppedrxpktsrate", "netscaler_interface_err_dropped_rx_packets_rate"],
-            ["trunkpktsreceivedrate", "netscaler_interface_trunk_packets_received_rate"],
-            ["txlacpdurate", "netscaler_interface_tx_lacpdu_rate"],
-            ["txbytesrate", "netscaler_interface_tx_bytes_rate"],
-            ["txpktsrate", "netscaler_interface_tx_packets_rate"],
-            ["netscalerpktsrate", "netscaler_interface_netscaler_packets_rate"],
-            ["trunkpktstransmittedrate", "netscaler_interface_trunk_packets_transmitted_rate"]
+            ["errpktrxrate", "interface_err_packets_rx_rate"],
+            ["rxlacpdurate", "interface_rx_lacpdu_rate"],
+            ["errdroppedtxpktsrate", "interface_err_dropped_tx_packets_rate"],
+            ["rxpktsrate", "interface_rx_packets_rate"],
+            ["errifindiscardsrate", "interface_err_ifin_discards_rate"],
+            ["nicerrifoutdiscardsrate", "interface_err_if_out_discards_rate"],
+            ["macmovedrate", "interface_mac_moved_rate"],
+            ["rxcrcerrorsrate", "interface_rx_crc_errors_rate"],
+            ["jumbopktstransmittedrate", "interface_jumbo_packets_transmitted_rate"],
+            ["jumbopktsreceivedrate", "interface_jumbo_packets_received_rate"],
+            ["rxbytesrate", "interface_rx_bytes_rate"],
+            ["errdroppedrxpktsrate", "interface_err_dropped_rx_packets_rate"],
+            ["trunkpktsreceivedrate", "interface_trunk_packets_received_rate"],
+            ["txlacpdurate", "interface_tx_lacpdu_rate"],
+            ["txbytesrate", "interface_tx_bytes_rate"],
+            ["txpktsrate", "interface_tx_packets_rate"],
+            ["netscalerpktsrate", "interface_netscaler_packets_rate"],
+            ["trunkpktstransmittedrate", "interface_trunk_packets_transmitted_rate"]
         ],
 
         "labels": [
@@ -252,105 +252,115 @@
 
     "lbvserver": {
         "counters": [
-            ["totalpktssent", "netscaler_lb_vserver_packets_sent_total"],
-            ["tothits", "netscaler_lb_vserver_hits_total"],
-            ["totalrequestbytes", "netscaler_lb_vserver_request_bytes_total"],
-            ["totalpktsrecvd", "netscaler_lb_vserver_packets_received_total"],
-            ["totalresponses", "netscaler_lb_vserver_responses_total"],
-            ["surgecount", "netscaler_lb_vserver_surge_count"],
-            ["toleratingttlbtransactionsrate", "netscaler_lb_vserver_tolerable_transactions_count"],
-            ["totcltttlbtransactions", "netscaler_lb_vserver_ttlb_calculated_transactions_total"],
-            ["deferredreq", "netscaler_lb_vserver_deffered_requests_total"],
-            ["totspillovers", "netscaler_lb_vserver_spillover_count_total"],
-            ["invalidrequestresponse", "netscaler_lb_vserver_invalid_response_request_total"],
-            ["totalrequests", "netscaler_lb_vserver_requests_total"],
-            ["invalidrequestresponsedropped", "netscaler_lb_vserver_invalid_response_request_dropped_total"],
-            ["frustratingttlbtransactions", "netscaler_lb_vserver_frustrating_transactions_total"],
-            ["toleratingttlbtransactions", "netscaler_lb_vserver_tolerable_transactions_total"],
-            ["totvserverdownbackuphits", "netscaler_lb_vserver_backup_server_divert_count_total"],
-            ["totalresponsebytes", "netscaler_lb_vserver_response_bytes_received_total"],
-            ["totalsvrbusyerr", "netscaler_lb_vserver_busy_error_total"]
+            ["totalpktssent", "lb_packets_sent_total"],
+            ["tothits", "lb_hits_total"],
+            ["totalrequestbytes", "lb_request_bytes_total"],
+            ["totalpktsrecvd", "lb_packets_received_total"],
+            ["totalresponses", "lb_responses_total"],
+            ["surgecount", "lb_surge_count"],
+            ["toleratingttlbtransactionsrate", "lb_tolerable_transactions_count"],
+            ["totcltttlbtransactions", "lb_ttlb_calculated_transactions_total"],
+            ["deferredreq", "lb_deffered_requests_total"],
+            ["totspillovers", "lb_spillover_count_total"],
+            ["invalidrequestresponse", "lb_invalid_response_request_total"],
+            ["totalrequests", "lb_requests_total"],
+            ["invalidrequestresponsedropped", "lb_invalid_response_request_dropped_total"],
+            ["frustratingttlbtransactions", "lb_frustrating_transactions_total"],
+            ["toleratingttlbtransactions", "lb_tolerable_transactions_total"],
+            ["totvserverdownbackuphits", "lb_backup_server_divert_count_total"],
+            ["totalresponsebytes", "lb_response_bytes_received_total"]
         ],
 
         "gauges": [
-            ["requestbytesrate", "netscaler_lb_vserver_request_rate_bytes"],
-            ["requestsrate", "netscaler_lb_vserver_request_rate"],
-            ["pktsrecvdrate", "netscaler_lb_vserver_pakcets_received_rate"],
-            ["frustratingttlbtransactionsrate", "netscaler_lb_vserver_frustrating_transactions_rate"],
-            ["cltresponsetimeapdex", "netscaler_lb_vserver_client_response_time_adex"],
-            ["sothreshold", "netscaler_lb_vserver_spill_over_threshold"],
-            ["cursrvrconnections", "netscaler_lb_vserver_actual_servers_current_connections"],
-            ["svcsurgecount", "netscaler_lb_vserver_surge_queue_requests_count"],
-            ["labelledconn", "netscaler_lb_vserver_labelled_connections_count"],
-            ["curmptcpsessions", "netscaler_lb_vserver_current_mtcp_sessions_count"],
-            ["deferredreqrate", "netscaler_lb_vserver_deffered_requets_rate"],
-            ["avgcltttlb", "netscaler_lb_vserver_avergage_ttlb"],
-            ["cltttlbtransactionsrate", "netscaler_lb_vserver_ttlb_transactions_rate"],
-            ["responsesrate", "netscaler_lb_vserver_total_responses_rate"],
-            ["actsvcs", "netscaler_lb_vserver_active_sessions_count"],
-            ["pktssentrate", "netscaler_lb_vserver_total_packets_sent_rate"],
-            ["cursubflowconn", "netscaler_lb_vserver_current_mtcp_subflows_count"],
-            ["curclntconnections", "netscaler_lb_vserver_current_client_connection_count"],
-            ["pushlabel", "netscaler_lb_vserver_push_label_count"],
-            ["hitsrate", "netscaler_lb_vserver_hits_rate"],
-            ["establishedconn", "netscaler_lb_vserver_established_connections_count"],
-            ["responsebytesrate", "netscaler_lb_vserver_response_bytes_received_rate"],
-            ["inactsvcs", "netscaler_lb_vserver_inactive_services_count"],
-            ["svrbusyerrrate", "netscaler_lb_vserver_busy_error_rate"]
+            ["requestbytesrate", "lb_request_rate_bytes"],
+            ["requestsrate", "lb_request_rate"],
+            ["pktsrecvdrate", "lb_pakcets_received_rate"],
+            ["frustratingttlbtransactionsrate", "lb_frustrating_transactions_rate"],
+            ["cltresponsetimeapdex", "lb_client_response_time_adex"],
+            ["sothreshold", "lb_spill_over_threshold"],
+            ["cursrvrconnections", "lb_actual_servers_current_connections"],
+            ["svcsurgecount", "lb_surge_queue_requests_count"],
+            ["labelledconn", "lb_labelled_connections_count"],
+            ["curmptcpsessions", "lb_current_mtcp_sessions_count"],
+            ["deferredreqrate", "lb_deffered_requets_rate"],
+            ["avgcltttlb", "lb_avergage_ttlb"],
+            ["cltttlbtransactionsrate", "lb_ttlb_transactions_rate"],
+            ["responsesrate", "lb_total_responses_rate"],
+            ["actsvcs", "lb_active_sessions_count"],
+            ["pktssentrate", "lb_total_packets_sent_rate"],
+            ["cursubflowconn", "lb_current_mtcp_subflows_count"],
+            ["curclntconnections", "lb_current_client_connection_count"],
+            ["pushlabel", "lb_push_label_count"],
+            ["hitsrate", "lb_hits_rate"],
+            ["establishedconn", "lb_established_connections_count"],
+            ["responsebytesrate", "lb_response_bytes_received_rate"],
+            ["inactsvcs", "lb_inactive_services_count"]
         ],
 
         "labels": [
-            ["name", "lb_vserver_name"],
-            ["type", "lb_vserver_type"]
+            ["name", "lb_ingress_name"],
+            ["type", "lb_type"],
+            ["name", "lb_service_name"]
         ]
     },
 
     "csvserver": {
         "counters": [
-            ["totalpktssent", "netscaler_cs_vserver_packets_sent_total"],
-            ["tothits", "netscaler_cs_vserver_hits_total"],
-            ["totalrequestbytes", "netscaler_cs_vserver_request_bytes_total"],
-            ["totalpktsrecvd", "netscaler_cs_vserver_packets_received_total"],
-            ["totalresponses", "netscaler_cs_vserver_responses_total"],
-            ["toleratingttlbtransactionsrate", "netscaler_cs_vserver_tolerable_transactions_count"],
-            ["totcltttlbtransactions", "netscaler_cs_vserver_ttlb_calculated_transactions_total"],
-            ["deferredreq", "netscaler_cs_vserver_deffered_requests_total"],
-            ["totspillovers", "netscaler_cs_vserver_spillover_count_total"],
-            ["invalidrequestresponse", "netscaler_cs_vserver_invalid_response_request_total"],
-            ["totalrequests", "netscaler_cs_vserver_requests_total"],
-            ["invalidrequestresponsedropped", "netscaler_cs_vserver_invalid_response_request_dropped_total"],
-            ["frustratingttlbtransactions", "netscaler_cs_vserver_frustrating_transactions_total"],
-            ["toleratingttlbtransactions", "netscaler_cs_vserver_tolerable_transactions_total"],
-            ["totvserverdownbackuphits", "netscaler_cs_vserver_backup_server_divert_count_total"],
-            ["totalresponsebytes", "netscaler_cs_vserver_response_bytes_received_total"]
+            ["totalpktssent", "cs_packets_sent_total"],
+            ["tothits", "cs_hits_total"],
+            ["totalrequestbytes", "cs_request_bytes_total"],
+            ["totalpktsrecvd", "cs_packets_received_total"],
+            ["totalresponses", "cs_responses_total"],
+            ["toleratingttlbtransactionsrate", "cs_tolerable_transactions_count"],
+            ["totcltttlbtransactions", "cs_ttlb_calculated_transactions_total"],
+            ["deferredreq", "cs_deffered_requests_total"],
+            ["totspillovers", "cs_spillover_count_total"],
+            ["invalidrequestresponse", "cs_invalid_response_request_total"],
+            ["totalrequests", "cs_requests_total"],
+            ["invalidrequestresponsedropped", "cs_invalid_response_request_dropped_total"],
+            ["frustratingttlbtransactions", "cs_frustrating_transactions_total"],
+            ["toleratingttlbtransactions", "cs_tolerable_transactions_total"],
+            ["totvserverdownbackuphits", "cs_backup_server_divert_count_total"],
+            ["totalresponsebytes", "cs_response_bytes_received_total"]
         ],
         "gauges": [
-            ["requestbytesrate", "netscaler_cs_vserver_request_rate_bytes"],
-            ["requestsrate", "netscaler_cs_vserver_request_rate"],
-            ["pktsrecvdrate", "netscaler_cs_vserver_pakcets_received_rate"],
-            ["frustratingttlbtransactionsrate", "netscaler_cs_vserver_frustrating_transactions_rate"],
-            ["cltresponsetimeapdex", "netscaler_cs_vserver_client_response_time_adex"],
-            ["sothreshold", "netscaler_cs_vserver_spill_over_threshold"],
-            ["cursrvrconnections", "netscaler_cs_vserver_actual_servers_current_connections"],
-            ["labelledconn", "netscaler_cs_vserver_labelled_connections_count"],
-            ["curmptcpsessions", "netscaler_cs_vserver_current_mtcp_sessions_count"],
-            ["deferredreqrate", "netscaler_cs_vserver_deffered_requets_rate"],
-            ["avgcltttlb", "netscaler_cs_vserver_avergage_ttlb"],
-            ["cltttlbtransactionsrate", "netscaler_cs_vserver_ttlb_transactions_rate"],
-            ["responsesrate", "netscaler_cs_vserver_total_responses_rate"],
-            ["pktssentrate", "netscaler_cs_vserver_total_packets_sent_rate"],
-            ["cursubflowconn", "netscaler_cs_vserver_current_mtcp_subflows_count"],
-            ["curclntconnections", "netscaler_cs_vserver_current_client_connection_count"],
-            ["pushlabel", "netscaler_cs_vserver_push_label_count"],
-            ["hitsrate", "netscaler_cs_vserver_hits_rate"],
-            ["establishedconn", "netscaler_cs_vserver_established_connections_count"],
-            ["responsebytesrate", "netscaler_cs_vserver_response_bytes_received_rate"]
+            ["requestbytesrate", "cs_request_rate_bytes"],
+            ["requestsrate", "cs_request_rate"],
+            ["pktsrecvdrate", "cs_pakcets_received_rate"],
+            ["frustratingttlbtransactionsrate", "cs_frustrating_transactions_rate"],
+            ["cltresponsetimeapdex", "cs_client_response_time_adex"],
+            ["sothreshold", "cs_spill_over_threshold"],
+            ["cursrvrconnections", "cs_actual_servers_current_connections"],
+            ["labelledconn", "cs_labelled_connections_count"],
+            ["curmptcpsessions", "cs_current_mtcp_sessions_count"],
+            ["deferredreqrate", "cs_deffered_requets_rate"],
+            ["avgcltttlb", "cs_avergage_ttlb"],
+            ["cltttlbtransactionsrate", "cs_ttlb_transactions_rate"],
+            ["responsesrate", "cs_total_responses_rate"],
+            ["pktssentrate", "cs_total_packets_sent_rate"],
+            ["cursubflowconn", "cs_current_mtcp_subflows_count"],
+            ["curclntconnections", "cs_current_client_connection_count"],
+            ["pushlabel", "cs_push_label_count"],
+            ["hitsrate", "cs_hits_rate"],
+            ["establishedconn", "cs_established_connections_count"],
+            ["responsebytesrate", "cs_response_bytes_received_rate"]
         ],
         "labels": [
-            ["name", "cs_vserver_name"],
-            ["type", "cs_vserver_type"]
+            ["name", "cs_name"],
+            ["type", "cs_type"]
+        ]
+    },
+
+    "nscapacity": {
+        "counters": [
+            ["bandwidth", "allocated_bandwidth"]
+        ]
+    },
+
+   "ns": {
+        "gauges": [
+            ["rxmbitsrate", "througput_rx_mbits_rate"]
         ]
     }
-
 }
 
