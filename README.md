@@ -426,8 +426,8 @@ The steps bellow can be followed to setup up a Grafana container with a sample d
 <img src="images/grafana-datasource-2.png" width="300">
 
 5. Usage of Dashboard: By default with "sample_services_stats.json",dashboard shows service requests, surque queue, RPS and Invalid Request/Response. User can select any of the configured services and then apply filter for a given ingress from the drop down menu for ingress. And with "sample_system_stats.json", dashboard shows CPU utilization, Memory Utilization and bandwidth capacity utilization where user can also set an alert. The dashboard can be expanded to include graphs of any other stats which the exporter is collecting. For more information on modifying the Grafana dashboard, please take a look at their [documentation](http://docs.grafana.org/) or demo [videos](https://www.youtube.com/watch?v=mgcJPREl3CU).
-<img src="images/service-stats-dashboard.png" width="500">
-<img src="images/system-stats-dashboard.png" width="500">
+<img src="images/service-stats-dashboard.png" width="400">
+<img src="images/system-stats-dashboard.png" width="400">
 
 **NOTE:** Data being plotted on the graphs can be filtered based on lbvservers or datasources using the blue dropdown buttons at the top of the dashboard.
 
