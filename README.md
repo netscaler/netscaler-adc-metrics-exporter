@@ -220,71 +220,72 @@ For example, to  export ```aaa``` stats, the lines given between ```-.-.-.-``` c
 {
     "system": {
         "counters": [
-            ["numcpus", "netscaler_cpu_number"]
+            ["numcpus", "cpu_number"]
         ],
 
         "gauges": [
-            ["cpuusagepcnt", "netscaler_cpu_usage_percent"],
-            ["mgmtcpuusagepcnt", "netscaler_cpu_management_cpu_usage_percent"],
-            ["pktcpuusagepcnt", "netscaler_cpu_packet_cpu_usage_percent"],
-            ["rescpuusagepcnt", "netscaler_cpu_res_cpu_usage_percent"]
+            ["cpuusagepcnt", "cpu_usage_percent"],
+            ["mgmtcpuusagepcnt", "cpu_management_cpu_usage_percent"],
+            ["pktcpuusagepcnt", "cpu_packet_cpu_usage_percent"],
+            ["rescpuusagepcnt", "cpu_res_cpu_usage_percent"]
         ]
     },
 
 -.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
     "aaa": {
             "counters": [
-                ["aaatotsessions", "netscaler_aaa_tot_sessions"],
-                ["aaatotsessiontimeout", "netscaler_aaa_tot_session_timeout"]
+                ["aaatotsessions", "aaa_tot_sessions"],
+                ["aaatotsessiontimeout", "aaa_tot_session_timeout"]
             ],
             "gauges": [
-                ["aaasessionsrate', 'netscaler_aaa_sessions_rate"],
-                ["aaasessiontimeoutrate ', 'netscaler_aaa_session_timeout_rate"]
+                ["aaasessionsrate', 'aaa_sessions_rate"],
+                ["aaasessiontimeoutrate ', 'aaa_session_timeout_rate"]
             ]
       },
 -.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
 
     "protocolhttp": {
         "counters": [
-            ["httptotrequests", "netscaler_http_tot_requests"],
-            ["httptotresponses", "netscaler_http_tot_responses"],
-            ["httptotposts", "netscaler_http_tot_posts"],
-            ["httptotgets", "netscaler_http_tot_gets"],
+            ["httptotrequests", "http_tot_requests"],
+            ["httptotresponses", "http_tot_responses"],
+            ["httptotposts", "http_tot_posts"],
+            ["httptotgets", "http_tot_gets"],
             ...
             ...
-            ["httptotchunkedrequests", "netscaler_http_tot_chunked_requests"]
+            ["httptotchunkedrequests", "http_tot_chunked_requests"]
         ],
 
         "gauges": [
-            ["httprequestsrate", "netscaler_http_requests_rate"],
-            ["spdystreamsrate", "netscaler_http_spdy_streams_rate"],
+            ["httprequestsrate", "http_requests_rate"],
+            ["spdystreamsrate", "http_spdy_streams_rate"],
             ...
             ...
-            ["http11responsesrate", "netscaler_http_11_responses_rate"]
+            ["http11responsesrate", "http_11_responses_rate"]
         ]
     },
 
     "lbvserver": {
         "counters": [
-            ["totalpktssent", "netscaler_lb_vserver_packets_sent_total"],
-            ["tothits", "netscaler_lb_vserver_hits_total"],
-            ["totalrequestbytes", "netscaler_lb_vserver_request_bytes_total"],
+            ["totalpktssent", "lb_packets_sent_total"],
+            ["tothits", "lb_hits_total"],
+            ["totalrequestbytes", "lb_request_bytes_total"],
             ...
             ... 
-            ["totalresponsebytes", "netscaler_lb_vserver_response_bytes_received_total"]
+            ["totalresponsebytes", "lb_response_bytes_received_total"]
         ],
 
         "gauges": [
-            ["requestbytesrate", "netscaler_lb_vserver_request_rate_bytes"],
-            ["requestsrate", "netscaler_lb_vserver_request_rate"],
+            ["requestbytesrate", "lb_request_rate_bytes"],
+            ["requestsrate", "lb_request_rate"],
             ...
             ...
-            ["inactsvcs", "netscaler_lb_vserver_inactive_services_count"]
+            ["inactsvcs", "lb_inactive_services_count"]
         ],
 
-        "labels": [
-            ["name", "lb_vserver_name"],
-            ["type", "lb_vserver_type"]
+        
+            ["name", "lb_ingress_name"],
+            ["type", "lb_type"],
+            ["name", "lb_service_name"]
         ]
     },
 
@@ -317,49 +318,49 @@ where ```hostIP``` is the IP of the host on which the python script or container
 <br>
 
 ```
-# HELP netscaler_http_tot_rx_packets tcptotrxpkts
-# TYPE netscaler_http_tot_rx_packets counter
-netscaler_http_tot_rx_packets{nsip="10.0.0.1:80"} 2094931640.0
-# HELP netscaler_tcp_tot_rx_bytes tcptotrxbytes
-# TYPE netscaler_tcp_tot_rx_bytes counter
-netscaler_tcp_tot_rx_bytes{nsip="10.0.0.1:80"} 735872803514.0
-# HELP netscaler_tcp_tx_bytes tcptottxbytes
-# TYPE netscaler_tcp_tx_bytes counter
-netscaler_tcp_tx_bytes{nsip="10.0.0.1:80"} 249210838820.0
-# HELP netscaler_tcp_tot_tx_packets tcptottxpkts
-# TYPE netscaler_tcp_tot_tx_packets counter
-netscaler_tcp_tot_tx_packets{nsip="10.0.0.1:80"} 2082562915.0
-# HELP netscaler_tcp_tot_client_connections_opened tcptotclientconnopened
-# TYPE netscaler_tcp_tot_client_connections_opened counter
-netscaler_tcp_tot_client_connections_opened{nsip="10.0.0.1:80"} 35606929.0
-netscaler_ip_tot_bad_mac_addresses{nsip="10.0.0.1:80"} 0.0
-# HELP netscaler_ip_rx_packers_rate iprxpktsrate
-# TYPE netscaler_ip_rx_packers_rate gauge
-netscaler_ip_rx_packers_rate{nsip="10.0.0.1:80"} 17703.0
-# HELP netscaler_ip_rx_bytes_rate iprxbytesrate
-# TYPE netscaler_ip_rx_bytes_rate gauge
-netscaler_ip_rx_bytes_rate{nsip="10.0.0.1:80"} 5797562.0
-# HELP netscaler_ip_tx_packets_rate iptxpktsrate
-# TYPE netscaler_ip_tx_packets_rate gauge
-netscaler_ip_tx_packets_rate{nsip="10.0.0.1:80"} 18119.0
-# HELP netscaler_ip_bytes_rate iptxbytesrate
-# TYPE netscaler_ip_bytes_rate gauge
-netscaler_ip_bytes_rate{nsip="10.0.0.1:80"} 1038524.0
-# HELP netscaler_services_tot_requests totalrequests
-# TYPE netscaler_services_tot_requests counter
-netscaler_services_tot_requests{nsip="10.0.0.2:80",service_ip="20.0.0.56",servicegroup_name="svcgrp"} 10.0
-netscaler_services_tot_requests{nsip="10.0.0.2:80",service_ip="20.0.0.57",servicegroup_name="svcgrp"} 11.0
-netscaler_services_tot_requests{nsip="10.0.0.2:80",service_ip="20.0.0.60",servicegroup_name="svcgrp2"} 4.0
-# HELP netscaler_services_tot_response_bytes totalresponsebytes
-# TYPE netscaler_services_tot_response_bytes counter
-netscaler_services_tot_response_bytes{nsip="10.0.0.2:80",service_ip="20.0.0.56",servicegroup_name="svcgrp"} 2320.0
-netscaler_services_tot_response_bytes{nsip="10.0.0.2:80",service_ip="20.0.0.57",servicegroup_name="svcgrp"} 2552.0
-netscaler_services_tot_response_bytes{nsip="10.0.0.2:80",service_ip="20.0.0.60",servicegroup_name="svcgrp2"} 936.0
-# HELP netscaler_services_tot_request_bytes totalrequestbytes
-# TYPE netscaler_services_tot_request_bytes counter
-netscaler_services_tot_request_bytes{nsip="10.0.0.2:80",service_ip="20.0.0.56",servicegroup_name="svcgrp"} 860.0
-netscaler_services_tot_request_bytes{nsip="10.0.0.2:80",service_ip="20.0.0.57",servicegroup_name="svcgrp"} 946.0
-netscaler_services_tot_request_bytes{nsip="10.0.0.2:80",service_ip="20.0.0.60",servicegroup_name="svcgrp2"} 344.0
+# HELP http_tot_rx_packets tcptotrxpkts
+# TYPE http_tot_rx_packets counter
+http_tot_rx_packets{nsip="10.0.0.1:80"} 2094931640.0
+# HELP tcp_tot_rx_bytes tcptotrxbytes
+# TYPE tcp_tot_rx_bytes counter
+tcp_tot_rx_bytes{nsip="10.0.0.1:80"} 735872803514.0
+# HELP tcp_tx_bytes tcptottxbytes
+# TYPE tcp_tx_bytes counter
+tcp_tx_bytes{nsip="10.0.0.1:80"} 249210838820.0
+# HELP tcp_tot_tx_packets tcptottxpkts
+# TYPE tcp_tot_tx_packets counter
+tcp_tot_tx_packets{nsip="10.0.0.1:80"} 2082562915.0
+# HELP tcp_tot_client_connections_opened tcptotclientconnopened
+# TYPE tcp_tot_client_connections_opened counter
+tcp_tot_client_connections_opened{nsip="10.0.0.1:80"} 35606929.0
+ip_tot_bad_mac_addresses{nsip="10.0.0.1:80"} 0.0
+# HELP ip_rx_packers_rate iprxpktsrate
+# TYPE ip_rx_packers_rate gauge
+ip_rx_packers_rate{nsip="10.0.0.1:80"} 17703.0
+# HELP ip_rx_bytes_rate iprxbytesrate
+# TYPE ip_rx_bytes_rate gauge
+ip_rx_bytes_rate{nsip="10.0.0.1:80"} 5797562.0
+# HELP ip_tx_packets_rate iptxpktsrate
+# TYPE ip_tx_packets_rate gauge
+ip_tx_packets_rate{nsip="10.0.0.1:80"} 18119.0
+# HELP ip_bytes_rate iptxbytesrate
+# TYPE ip_bytes_rate gauge
+ip_bytes_rate{nsip="10.0.0.1:80"} 1038524.0
+# HELP services_tot_requests totalrequests
+# TYPE services_tot_requests counter
+services_tot_requests{nsip="10.0.0.2:80",service_ip="20.0.0.56",servicegroup_name="svcgrp"} 10.0
+services_tot_requests{nsip="10.0.0.2:80",service_ip="20.0.0.57",servicegroup_name="svcgrp"} 11.0
+services_tot_requests{nsip="10.0.0.2:80",service_ip="20.0.0.60",servicegroup_name="svcgrp2"} 4.0
+# HELP services_tot_response_bytes totalresponsebytes
+# TYPE services_tot_response_bytes counter
+services_tot_response_bytes{nsip="10.0.0.2:80",service_ip="20.0.0.56",servicegroup_name="svcgrp"} 2320.0
+services_tot_response_bytes{nsip="10.0.0.2:80",service_ip="20.0.0.57",servicegroup_name="svcgrp"} 2552.0
+services_tot_response_bytes{nsip="10.0.0.2:80",service_ip="20.0.0.60",servicegroup_name="svcgrp2"} 936.0
+# HELP services_tot_request_bytes totalrequestbytes
+# TYPE services_tot_request_bytes counter
+services_tot_request_bytes{nsip="10.0.0.2:80",service_ip="20.0.0.56",servicegroup_name="svcgrp"} 860.0
+services_tot_request_bytes{nsip="10.0.0.2:80",service_ip="20.0.0.57",servicegroup_name="svcgrp"} 946.0
+services_tot_request_bytes{nsip="10.0.0.2:80",service_ip="20.0.0.60",servicegroup_name="svcgrp2"} 344.0
 ```
 
 </details>
@@ -415,19 +416,18 @@ The steps bellow can be followed to setup up a Grafana container with a sample d
 
 2. Run grafana container: ```docker run -dt -p 3000:3000 grafana/grafana:latest```
 
-3. Import the sample grafana dashboard file: Login to Grafana using admin:admin, from the column on the left select the ```+``` symbol, select "Import", and select "upload .json file". Now, navigate to and upload ```sample_grafana_dashboard.json```.
+3. Import any of the sample grafana dashboard files: Login to Grafana using admin:admin, from the column on the left select the ```+``` symbol, select "Import", and select "upload .json file". Now, navigate to and upload "sample_service_stats.json" or "sample_system_stats.json".
 
 <img src="images/grafana-import-json.png" width="200">
 
-4. This will import a sample template which displays CPU Utilization, Memory Utilization, Total LB vserver Hits, LB vserver Hits Rate, and HTTP Hits Rate. 
-
-5. To start seeing graphs and values in the dashboard, add the Prometheus datasource(s) to Grafana. While adding the datasource, ensure the name of the Prometheus datasource starts with the word "prometheus" (eg. prometheus_datasource1). Once added, datasources starting with the word "prometheus" will automatically get detected in the dropdown filters of the dashboard. 
+4. To start seeing graphs and values in the dashboard, add the Prometheus datasource(s) to Grafana. While adding the datasource, ensure the name of the Prometheus datasource starts with the word "prometheus" (eg. prometheus_datasource1). Once added, datasources starting with the word "prometheus" will automatically get detected in the dropdown filters of the dashboard. 
 
 <img src="images/grafana-datasource-1.png" width="200">
 <img src="images/grafana-datasource-2.png" width="300">
 
-6. Usage of Dashboard: By default the dashboard shows CPU utilization percentage, memory utilization percentage, total hits to lbvservers, lbvserver hit rate, and http hit rate. The dashboard can be expanded to include graphs of any other stats which the exporter is collecting. For more information on modifying the Grafana dashboard, please take a look at their [documentation](http://docs.grafana.org/) or demo [videos](https://www.youtube.com/watch?v=mgcJPREl3CU).
-<img src="images/grafana-dashboard.png" width="800">
+5. Usage of Dashboard: By default with "sample_services_stats.json",dashboard shows service requests, surque queue, RPS and Invalid Request/Response. User can select any of the configured services and then apply filter for a given ingress from the drop down menu for ingress. And with "sample_system_stats.json", dashboard shows CPU utilization, Memory Utilization and bandwidth capacity utilization where user can also set an alert. The dashboard can be expanded to include graphs of any other stats which the exporter is collecting. For more information on modifying the Grafana dashboard, please take a look at their [documentation](http://docs.grafana.org/) or demo [videos](https://www.youtube.com/watch?v=mgcJPREl3CU).
+<img src="images/service-stats-dashboard.png" width="500">
+<img src="images/system-stats-dashboard.png" width="500">
 
 **NOTE:** Data being plotted on the graphs can be filtered based on lbvservers or datasources using the blue dropdown buttons at the top of the dashboard.
 
