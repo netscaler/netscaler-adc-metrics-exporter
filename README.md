@@ -64,15 +64,15 @@ The user can then access the exported metrics directly thorugh port 8888 on the 
 <summary>Usage as a Container</summary>
 <br>
 
-In order to use the exporter as a container, the image ```quay.io/citrix/netscaler-metrics-exporter:v1.0.5``` will need to be pulled using;
+In order to use the exporter as a container, the image ```quay.io/citrix/netscaler-metrics-exporter:v1.0.6``` will need to be pulled using;
 ```
-docker pull quay.io/citrix/netscaler-metrics-exporter:v1.0.5
+docker pull quay.io/citrix/netscaler-metrics-exporter:v1.0.6
 ```
 **NOTE:** It can also be build locally using ```docker build -f Dockerfile -t <image_name>:<tag> ./```
 
 Now, the exporter can be run using:
 ```
-docker run -dt -p <host_port>:<container_port> quay.io/citrix/netscaler-metrics-exporter:v1.0.5 [flags]
+docker run -dt -p <host_port>:<container_port> quay.io/citrix/netscaler-metrics-exporter:v1.0.6 [flags]
 ```
 where the flags are:
 
@@ -93,7 +93,7 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 
 To setup the exporter as given in the diagram, the following command can be used:
 ```
-docker run -dt -p 8888:8888 --name netscaler-exporter quay.io/citrix/netscaler-metrics-exporter:v1.0.5 --target-nsip=10.0.0.1:80 --target-nsip=10.0.0.2:80 --target-nsip=172.17.0.2:80 --port 8888
+docker run -dt -p 8888:8888 --name netscaler-exporter quay.io/citrix/netscaler-metrics-exporter:v1.0.6 --target-nsip=10.0.0.1:80 --target-nsip=10.0.0.2:80 --target-nsip=172.17.0.2:80 --port 8888
 ```
 This directs the exporter container to scrape the 10.0.0.1, 10.0.0.2, and 172.17.0.2, IPs on port 80, and the expose the stats it collects on port 8888. The user can then access the exported metrics directly thorugh port 8888 on the machine where the exporter is running, or Prometheus and Grafana can be setup to view the exported metrics though their GUI.
 
@@ -119,7 +119,7 @@ metadata:
 spec:
   containers:
     - name: exporter
-      image: quay.io/citrix/netscaler-metrics-exporter:v1.0.5
+      image: quay.io/citrix/netscaler-metrics-exporter:v1.0.6
       args:
         - "--target-nsip=10.0.0.1:80"
         - "--target-nsip=10.0.0.2:80"
@@ -200,6 +200,7 @@ Sl. No. |     STATS                 | NS nitro name
 7       | Interface stats           | "Interface" (capital 'i')
 8       | Service stats             | "service"
 9       | Service group stats       | "services"
+10      | Bandwidth Capacity stats  | "nscapacity"
 
 
 Exporting Additional Stats which are not Included by Default:
