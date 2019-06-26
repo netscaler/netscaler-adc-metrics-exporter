@@ -131,7 +131,7 @@
         ],
 
         "gauges": [
-            ["iprxpktsrate", "ip_rx_packers_rate"],
+            ["iprxpktsrate", "ip_rx_packets_rate"],
             ["iprxbytesrate", "ip_rx_bytes_rate"],
             ["iptxpktsrate", "ip_tx_packets_rate"],
             ["iptxbytesrate", "ip_bytes_rate"],
