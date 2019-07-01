@@ -274,7 +274,7 @@
         "gauges": [
             ["requestbytesrate", "lb_request_rate_bytes"],
             ["requestsrate", "lb_request_rate"],
-            ["pktsrecvdrate", "lb_pakcets_received_rate"],
+            ["pktsrecvdrate", "lb_packets_received_rate"],
             ["frustratingttlbtransactionsrate", "lb_frustrating_transactions_rate"],
             ["cltresponsetimeapdex", "lb_client_response_time_adex"],
             ["sothreshold", "lb_spill_over_threshold"],
@@ -326,7 +326,7 @@
         "gauges": [
             ["requestbytesrate", "cs_request_rate_bytes"],
             ["requestsrate", "cs_request_rate"],
-            ["pktsrecvdrate", "cs_pakcets_received_rate"],
+            ["pktsrecvdrate", "cs_packets_received_rate"],
             ["frustratingttlbtransactionsrate", "cs_frustrating_transactions_rate"],
             ["cltresponsetimeapdex", "cs_client_response_time_adex"],
             ["sothreshold", "cs_spill_over_threshold"],
