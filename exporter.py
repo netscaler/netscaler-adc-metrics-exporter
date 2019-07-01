@@ -14,6 +14,7 @@ from prometheus_client.core import GaugeMetricFamily, CounterMetricFamily, REGIS
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from requests.auth import HTTPBasicAuth
 
+
 def parseConfig(args):
     try:
         with open(args.config_file, 'r') as stream:
@@ -25,22 +26,24 @@ def parseConfig(args):
         print(e)
     return args
 
+
 def validate_ns_session(protocol, nsip, username, password):
     url = '%s://%s/nitro/v1/config/' % (protocol, nsip)
     try:
         response = requests.get(url, verify=False, auth=HTTPBasicAuth(username, password))
         if (response.status_code == requests.status_codes.codes.unauthorized):
             logger.error('Invalid username or password!, Unaurthorized Err : {}'.format(response.status_code))
-            return False	    
+            return False
     except requests.exceptions.RequestException as err:
         logger.error('{}'.format(err))
         return False
     return True
-    
+
+
 # Function to fire nitro commands and collect data from NS
 def collect_data(nsip, entity, username, password, protocol, nitro_timeout):
 
-    #Login credentials
+    # Login credentials
     headers = {'X-NITRO-USER': username, 'X-NITRO-PASS': password}
     # nitro call for all entities except 'services' (ie. servicegroups)
     if (entity != 'services'):
@@ -52,23 +55,25 @@ def collect_data(nsip, entity, username, password, protocol, nitro_timeout):
         data = r.json()
         if data['errorcode'] == 0:
             return data[entity]
-
-
     # nitro call for 'services' entity (ie. servicegroups)
     else:
-        url = '%s://%s/nitro/v1/stat/servicegroup?statbindings=yes'%(protocol, nsip)
-        r = requests.get(url, headers=headers, verify=False, timeout=nitro_timeout) # get dict with all servicegroups
+        url = '%s://%s/nitro/v1/stat/servicegroup?statbindings=yes' % (protocol, nsip)
+        # get dict with all servicegroups
+        r = requests.get(url, headers=headers, verify=False, timeout=nitro_timeout)
         servicegroup_list_ds = r.json()
         if servicegroup_list_ds['errorcode'] == 0:
             servicegroup_data = []
             for servicegroups_ds in servicegroup_list_ds['servicegroup']:
                 _manual_servicegroup_name = servicegroups_ds['servicegroupname']
-                url = '%s://%s/nitro/v1/stat/servicegroup/%s?statbindings=yes'%(protocol, nsip, _manual_servicegroup_name)
-                r = requests.get(url, headers=headers, verify=False, timeout=nitro_timeout) # get dict with stats of all services bound to a particular servicegroup
+                url = '%s://%s/nitro/v1/stat/servicegroup/%s?statbindings=yes' % (protocol, nsip, _manual_servicegroup_name)
+                # get dict with stats of all services bound to a particular servicegroup
+                r = requests.get(url, headers=headers, verify=False, timeout=nitro_timeout)
                 data_tmp = r.json()
                 if data_tmp['errorcode'] == 0:
-                    for individual_servicebinding_data in data_tmp['servicegroup'][0]['servicegroupmember']: # create a list with stats of all services bound to NS of all servicegroups
-                        individual_servicebinding_data['_manual_servicegroup_name'] = _manual_servicegroup_name # manually adding key:value '_manual_servicegroup_name':_manual_servicegroup_name to stats of a particular service
+                    # create a list with stats of all services bound to NS of all servicegroups
+                    for individual_servicebinding_data in data_tmp['servicegroup'][0]['servicegroupmember']:
+                        # manually adding key:value '_manual_servicegroup_name':_manual_servicegroup_name to stats of a particular service
+                        individual_servicebinding_data['_manual_servicegroup_name'] = _manual_servicegroup_name
                         servicegroup_data.append(individual_servicebinding_data)
         return servicegroup_data
 
@@ -82,9 +87,10 @@ def update_lbvs_label(k8s_prefix, label_values, ns_metric_name, log_prefix_match
         return True
     else:
         if log_prefix_match:
-             logger.info('metrices for lbvserver with k8sprefix "%s" are not fetched', cur_prefix)
+            logger.info('metrices for lbvserver with k8sprefix "%s" are not fetched', cur_prefix)
         return False
-	
+
+
 class NetscalerCollector(object):
 
     def __init__(self, nsips, metrics, username, password, protocol, nitro_timeout, k8s_prefix):
@@ -123,19 +129,19 @@ class NetscalerCollector(object):
                 c = CounterMetricFamily(prom_metric_name, ns_metric_name, labels=label_names)
                 for nsip in self.nsips:
                     entity_stats = data[nsip].get(entity_name, [])
-                    if( type(entity_stats) is not list):
+                    if(type(entity_stats) is not list):
                         entity_stats = [entity_stats]
 
                     for data_item in entity_stats:
-                        if not ns_metric_name in data_item.keys():
-                            logger.warning('Counter stats for %s not enabled in netscalar %s, so could not add to %s' %(ns_metric_name, nsip, entity_name))
+                        if ns_metric_name not in data_item.keys():
+                            logger.warning('Counter stats for %s not enabled in netscalar %s, so could not add to %s' % (ns_metric_name, nsip, entity_name))
                             break
- 
+
                         if('labels' in entity.keys()):
                             label_values = [data_item[key] for key in [v[0] for v in entity['labels']]]
 
                             if entity_name == "lbvserver":
-                                prefix_match  = update_lbvs_label(self.k8s_prefix, label_values, ns_metric_name, log_prefix_match)
+                                prefix_match = update_lbvs_label(self.k8s_prefix, label_values, ns_metric_name, log_prefix_match)
                                 if not prefix_match:
                                     log_prefix_match = False
                                     continue
@@ -146,10 +152,9 @@ class NetscalerCollector(object):
                         try:
                             c.add_metric(label_values, float(data_item[ns_metric_name]))
                         except Exception as e:
-                           logger.error('Caught exception while adding counter %s to %s: %s' %(ns_metric_name, entity_name, str(e)))
+                            logger.error('Caught exception while adding counter %s to %s: %s' % (ns_metric_name, entity_name, str(e)))
 
-                yield c 
-
+                yield c
 
             # Provide collected metric to Prometheus as a gauge
             for ns_metric_name, prom_metric_name in entity.get('gauges', []):
@@ -160,15 +165,15 @@ class NetscalerCollector(object):
                         entity_stats = [entity_stats]
 
                     for data_item in entity_stats:
-                        if not ns_metric_name in data_item.keys():
-                            logger.warning('Gauge stats for %s not enabled in netscalar %s, so could not add to %s' %(ns_metric_name, nsip, entity_name))
+                        if ns_metric_name not in data_item.keys():
+                            logger.warning('Gauge stats for %s not enabled in netscalar %s, so could not add to %s' % (ns_metric_name, nsip, entity_name))
                             break
 
                         if('labels' in entity.keys()):
                             label_values = [data_item[key] for key in [v[0] for v in entity['labels']]]
 
                             if entity_name == "lbvserver":
-                                prefix_match  = update_lbvs_label(self.k8s_prefix, label_values, ns_metric_name, log_prefix_match)
+                                prefix_match = update_lbvs_label(self.k8s_prefix, label_values, ns_metric_name, log_prefix_match)
                                 if not prefix_match:
                                     log_prefix_match = False
                                     continue
@@ -179,7 +184,7 @@ class NetscalerCollector(object):
                         try:
                             g.add_metric(label_values, float(data_item[ns_metric_name]))
                         except Exception as e:
-                           logger.error('Caught exception while adding counter %s to %s: %s' %(ns_metric_name, entity_name, str(e)))
+                            logger.error('Caught exception while adding counter %s to %s: %s' % (ns_metric_name, entity_name, str(e)))
 
                 yield g
 
@@ -207,7 +212,7 @@ if __name__ == '__main__':
             filename=args.log_file,
             format='%(asctime)s %(levelname)-8s %(message)s',
             datefmt='%FT%T%z',
-            level= {
+            level={
                 'DEBUG': logging.DEBUG,
                 'INFO': logging.INFO,
                 'WARN': logging.WARN,
@@ -238,13 +243,13 @@ if __name__ == '__main__':
 
     # Get username and password of NetScalers.
     ns_user = os.environ.get("NS_USER")
-    if ns_user == None:
+    if ns_user is None:
         ns_user = args.username
     ns_password = os.environ.get("NS_PASSWORD")
-    if ns_password == None:
+    if ns_password is None:
         ns_password = args.password
     else:
-      logger.warning('Using NS_PASSWORD Environment variable is insecure. Consider using config.yaml file and --config-file option to define password')
+        logger.warning('Using NS_PASSWORD Environment variable is insecure. Consider using config.yaml file and --config-file option to define password')
 
     # Load the metrics file specifying stats to be collected
     try:
@@ -252,37 +257,36 @@ if __name__ == '__main__':
         # collect selected metrics only
         if args.metric:
             metrics_data = json.load(f)
-            metrics_json = {d:metrics_data[d] for d in metrics_data.keys() if d in args.metric}
+            metrics_json = {d: metrics_data[d] for d in metrics_data.keys() if d in args.metric}
         # collect all default metrics
         else:
             metrics_json = json.load(f)
     except Exception as e:
         logger.error('Error while loading metrics::%s', e)
 
-
-    #validating netscalar access
-    secure = args.secure.lower() 
+    # validating netscalar access
+    secure = args.secure.lower()
     if secure == 'yes':
         ns_protocol = 'https'
     else:
         ns_protocol = 'http'
-   
+
     requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
     for nsip in args.target_nsip:
         res = validate_ns_session(ns_protocol, nsip, ns_user, ns_password)
-        if res == False:
-	   logger.error('Exiting since NS access test failed for nsip {}'.format(nsip) )
-           sys.exit()
+        if res is False:
+            logger.error('Exiting since NS access test failed for nsip {}'.format(nsip))
+            sys.exit()
 
     if not args.k8sprefix.isalnum():
-	logger.error('Invalid k8sprefix : non-alphanumeric not accepted')
+        logger.error('Invalid k8sprefix : non-alphanumeric not accepted')
         sys.exit()
-   
+
     # Register the exporter as a stat collector
     logger.info('Registering collector for %s' % args.target_nsip)
     try:
-        REGISTRY.register(NetscalerCollector(nsips=args.target_nsip, metrics=metrics_json, username=ns_user, 
-						password=ns_password, protocol=ns_protocol, nitro_timeout=args.timeout, k8s_prefix=args.k8sprefix))
+        REGISTRY.register(NetscalerCollector(nsips=args.target_nsip, metrics=metrics_json, username=ns_user,
+                                             password=ns_password, protocol=ns_protocol, nitro_timeout=args.timeout, k8s_prefix=args.k8sprefix))
     except Exception as e:
         logger.error('Exiting: invalid arguments! could not register collector for {}::{}'.format(args.target_nsip, e))
         sys.exit()
