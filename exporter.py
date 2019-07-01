@@ -133,6 +133,8 @@ class NetscalerCollector(object):
                         entity_stats = [entity_stats]
 
                     for data_item in entity_stats:
+                        if not data_item:
+                            continue
                         if ns_metric_name not in data_item.keys():
                             logger.warning('Counter stats for %s not enabled in netscalar %s, so could not add to %s' % (ns_metric_name, nsip, entity_name))
                             break
@@ -165,6 +167,8 @@ class NetscalerCollector(object):
                         entity_stats = [entity_stats]
 
                     for data_item in entity_stats:
+                        if not data_item:
+                            continue
                         if ns_metric_name not in data_item.keys():
                             logger.warning('Gauge stats for %s not enabled in netscalar %s, so could not add to %s' % (ns_metric_name, nsip, entity_name))
                             break
