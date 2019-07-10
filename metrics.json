@@ -364,6 +364,43 @@
         "gauges": [
             ["rxmbitsrate", "througput_rx_mbits_rate"]
         ]
-    }
+    },
+
+    "aaa": {
+        "counters": [
+            ["aaaauthsuccess", "aaa_auth_success"],
+            ["aaaauthfail", "aaa_auth_fail"],
+            ["aaaauthonlyhttpsuccess", "aaa_auth_only_http_success"],
+            ["aaaauthonlyhttpfail", "aaa_auth_only_http_fail"],
+            ["aaaauthnonhttpsuccess", "aaa_auth_non_http_success"],
+            ["aaaauthnonhttpfail", "aaa_auth_non_http_fail"],
+            ["aaatotsessions", "aaa_tot_sessions"],
+            ["aaatotsessiontimeout", "aaa_tot_sessiontimeout"],
+            ["aaatottmsessions", "aaa_tot_tm_sessions"]
+        ],
+
+        "gauges": [
+            ["aaacuricasessions", "aaa_cur_ica_sessions"],
+            ["aaacuricaonlyconn", "aaa_cur_ica_only_conn"],
+            ["aaacuricaconn", "aaa_cur_ica_conn"],
+            ["aaacurtmsessions", "aaa_cur_tm_sessions"],
+            ["aaacursessions", "aaa_cur_sessions"],
+            ["aaacuricasessions", "aaa_cur_ica_sessions"],
+            ["aaaauthsuccessrate", "aaa_auth_success_rate"],
+            ["aaaauthfailrate", "aaa_auth_fail_rate"],
+            ["aaaauthonlyhttpsuccessrate", "aaa_auth_only_http_success_rate"],
+            ["aaaauthonlyhttpfailrate", "aaa_auth_only_http_fail_rate"],
+            ["aaaauthnonhttpsuccessrate", "aaa_auth_non_http_success_rate"],
+            ["aaaauthnonhttpfailrate", "aaa_auth_non_http_fail_rate"],
+            ["aaacursessionsrate", "aaa_cur_sessions_rate"],
+            ["aaasessionsrate", "aaa_sessions_rate"],
+            ["aaasessiontimeoutrate", "aaa_session_timeout_rate"],
+            ["aaacuricasessionsrate", "aaa_cur_ica_sessions_rate"],
+            ["aaacuricaonlyconnrate", "aaa_cur_ica_only_conn_rate"],
+            ["aaacuricaconnrate", "aaa_cur_ica_conn_rate"],
+            ["aaacurtmsessionsrate", "aaa_cur_tm_sessions_rate"],
+            ["aaatmsessionsrate", "aaa_tm_sessions_rate"]
+        ]
+    } 
 }
 
