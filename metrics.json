@@ -269,7 +269,7 @@
             ["toleratingttlbtransactions", "lb_tolerable_transactions_total"],
             ["totvserverdownbackuphits", "lb_backup_server_divert_count_total"],
             ["totalresponsebytes", "lb_response_bytes_received_total"],
-            ["totalsvrbusyerr", "lb_vserver_busy_error_total"]
+            ["totalsvrbusyerr", "lb_busy_error_total"]
         ],
 
         "gauges": [
@@ -296,7 +296,7 @@
             ["establishedconn", "lb_established_connections_count"],
             ["responsebytesrate", "lb_response_bytes_received_rate"],
             ["inactsvcs", "lb_inactive_services_count"],
-            ["svrbusyerrrate", "lb_vserver_busy_error_rate"]
+            ["svrbusyerrrate", "lb_busy_error_rate"]
         ],
 
         "labels": [
