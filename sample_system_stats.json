@@ -270,7 +270,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "cpu_usage_percent",
+          "expr": "packet_cpu_usage_percent",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"

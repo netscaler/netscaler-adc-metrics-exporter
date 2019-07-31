@@ -5,11 +5,10 @@
         ],
 
         "gauges": [
-            ["cpuusagepcnt", "cpu_usage_percent"],
             ["memusagepcnt", "memory_usage_percent"],
-            ["mgmtcpuusagepcnt", "cpu_management_cpu_usage_percent"],
-            ["pktcpuusagepcnt", "cpu_packet_cpu_usage_percent"],
-            ["rescpuusagepcnt", "cpu_res_cpu_usage_percent"]
+            ["mgmtcpuusagepcnt", "management_cpu_usage_percent"],
+            ["pktcpuusagepcnt", "packet_cpu_usage_percent"],
+            ["rescpuusagepcnt", "res_cpu_usage_percent"]
         ]
     },
 
