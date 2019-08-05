@@ -5,10 +5,11 @@
         ],
 
         "gauges": [
+            ["cpuusagepcnt", "cpu_usage_percent"],
             ["memusagepcnt", "memory_usage_percent"],
-            ["mgmtcpuusagepcnt", "management_cpu_usage_percent"],
-            ["pktcpuusagepcnt", "packet_cpu_usage_percent"],
-            ["rescpuusagepcnt", "res_cpu_usage_percent"]
+            ["mgmtcpuusagepcnt", "cpu_management_cpu_usage_percent"],
+            ["pktcpuusagepcnt", "cpu_packet_cpu_usage_percent"],
+            ["rescpuusagepcnt", "cpu_res_cpu_usage_percent"]
         ]
     },
 
@@ -162,6 +163,8 @@
 
         "labels": [
             ["_manual_servicegroup_name", "servicegroup_name"],
+            ["servicetype", "service_type"],
+            ["state", "service_state"],
             ["primaryipaddress", "service_ip"]
         ]
     },
@@ -196,7 +199,8 @@
 
         "labels": [
             ["name", "service_name"],
-            ["servicetype", "service_type"]
+            ["servicetype", "service_type"],
+            ["state", "service_state"]
         ]
     },
 

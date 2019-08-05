@@ -75,7 +75,7 @@ def collect_data(nsip, entity, username, password, protocol, nitro_timeout):
                         # manually adding key:value '_manual_servicegroup_name':_manual_servicegroup_name to stats of a particular service
                         individual_servicebinding_data['_manual_servicegroup_name'] = _manual_servicegroup_name
                         servicegroup_data.append(individual_servicebinding_data)
-        return servicegroup_data
+            return servicegroup_data
 
 
 def update_lbvs_label(k8s_prefix, label_values, ns_metric_name, log_prefix_match):
