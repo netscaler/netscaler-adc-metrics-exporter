@@ -12,6 +12,12 @@ To monitor stats and counters of NetScaler instances, netscaler-metric-exporter 
 
    Details about setting up the exporter to work in an environment as given in the figure is provided in the following sections. A note on which NetScaler entities/metrics the exporter scrapes by default and how to modify it is also explained.
 
+#### Participate:
+
+   You can discuss bugs/feature requests on our Slack channel. To request an invitation to participate in the Citrix ADC Cloud Native Slack channel(citrixadccloudnative.slack.com), please supply your email address using this form: https://podio.com/webforms/22979270/1633242
+
+
+
 Usage:
 ---
 The exporter can be run as a standalone python script, built into a container or run as a pod in Kubernetes. The corresponding drop-downs explain how to deploy it in each of the manners.
