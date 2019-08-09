@@ -4,13 +4,13 @@ Exporter for NetScaler Stats
 Description:
 ---
 
-This is a simple server that scrapes Citrix NetScaler (NS) stats and exports them via HTTP to Prometheus. Prometheus can then be added as a data source to Grafana to view the netscaler stats graphically.
+This is a simple server that scrapes Citrix ADC stats and exports them via HTTP to Prometheus. Prometheus can then be added as a data source to Grafana to view the Citrix ADC stats graphically.
 
 ![exporter_diagram](images/Netscaler-exporter-workflow.png)
  
-To monitor stats and counters of NetScaler instances, netscaler-metric-exporter is being run as a container or script. It collects NetScaler stats such as total hits to a vserver, http request rate, ssl encryption-decryption rate, etc from the NetScaler instances and holds them until the Prometheus server pulls the stats and stores them with a timestamp. Grafana can then be pointed to the Prometheus server to fetch the stats, plot them, set alarms, create heat maps, generate tables, etc as needed to analyse the NetScaler stats. 
+To monitor stats and counters of Citrix ADC instances, netscaler-metric-exporter is being run as a container or script. It collects Citrix ADC stats such as total hits to a vserver, http request rate, ssl encryption-decryption rate, etc from the Citrix ADC instances and holds them until the Prometheus server pulls the stats and stores them with a timestamp. Grafana can then be pointed to the Prometheus server to fetch the stats, plot them, set alarms, create heat maps, generate tables, etc as needed to analyse the Citrix ADC stats. 
 
-   Details about setting up the exporter to work in an environment as given in the figure is provided in the following sections. A note on which NetScaler entities/metrics the exporter scrapes by default and how to modify it is also explained.
+   Details about setting up the exporter to work in an environment as given in the figure is provided in the following sections. A note on which Citrix ADC entities/metrics the exporter scrapes by default and how to modify it is also explained.
 
 #### Participate:
 
@@ -40,14 +40,14 @@ where the flags are:
 
 flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description
 -----------------|--------------------
---target-nsip    | Provide the &lt;IP:port&gt; of the Netscalers to be monitored
+--target-nsip    | Provide the &lt;IP:port&gt; of the Citrix ADC to be monitored
 --port	         | Specify on which port metrics collected by the exporter should be exposed. Agents like Prometheus will need to scrape this port of the container to collected metrics
 --metric         | Provide a specific metric to load from metrics.json file (eg: 'lbvserver', 'protocolhttp', etc). If not provided, all metric entities from metrics.json will be loaded
---secure         | Option 'yes' can be provided to collect metrics from NetScalers over TLS. Default: 'no'.
---username       | Provide the username of the NetScaler to be monitored. Default: 'nsroot'
---password       | Provide the password of the NetScaler to be monitored. Default: 'nsroot'
+--secure         | Option 'yes' can be provided to collect metrics from Citrix ADC over TLS. Default: 'no'.
+--username       | Provide the username of the Citrix ADC to be monitored. Default: 'nsroot'
+--password       | Provide the password of the Citrix ADC to be monitored. Default: 'nsroot'
 --start-delay    | Specify time for which exporter should sleep before starting metric collection. Default: 10s
---timeout        | Specify timeout period for exporter to obtain response from target NetScalers. Default: 15s
+--timeout        | Specify timeout period for exporter to obtain response from target Citrix ADCs. Default: 15s
 --metrics-file   | The location of metrics.json file. Default: /exporter/metrics.json
 --log-file       | The location of exporter.log file. Default: /exporter/exporter.log
 --log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: ERROR
@@ -60,7 +60,7 @@ nohup python exporter.py --target-nsip=10.0.0.1:80 --target-nsip=10.0.0.2:80 --t
 This directs the exporter container to scrape the 10.0.0.1, 10.0.0.2, and 172.17.0.2, IPs on port 80, and the expose the stats it collects on port 8888. 
 The user can then access the exported metrics directly thorugh port 8888 on the machine where the exporter is running, or Prometheus and Grafana can be setup to view the exported metrics though their GUI.
 
-**NOTE:**  If TLS is being used by providing the --secure='yes' option, then it is recommended to create a new user on the NetScaler having only read permission. Documentation on creating new users with required permission can be found [here](ADD_LINK).
+**NOTE:**  If TLS is being used by providing the --secure='yes' option, then it is recommended to create a new user on the Citrix ADC having only read permission. Documentation on creating new users with required permission can be found [here](ADD_LINK).
 
 </details>
 
@@ -84,14 +84,14 @@ where the flags are:
 
 flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description
 -----------------|--------------------
---target-nsip    | Provide the &lt;IP:port&gt; of the Netscalers to be monitored
+--target-nsip    | Provide the &lt;IP:port&gt; of the Citrix ADC to be monitored
 --port	         | Specify on which port metrics collected by the exporter should be exposed. Agents like Prometheus will need to scrape this port of the container to collected metrics
 --metric         | Provide a specific metric to load from metrics.json file (eg: 'lbvserver', 'protocolhttp', etc). If not provided, all metric entities from metrics.json will be loaded
---secure         | Option 'yes' can be provided to collect metrics from NetScalers over TLS. Default: 'no'.
---username       | Provide the username of the NetScaler to be monitored. Default: 'nsroot'
---password       | Provide the password of the NetScaler to be monitored. Default: 'nsroot'
+--secure         | Option 'yes' can be provided to collect metrics from Citrix ADC over TLS. Default: 'no'.
+--username       | Provide the username of the Citrix ADC to be monitored. Default: 'nsroot'
+--password       | Provide the password of the Citrix ADC to be monitored. Default: 'nsroot'
 --start-delay    | Specify time for which exporter should sleep before starting metric collection. Default: 10s
---timeout        | Specify timeout period for exporter to obtain response from target NetScalers. Default: 15s
+--timeout        | Specify timeout period for exporter to obtain response from target Citrix ADC. Default: 15s
 --metrics-file   | The location of metrics.json file. Default: /exporter/metrics.json
 --log-file       | The location of exporter.log file. Default: /exporter/exporter.log
 --log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: ERROR
@@ -105,13 +105,13 @@ This directs the exporter container to scrape the 10.0.0.1, 10.0.0.2, and 172.17
 
 **NOTE:** In the command above, the value of the ```--port``` flag should be the same as the ```container_port```.
 
-**NOTE:**  If TLS is being used by providing the --secure='yes' option, then it is recommended to create a new user on the NetScaler having only read permission. Documentation on creating new users with required permission can be found [here](ADD_LINK).
+**NOTE:**  If TLS is being used by providing the --secure='yes' option, then it is recommended to create a new user on the Citrix ADC having only read permission. Documentation on creating new users with required permission can be found [here](ADD_LINK).
 
 </details>
 
 
 <details>
-<summary>Usage as a Pod in Kubernetes</summary>
+<summary>Run the exporter as a Pod in Kubernetes</summary>
 <br>
 
 The following yaml file can be used to deploy the exporter as a pod in Kuberenetes and expose it as a service. Here, the necessary flags are provided as a list in the ```args:``` section of the yaml file.
@@ -152,29 +152,35 @@ Flags which can be provided to the exporter in the ```args:``` section are:
 
 flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description
 -----------------|--------------------
---target-nsip    | Provide the &lt;IP:port&gt; of the Netscalers to be monitored
+--target-nsip    | Provide the &lt;IP:port&gt; of the Citrix ADC to be monitored
 --port	         | Specify on which port metrics collected by the exporter should be exposed. Agents like Prometheus will need to scrape this port of the container to collected metrics
 --metric         | Provide a specific metric to load from metrics.json file (eg: 'lbvserver', 'protocolhttp', etc). If not provided, all metric entities from metrics.json will be loaded
---secure         | Option 'yes' can be provided to collect metrics from NetScalers over TLS. Default: 'no'.
---username       | Provide the username of the NetScaler to be monitored. Default: 'nsroot'
---password       | Provide the password of the NetScaler to be monitored. Default: 'nsroot'
+--secure         | Option 'yes' can be provided to collect metrics from Citrix ADC over TLS. Default: 'no'.
+--username       | Provide the username of the Citrix ADC to be monitored. Default: 'nsroot'
+--password       | Provide the password of the Citrix ADC to be monitored. Default: 'nsroot'
 --start-delay    | Specify time for which exporter should sleep before starting metric collection. Default: 10s
---timeout        | Specify timeout period for exporter to obtain response from target NetScalers. Default: 15s
+--timeout        | Specify timeout period for exporter to obtain response from target Citrix ADC. Default: 15s
 --metrics-file   | The location of metrics.json file. Default: /exporter/metrics.json
 --log-file       | The location of exporter.log file. Default: /exporter/exporter.log
 --log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: ERROR
 --config-file    | File with non-required configs such as ```--username```, ```--password```, ```--start-delay```, etc. Helps supply username and password through file rather than CLI.
 
-**NOTE:**  If TLS is being used by providing the --secure='yes' option, then it is recommended to create a new user on the NetScaler having only read permission. Documentation on creating new users with required permission can be found [here](ADD_LINK).
+**NOTE:**  If TLS is being used by providing the --secure='yes' option, then it is recommended to create a new user on the Citrix ADC having only read permission. Documentation on creating new users with required permission can be found [here](ADD_LINK).
 
 </details>
 
-Netscaler configuration:
+<details>
+<summary>Automatically monitor workloads in Kubernetes using Citrix ADC and Prometheus Operator</summary>
+<br>
+When the Citrix ADC is used as an Ingress to workloads in a Kubernetes, cluster, you can use the exporter along with the Prometheus Operator (https://github.com/coreos/prometheus-operator) to automatically monitor new workloads as they are deployed. https://developer-docs.citrix.com/projects/citrix-k8s-ingress-controller/en/latest/metrics/promotheus-grafana/
+</details>
+
+Citrix ADC configuration:
 ---
-It is preferable to create specific user for data scraping from Netscaler with permissions to stats data only.
+It is preferable to create specific user for data scraping from Citrix ADC with permissions to stats data only.
 
 <details>
-<summary>Netscaler config example</summary>
+<summary>Citrix ADC config example</summary>
 
 ```
 # Create a new Command Policy which is only allowed to run the stat command
@@ -193,7 +199,7 @@ bind system user stats-user stats-policy 100
 Stats Exported by Default:
 ---
 
-The exporter is configured to export some of the most commonly used stats for a Netscaler device. They are mentioned in the ```metrics.json``` file and summarized in the table below:
+The exporter is configured to export some of the most commonly used stats for a Citrix ADC device. They are mentioned in the ```metrics.json``` file and summarized in the table below:
 
 Sl. No. |     STATS                 | NS nitro name
 --------|---------------------------|--------------
@@ -212,7 +218,7 @@ Sl. No. |     STATS                 | NS nitro name
 Exporting Additional Stats which are not Included by Default:
 ---
 
-In this document, the term 'entity' has been used to refer to NetScaler entities such as HTTP, Interfaces, LB, etc. The term 'metrics' has been used to refer to the stats collected for these entities. For example,
+In this document, the term 'entity' has been used to refer to Citrix ADC entities such as HTTP, Interfaces, LB, etc. The term 'metrics' has been used to refer to the stats collected for these entities. For example,
 the entity ```lbvserver``` has metrics such as ```totalpktsent```, ```tothits```, ```requestsrate```, etc. These metrics are classified by Prometheus into two categories -- ```counters``` and ```gauges``` as per this [link](https://prometheus.io/docs/concepts/metric_types/).   
 
 Metrics whose value can only increase with time are called counters and those which can increase or decrease are called gauges. For the example of ```lbvserver```, ```totalpktsent``` and ```tothits``` are counters, while ```requestsrate``` is a gauge. 
@@ -307,18 +313,18 @@ For example, to  export ```aaa``` stats, the lines given between ```-.-.-.-``` c
 <br>
 
 
-On a given NetScaler, some entities such as lbvserver, csvserver, interfaces, etc can have multiple instances of that entity configured, each having its own name. Such entities have an additional structure in ```metrics.json``` called ```label```.
+On a given Citrix ADC, some entities such as lbvserver, csvserver, interfaces, etc can have multiple instances of that entity configured, each having its own name. Such entities have an additional structure in ```metrics.json``` called ```label```.
 A label is used for such entities to differenciate stats among different instances of that entity based on name, ip, type, or any other suitable characteristic of that entitiy. 
-Other entities such as http, tcp, ssl are present as a single global parameter for the NetScaler, and thus do not have a ```label``` section in ```metrics.json```.
+Other entities such as http, tcp, ssl are present as a single global parameter for the Citrix ADC, and thus do not have a ```label``` section in ```metrics.json```.
 
 Verification of Exporter Functionality
 ---
-To verify if the exporter is scraping and exporting stats from NetScaler instances, the following url can be opened on a web browser or curl command can be fired from CLI:
+To verify if the exporter is scraping and exporting stats from Citrix ADC instances, the following url can be opened on a web browser or curl command can be fired from CLI:
 ```
 http://<hostIP>:<port>
 curl http://<hostIP>:<port>
 ```
-where ```hostIP``` is the IP of the host on which the python script or container is running, and ```port``` is the value of the ```--port``` flag which had been provided (```8888``` as per the example). All the stats for all the entities configured on the NetScaler and provided in ```metrics.json``` should appear along with their live values. An example response would be as follows;
+where ```hostIP``` is the IP of the host on which the python script or container is running, and ```port``` is the value of the ```--port``` flag which had been provided (```8888``` as per the example). All the stats for all the entities configured on the Citrix ADC and provided in ```metrics.json``` should appear along with their live values. An example response would be as follows;
 
 <details>
 <summary>Sample Output</summary>
@@ -481,12 +487,12 @@ ii. If a standalone Promtheus container/pod is being used, try increasing the ``
 <summary>3. Empty values next to metric names</summary>
 <br>
 
-It may be observed that some metrics are being received by Prometheus but have no value associated with them. This means that that the exporter is unable to collect that particular metric from the NetScaler. It could be either becuase:
+It may be observed that some metrics are being received by Prometheus but have no value associated with them. This means that that the exporter is unable to collect that particular metric from the Citrix ADC. It could be either becuase:
 
 	
-i. The device provided as a ```--target-nsip``` is reachable on the IP and port but is not a NetScaler, or
+i. The device provided as a ```--target-nsip``` is reachable on the IP and port but is not a Citrix ADC, or
 	
-ii. The metric being fetched does not exist in the NetScaler. Possibly due to it being an invalid metric name.
+ii. The metric being fetched does not exist in the Citrix ADC. Possibly due to it being an invalid metric name.
 		
 </details>
 <br>
