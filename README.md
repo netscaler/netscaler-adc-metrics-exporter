@@ -1,4 +1,4 @@
-Exporter for NetScaler Stats
+Exporter for Citrix ADC (NetScaler) Stats
 ===
 
 Description:
