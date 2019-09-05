@@ -78,31 +78,32 @@ def collect_data(nsip, entity, username, password, protocol, nitro_timeout):
             return servicegroup_data
 
 
-def update_lbvs_label(k8s_prefix, label_values, ns_metric_name, log_prefix_match):
+def update_lbvs_label(k8s_cic_prefix, label_values, ns_metric_name, log_prefix_match):
     '''Updates lbvserver lables for ingress and services'''
     cur_prefix = str(label_values[0].split("_")[0].split("-", 1)[0])
-    if cur_prefix == k8s_prefix:
+    if cur_prefix == k8s_cic_prefix:
         label_values[0] = label_values[0].split("_")[0].split("-", 1)[1]
         label_values[2] = label_values[2].split("_")[3].split("-", 1)[1]
         return True
     else:
-        if log_prefix_match:
-            logger.info('metrices for lbvserver with k8sprefix "%s" are not fetched', cur_prefix)
+        if os.environ.get('KUBERNETES_SERVICE_HOST') is not None:
+            if log_prefix_match:
+                logger.info('metrices for lbvserver with k8sCICprefix "%s" are not fetched', cur_prefix)
         return False
 
 
-class NetscalerCollector(object):
+class CitrixAdcCollector(object):
 
-    def __init__(self, nsips, metrics, username, password, protocol, nitro_timeout, k8s_prefix):
+    def __init__(self, nsips, metrics, username, password, protocol, nitro_timeout, k8s_cic_prefix):
         self.nsips = nsips
         self.metrics = metrics
         self.username = username
         self.password = password
         self.protocol = protocol
         self.nitro_timeout = nitro_timeout
-        self.k8s_prefix = k8s_prefix
+        self.k8s_cic_prefix = k8s_cic_prefix
 
-    # Collect metrics from NetScalers
+    # Collect metrics from Citrix ADCs
     def collect(self):
         data = {}
         for nsip in self.nsips:
@@ -142,11 +143,12 @@ class NetscalerCollector(object):
                         if('labels' in entity.keys()):
                             label_values = [data_item[key] for key in [v[0] for v in entity['labels']]]
 
-                            if entity_name == "lbvserver":
-                                prefix_match = update_lbvs_label(self.k8s_prefix, label_values, ns_metric_name, log_prefix_match)
-                                if not prefix_match:
-                                    log_prefix_match = False
-                                    continue
+                            if os.environ.get('KUBERNETES_SERVICE_HOST') is not None:
+                                if entity_name == "lbvserver":
+                                    prefix_match = update_lbvs_label(self.k8s_cic_prefix, label_values, ns_metric_name, log_prefix_match)
+                                    if not prefix_match:
+                                        log_prefix_match = False
+                                        continue
 
                             label_values.append(nsip)
                         else:
@@ -177,7 +179,7 @@ class NetscalerCollector(object):
                             label_values = [data_item[key] for key in [v[0] for v in entity['labels']]]
 
                             if entity_name == "lbvserver":
-                                prefix_match = update_lbvs_label(self.k8s_prefix, label_values, ns_metric_name, log_prefix_match)
+                                prefix_match = update_lbvs_label(self.k8s_cic_prefix, label_values, ns_metric_name, log_prefix_match)
                                 if not prefix_match:
                                     log_prefix_match = False
                                     continue
@@ -196,19 +198,19 @@ class NetscalerCollector(object):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--target-nsip', required=True, action='append', help='The IP of the Netscaler to gather metrics from. Required')
+    parser.add_argument('--target-nsip', required=True, action='append', help='The IP of the Citrix ADC to gather metrics from. Required')
     parser.add_argument('--start-delay', default=10, type=float, help='Start the exporter running after a delay to allow other containers to start. Default: 10s')
     parser.add_argument('--port', required=True, type=int, help='The port for the exporter to listen on. Required')
     parser.add_argument('--metric', required=False, action='append', type=str, help='Collect only the metrics specified here, may be used multiple times.')
-    parser.add_argument('--username', default='nsroot', type=str, help='The username used to access the Netscaler or NS_USER env var. Default: nsroot')
-    parser.add_argument('--password', default='nsroot', type=str, help='The password used to access the Netscaler or NS_PASSWORD env var. Default: nsroot')
+    parser.add_argument('--username', default='nsroot', type=str, help='The username used to access the Citrix ADC or NS_USER env var. Default: nsroot')
+    parser.add_argument('--password', default='nsroot', type=str, help='The password used to access the Citrix ADC or NS_PASSWORD env var. Default: nsroot')
     parser.add_argument('--secure', default='no', type=str, help='yes: Use HTTPS, no: Use HTTP. Default: no')
     parser.add_argument('--timeout', default=15, type=float, help='Timeout for Nitro calls.')
     parser.add_argument('--metrics-file', required=False, default='/exporter/metrics.json', type=str, help='Location of metrics.json file. Default: /exporter/metrics.json')
     parser.add_argument('--log-file', required=False, default='/exporter/exporter.log', type=str, help='Location of exporter.log file. Default: /exporter/exporter.log')
     parser.add_argument('--log-level', required=False, default='DEBUG', type=str, choices=['DEBUG', 'INFO', 'WARN', 'ERROR', 'CRITICAL', 'debug', 'info', 'warn', 'error', 'critical'])
     parser.add_argument('--config-file', required=False, type=str)
-    parser.add_argument('--k8sprefix', required=False, default='k8s', type=str, help='Prefix for CIC configured k8s entities')
+    parser.add_argument('--k8sCICprefix', required=False, default='k8s', type=str, help='Prefix for CIC configured k8s entities')
     args = parser.parse_args()
 
     try:
@@ -227,7 +229,7 @@ if __name__ == '__main__':
         print('Error while setting logger configs::%s', e)
     logging.getLogger("requests").setLevel(logging.WARNING)
     logging.getLogger("urllib3").setLevel(logging.WARNING)
-    logger = logging.getLogger('netscaler_metrics_exporter')
+    logger = logging.getLogger('citrix_adc_metrics_exporter')
 
     if args.config_file:
         args = parseConfig(args)
@@ -245,7 +247,7 @@ if __name__ == '__main__':
         logger.critical('Error while opening port::%s', e)
         print(e)
 
-    # Get username and password of NetScalers.
+    # Get username and password of CItrix ADCs
     ns_user = os.environ.get("NS_USER")
     if ns_user is None:
         ns_user = args.username
@@ -282,15 +284,15 @@ if __name__ == '__main__':
             logger.error('Exiting since NS access test failed for nsip {}'.format(nsip))
             sys.exit()
 
-    if not args.k8sprefix.isalnum():
-        logger.error('Invalid k8sprefix : non-alphanumeric not accepted')
+    if not args.k8sCICprefix.isalnum():
+        logger.error('Invalid k8sCICprefix : non-alphanumeric not accepted')
         sys.exit()
 
     # Register the exporter as a stat collector
     logger.info('Registering collector for %s' % args.target_nsip)
     try:
-        REGISTRY.register(NetscalerCollector(nsips=args.target_nsip, metrics=metrics_json, username=ns_user,
-                                             password=ns_password, protocol=ns_protocol, nitro_timeout=args.timeout, k8s_prefix=args.k8sprefix))
+        REGISTRY.register(CitrixAdcCollector(nsips=args.target_nsip, metrics=metrics_json, username=ns_user,
+                                             password=ns_password, protocol=ns_protocol, nitro_timeout=args.timeout, k8s_cic_prefix=args.k8sCICprefix))
     except Exception as e:
         logger.error('Exiting: invalid arguments! could not register collector for {}::{}'.format(args.target_nsip, e))
         sys.exit()

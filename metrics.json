@@ -216,7 +216,7 @@
             ["errdroppedtxpkts", "interface_err_dropped_tx_packets"],
             ["tottxbytes", "interface_tot_tx_bytes"],
             ["jumbopktstransmitted", "interface_jumbo_packets_transmitted"],
-            ["totnetscalerpkts", "interface_tot_netscaler_packets"],
+            ["totnetscalerpkts", "interface_tot_packets"],
             ["errpkttx", "interface_err_tx_packets"],
             ["totrxbytes", "interface_tot_rx_bytes"],
             ["trunkpktsreceived", "interface_trunk_packets_received"],
@@ -244,7 +244,7 @@
             ["txlacpdurate", "interface_tx_lacpdu_rate"],
             ["txbytesrate", "interface_tx_bytes_rate"],
             ["txpktsrate", "interface_tx_packets_rate"],
-            ["netscalerpktsrate", "interface_netscaler_packets_rate"],
+            ["netscalerpktsrate", "interface_packets_rate"],
             ["trunkpktstransmittedrate", "interface_trunk_packets_transmitted_rate"]
         ],
 

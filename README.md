@@ -6,9 +6,9 @@ Description:
 
 This is a simple server that scrapes Citrix ADC stats and exports them via HTTP to Prometheus. Prometheus can then be added as a data source to Grafana to view the Citrix ADC stats graphically.
 
-![exporter_diagram](images/Netscaler-exporter-workflow.png)
+![exporter_diagram](images/Citrix-adc-exporter-workflow.png)
  
-To monitor stats and counters of Citrix ADC instances, netscaler-metric-exporter is being run as a container or script. It collects Citrix ADC stats such as total hits to a vserver, http request rate, ssl encryption-decryption rate, etc from the Citrix ADC instances and holds them until the Prometheus server pulls the stats and stores them with a timestamp. Grafana can then be pointed to the Prometheus server to fetch the stats, plot them, set alarms, create heat maps, generate tables, etc as needed to analyse the Citrix ADC stats. 
+To monitor stats and counters of Citrix ADC instances, citrix-adc-metric-exporter is being run as a container or script. It collects Citrix ADC stats such as total hits to a vserver, http request rate, ssl encryption-decryption rate, etc from the Citrix ADC instances and holds them until the Prometheus server pulls the stats and stores them with a timestamp. Grafana can then be pointed to the Prometheus server to fetch the stats, plot them, set alarms, create heat maps, generate tables, etc as needed to analyse the Citrix ADC stats. 
 
    Details about setting up the exporter to work in an environment as given in the figure is provided in the following sections. A note on which Citrix ADC entities/metrics the exporter scrapes by default and how to modify it is also explained.
 
@@ -52,6 +52,7 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 --log-file       | The location of exporter.log file. Default: /exporter/exporter.log
 --log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: ERROR
 --config-file    | File with non-required configs such as ```--username```, ```--password```, ```--start-delay```, etc. Helps supply username and password through file rather than CLI.
+--k8sCICprefix   | Provide the prefix if exporter is used in kubernetes enviroment with Citrix ingress controller,certain stats will only be fetched if prefix provided here matches the k8s prefix used by CIC 
 
 The exporter can be setup as given in the diagram using;
 ```
@@ -70,15 +71,15 @@ The user can then access the exported metrics directly thorugh port 8888 on the 
 <summary>Usage as a Container</summary>
 <br>
 
-In order to use the exporter as a container, the image ```quay.io/citrix/netscaler-metrics-exporter:1.0.9``` will need to be pulled using;
+In order to use the exporter as a container, the image ```quay.io/citrix/citrix-adc-metrics-exporter:1.1``` will need to be pulled using;
 ```
-docker pull quay.io/citrix/netscaler-metrics-exporter:1.0.9
+docker pull quay.io/citrix/citrix-adc-metrics-exporter:1.1
 ```
 **NOTE:** It can also be build locally using ```docker build -f Dockerfile -t <image_name>:<tag> ./```
 
 Now, the exporter can be run using:
 ```
-docker run -dt -p <host_port>:<container_port> quay.io/citrix/netscaler-metrics-exporter:1.0.9 [flags]
+docker run -dt -p <host_port>:<container_port> quay.io/citrix/citrix-adc-metrics-exporter:1.1 [flags]
 ```
 where the flags are:
 
@@ -99,7 +100,7 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 
 To setup the exporter as given in the diagram, the following command can be used:
 ```
-docker run -dt -p 8888:8888 --name netscaler-exporter quay.io/citrix/netscaler-metrics-exporter:1.0.9 --target-nsip=10.0.0.1:80 --target-nsip=10.0.0.2:80 --target-nsip=172.17.0.2:80 --port 8888
+docker run -dt -p 8888:8888 --name citrix-adc-exporter quay.io/citrix/citrix-adc-metrics-exporter:1.1 --target-nsip=10.0.0.1:80 --target-nsip=10.0.0.2:80 --target-nsip=172.17.0.2:80 --port 8888
 ```
 This directs the exporter container to scrape the 10.0.0.1, 10.0.0.2, and 172.17.0.2, IPs on port 80, and the expose the stats it collects on port 8888. The user can then access the exported metrics directly thorugh port 8888 on the machine where the exporter is running, or Prometheus and Grafana can be setup to view the exported metrics though their GUI.
 
@@ -125,7 +126,7 @@ metadata:
 spec:
   containers:
     - name: exporter
-      image: quay.io/citrix/netscaler-metrics-exporter:1.0.9
+      image: quay.io/citrix/citrix-adc-metrics-exporter:1.1
       args:
         - "--target-nsip=10.0.0.1:80"
         - "--target-nsip=10.0.0.2:80"
@@ -440,7 +441,7 @@ The steps bellow can be followed to setup up a Grafana container with a sample d
 
 5. Usage of Dashboard: By default with "sample_services_stats.json",dashboard shows service requests, surque queue, RPS and Invalid Request/Response. User can select any of the configured services and then apply filter for a given ingress from the drop down menu for ingress. And with "sample_system_stats.json", dashboard shows CPU utilization, Memory Utilization and bandwidth capacity utilization where user can also set an alert. The dashboard can be expanded to include graphs of any other stats which the exporter is collecting. For more information on modifying the Grafana dashboard, please take a look at their [documentation](http://docs.grafana.org/) or demo [videos](https://www.youtube.com/watch?v=mgcJPREl3CU).
 
-<img src="images/service-stats-dashboard.png" width="400"> <img src="images/system-stats-dashboard.png" width="400">
+<img src="images/k8s-service-stats-dashboard.png" width="400"> <img src="images/system-stats-dashboard.png" width="400">
 
 **NOTE:** Data being plotted on the graphs can be filtered based on lbvservers or datasources using the blue dropdown buttons at the top of the dashboard.
 
