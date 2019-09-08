@@ -178,11 +178,12 @@ class CitrixAdcCollector(object):
                         if('labels' in entity.keys()):
                             label_values = [data_item[key] for key in [v[0] for v in entity['labels']]]
 
-                            if entity_name == "lbvserver":
-                                prefix_match = update_lbvs_label(self.k8s_cic_prefix, label_values, ns_metric_name, log_prefix_match)
-                                if not prefix_match:
-                                    log_prefix_match = False
-                                    continue
+                            if os.environ.get('KUBERNETES_SERVICE_HOST') is not None:
+                                if entity_name == "lbvserver":
+                                    prefix_match = update_lbvs_label(self.k8s_cic_prefix, label_values, ns_metric_name, log_prefix_match)
+                                    if not prefix_match:
+                                        log_prefix_match = False
+                                        continue
 
                             label_values.append(nsip)
                         else:

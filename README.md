@@ -97,6 +97,8 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 --log-file       | The location of exporter.log file. Default: /exporter/exporter.log
 --log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: ERROR
 --config-file    | File with non-required configs such as ```--username```, ```--password```, ```--start-delay```, etc. Helps supply username and password through file rather than CLI.
+--k8sCICprefix   | Provide the prefix if exporter is used in kubernetes enviroment with Citrix ingress controller,certain stats will only be fetched if prefix provided here matches the k8s prefix used by CIC 
+
 
 To setup the exporter as given in the diagram, the following command can be used:
 ```
@@ -165,6 +167,8 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 --log-file       | The location of exporter.log file. Default: /exporter/exporter.log
 --log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: ERROR
 --config-file    | File with non-required configs such as ```--username```, ```--password```, ```--start-delay```, etc. Helps supply username and password through file rather than CLI.
+--k8sCICprefix   | Provide the prefix if exporter is used in kubernetes enviroment with Citrix ingress controller,certain stats will only be fetched if prefix provided here matches the k8s prefix used by CIC 
+
 
 **NOTE:**  If TLS is being used by providing the --secure='yes' option, then it is recommended to create a new user on the Citrix ADC having only read permission. Documentation on creating new users with required permission can be found [here](ADD_LINK).
 
