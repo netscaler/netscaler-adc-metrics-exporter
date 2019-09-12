@@ -52,7 +52,7 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 --log-file       | The location of exporter.log file. Default: /exporter/exporter.log
 --log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: ERROR
 --config-file    | File with non-required configs such as ```--username```, ```--password```, ```--start-delay```, etc. Helps supply username and password through file rather than CLI.
---k8sCICprefix   | Provide the prefix if exporter is used in kubernetes enviroment with Citrix ingress controller,certain stats will only be fetched if prefix provided here matches the k8s prefix used by CIC 
+--k8sCICprefix   | Provide the prefix if exporter is used in kubernetes enviroment with Citrix ingress controller, "k8s_ingress_service_stats" dashboard can be used only if correct CICprefix is provided. Default prefix is "K8s"  
 
 The exporter can be setup as given in the diagram using;
 ```
@@ -71,15 +71,15 @@ The user can then access the exported metrics directly thorugh port 8888 on the 
 <summary>Usage as a Container</summary>
 <br>
 
-In order to use the exporter as a container, the image ```quay.io/citrix/citrix-adc-metrics-exporter:1.1``` will need to be pulled using;
+In order to use the exporter as a container, the image ```quay.io/citrix/citrix-adc-metrics-exporter:1.2``` will need to be pulled using;
 ```
-docker pull quay.io/citrix/citrix-adc-metrics-exporter:1.1
+docker pull quay.io/citrix/citrix-adc-metrics-exporter:1.2
 ```
 **NOTE:** It can also be build locally using ```docker build -f Dockerfile -t <image_name>:<tag> ./```
 
 Now, the exporter can be run using:
 ```
-docker run -dt -p <host_port>:<container_port> quay.io/citrix/citrix-adc-metrics-exporter:1.1 [flags]
+docker run -dt -p <host_port>:<container_port> quay.io/citrix/citrix-adc-metrics-exporter:1.2 [flags]
 ```
 where the flags are:
 
@@ -97,12 +97,12 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 --log-file       | The location of exporter.log file. Default: /exporter/exporter.log
 --log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: ERROR
 --config-file    | File with non-required configs such as ```--username```, ```--password```, ```--start-delay```, etc. Helps supply username and password through file rather than CLI.
---k8sCICprefix   | Provide the prefix if exporter is used in kubernetes enviroment with Citrix ingress controller,certain stats will only be fetched if prefix provided here matches the k8s prefix used by CIC 
+--k8sCICprefix   | Provide the prefix if exporter is used in kubernetes enviroment with Citrix ingress controller, "k8s_ingress_service_stats" dashboard can be used only if correct CICprefix is provided. Default prefix is "K8s"  
 
 
 To setup the exporter as given in the diagram, the following command can be used:
 ```
-docker run -dt -p 8888:8888 --name citrix-adc-exporter quay.io/citrix/citrix-adc-metrics-exporter:1.1 --target-nsip=10.0.0.1:80 --target-nsip=10.0.0.2:80 --target-nsip=172.17.0.2:80 --port 8888
+docker run -dt -p 8888:8888 --name citrix-adc-exporter quay.io/citrix/citrix-adc-metrics-exporter:1.2 --target-nsip=10.0.0.1:80 --target-nsip=10.0.0.2:80 --target-nsip=172.17.0.2:80 --port 8888
 ```
 This directs the exporter container to scrape the 10.0.0.1, 10.0.0.2, and 172.17.0.2, IPs on port 80, and the expose the stats it collects on port 8888. The user can then access the exported metrics directly thorugh port 8888 on the machine where the exporter is running, or Prometheus and Grafana can be setup to view the exported metrics though their GUI.
 
@@ -128,7 +128,7 @@ metadata:
 spec:
   containers:
     - name: exporter
-      image: quay.io/citrix/citrix-adc-metrics-exporter:1.1
+      image: quay.io/citrix/citrix-adc-metrics-exporter:1.2
       args:
         - "--target-nsip=10.0.0.1:80"
         - "--target-nsip=10.0.0.2:80"
@@ -167,7 +167,7 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 --log-file       | The location of exporter.log file. Default: /exporter/exporter.log
 --log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: ERROR
 --config-file    | File with non-required configs such as ```--username```, ```--password```, ```--start-delay```, etc. Helps supply username and password through file rather than CLI.
---k8sCICprefix   | Provide the prefix if exporter is used in kubernetes enviroment with Citrix ingress controller,certain stats will only be fetched if prefix provided here matches the k8s prefix used by CIC 
+--k8sCICprefix   | Provide the prefix if exporter is used in kubernetes enviroment with Citrix ingress controller, "k8s_ingress_service_stats" dashboard can be used only if correct CICprefix is provided. Default prefix is "K8s"  
 
 
 **NOTE:**  If TLS is being used by providing the --secure='yes' option, then it is recommended to create a new user on the Citrix ADC having only read permission. Documentation on creating new users with required permission can be found [here](ADD_LINK).
@@ -303,7 +303,8 @@ For example, to  export ```aaa``` stats, the lines given between ```-.-.-.-``` c
         
             ["name", "lb_ingress_name"],
             ["type", "lb_type"],
-            ["name", "lb_service_name"]
+            ["name", "lb_service_name"],
+            ["name", "lb_name"]
         ]
     },
 
