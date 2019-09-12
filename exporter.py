@@ -86,9 +86,8 @@ def update_lbvs_label(k8s_cic_prefix, label_values, ns_metric_name, log_prefix_m
         label_values[2] = label_values[2].split("_")[3].split("-", 1)[1]
         return True
     else:
-        if os.environ.get('KUBERNETES_SERVICE_HOST') is not None:
-            if log_prefix_match:
-                logger.info('metrices for lbvserver with k8sCICprefix "%s" are not fetched', cur_prefix)
+        if log_prefix_match:
+            logger.info('k8s_ingress_service_stat Ingress dashboard cannot be used for CIC prefix "%s"', cur_prefix)
         return False
 
 
@@ -148,7 +147,6 @@ class CitrixAdcCollector(object):
                                     prefix_match = update_lbvs_label(self.k8s_cic_prefix, label_values, ns_metric_name, log_prefix_match)
                                     if not prefix_match:
                                         log_prefix_match = False
-                                        continue
 
                             label_values.append(nsip)
                         else:
@@ -183,7 +181,6 @@ class CitrixAdcCollector(object):
                                     prefix_match = update_lbvs_label(self.k8s_cic_prefix, label_values, ns_metric_name, log_prefix_match)
                                     if not prefix_match:
                                         log_prefix_match = False
-                                        continue
 
                             label_values.append(nsip)
                         else:

@@ -305,7 +305,8 @@
         "labels": [
             ["name", "lb_ingress_name"],
             ["type", "lb_type"],
-            ["name", "lb_service_name"]
+            ["name", "lb_service_name"],
+            ["name", "lb_name"]
         ]
     },
 
