@@ -80,14 +80,17 @@ def collect_data(nsip, entity, username, password, protocol, nitro_timeout):
 
 def update_lbvs_label(k8s_cic_prefix, label_values, ns_metric_name, log_prefix_match):
     '''Updates lbvserver lables for ingress and services'''
-    cur_prefix = str(label_values[0].split("_")[0].split("-", 1)[0])
-    if cur_prefix == k8s_cic_prefix:
-        label_values[0] = label_values[0].split("_")[0].split("-", 1)[1]
-        label_values[2] = label_values[2].split("_")[3].split("-", 1)[1]
-        return True
+    if (str(label_values).find("_svc") != -1): 
+        cur_prefix = str(label_values[0].split("_")[0].split("-", 1)[0])
+        if cur_prefix == k8s_cic_prefix:
+            label_values[0] = label_values[0].split("_")[0].split("-", 1)[1]
+            label_values[2] = label_values[2].split("_")[3].split("-", 1)[1]
+            return True
+        else:
+            if log_prefix_match:
+                logger.info('k8s_ingress_service_stat Ingress dashboard cannot be used for CIC prefix "%s"', cur_prefix)
+            return False
     else:
-        if log_prefix_match:
-            logger.info('k8s_ingress_service_stat Ingress dashboard cannot be used for CIC prefix "%s"', cur_prefix)
         return False
 
 
