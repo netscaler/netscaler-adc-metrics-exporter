@@ -20,7 +20,7 @@
             ["ssltotsessions", "ssl_tot_sessions"],
             ["ssltotsslv2handshakes", "ssl_tot_v2_handshakes"],
             ["ssltotenc", "ssl_tot_encode"],
-            ["sslcryptoutilizationstat", "ssl_crypto_untilization_stat"], 
+            ["sslcryptoutilizationstat", "ssl_crypto_untilization_stat"],
             ["ssltotnewsessions", "ssl_tot_new_sessions"]
 
         ],
@@ -309,6 +309,16 @@
         ]
     },
 
+    "lbvserver_binding": {
+        "counters": [
+            ["percentup","lb_members_up_total"]
+        ],
+
+        "labels": [
+            ["name", "lb_name"]
+        ]
+    },
+
     "csvserver": {
         "counters": [
             ["totalpktssent", "cs_packets_sent_total"],
@@ -406,6 +416,5 @@
             ["aaacurtmsessionsrate", "aaa_cur_tm_sessions_rate"],
             ["aaatmsessionsrate", "aaa_tm_sessions_rate"]
         ]
-    } 
+    }
 }
-
