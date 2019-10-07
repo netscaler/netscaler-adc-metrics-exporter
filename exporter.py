@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 import os
 import yaml
 import json
@@ -45,6 +44,40 @@ def collect_data(nsip, entity, username, password, protocol, nitro_timeout):
 
     # Login credentials
     headers = {'X-NITRO-USER': username, 'X-NITRO-PASS': password}
+    if (entity == 'lbvserver_binding'):
+        url_lbvserver = '%s://%s/nitro/v1/config/lbvserver' % (protocol, nsip)
+
+        responselbvserver = requests.get(url_lbvserver, headers=headers, verify=False, timeout=nitro_timeout)
+        rlbvserver = responselbvserver.json()
+
+        lbvserver_binding_status_up = {'lbvserver_binding': []}
+
+        for lbvserver in rlbvserver['lbvserver']:
+            url = '%s://%s/nitro/v1/config/lbvserver_binding/%s' % (protocol, nsip, lbvserver['name'])
+            r = requests.get(url, headers=headers, verify=False, timeout=nitro_timeout)
+            values = r.json()
+            total = 0
+            total_down = 0
+            total_up = 0
+            for lbvserver_binding in values['lbvserver_binding']:
+                if ('lbvserver_servicegroupmember_binding' in lbvserver_binding):
+                    for lbvserver_binding_servers in lbvserver_binding['lbvserver_servicegroupmember_binding']:
+                        total += 1
+                        if lbvserver_binding_servers['curstate'] == "UP":
+                            total_up += 1
+                        else:
+                            total_down += 1
+                if total != 0:
+                    percentup = (total_up/total) * 100
+                else:
+                    percentup = 0
+
+                lbvserver_binding_status_up['lbvserver_binding'].append(({'name': lbvserver['name'], 'percentup': percentup}))
+
+        teste = json.dumps(lbvserver_binding_status_up)
+        data = json.loads(teste)
+        return data['lbvserver_binding']
+
     # nitro call for all entities except 'services' (ie. servicegroups)
     if (entity != 'services'):
         if(entity != 'nscapacity'):
@@ -56,6 +89,7 @@ def collect_data(nsip, entity, username, password, protocol, nitro_timeout):
         if data['errorcode'] == 0:
             return data[entity]
     # nitro call for 'services' entity (ie. servicegroups)
+
     else:
         url = '%s://%s/nitro/v1/stat/servicegroup?statbindings=yes' % (protocol, nsip)
         # get dict with all servicegroups
@@ -119,6 +153,7 @@ class CitrixAdcCollector(object):
 
         # Add labels to metrics and provide to Prometheus
         log_prefix_match = True
+
         for entity_name, entity in self.metrics.items():
             if('labels' in entity.keys()):
                 label_names = [v[1] for v in entity['labels']]
@@ -126,7 +161,6 @@ class CitrixAdcCollector(object):
             else:
                 label_names = []
                 label_names.append('nsip')
-
             # Provide collected metric to Prometheus as a counter
             for ns_metric_name, prom_metric_name in entity.get('counters', []):
                 c = CounterMetricFamily(prom_metric_name, ns_metric_name, labels=label_names)
@@ -138,13 +172,13 @@ class CitrixAdcCollector(object):
                     for data_item in entity_stats:
                         if not data_item:
                             continue
+
                         if ns_metric_name not in data_item.keys():
                             logger.warning('Counter stats for %s not enabled in netscalar %s, so could not add to %s' % (ns_metric_name, nsip, entity_name))
                             break
 
                         if('labels' in entity.keys()):
                             label_values = [data_item[key] for key in [v[0] for v in entity['labels']]]
-
                             if os.environ.get('KUBERNETES_SERVICE_HOST') is not None:
                                 if entity_name == "lbvserver":
                                     prefix_match = update_lbvs_label(self.k8s_cic_prefix, label_values, ns_metric_name, log_prefix_match)
@@ -213,6 +247,8 @@ if __name__ == '__main__':
     parser.add_argument('--config-file', required=False, type=str)
     parser.add_argument('--k8sCICprefix', required=False, default='k8s', type=str, help='Prefix for CIC configured k8s entities')
     args = parser.parse_args()
+
+
 
     try:
         logging.basicConfig(
@@ -291,6 +327,7 @@ if __name__ == '__main__':
 
     # Register the exporter as a stat collector
     logger.info('Registering collector for %s' % args.target_nsip)
+
     try:
         REGISTRY.register(CitrixAdcCollector(nsips=args.target_nsip, metrics=metrics_json, username=ns_user,
                                              password=ns_password, protocol=ns_protocol, nitro_timeout=args.timeout, k8s_cic_prefix=args.k8sCICprefix))
