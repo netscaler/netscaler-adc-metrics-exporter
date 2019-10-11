@@ -80,7 +80,7 @@ def collect_data(nsip, entity, username, password, protocol, nitro_timeout):
 
     # nitro call for all entities except 'services' (ie. servicegroups)
     if (entity != 'services'):
-        if(entity != 'nscapacity'):
+        if(entity != 'nscapacity' and entity != 'sslcertkey'):
             url = '%s://%s/nitro/v1/stat/%s' % (protocol, nsip, entity)
         else:
             url = '%s://%s/nitro/v1/config/%s' % (protocol, nsip, entity)
