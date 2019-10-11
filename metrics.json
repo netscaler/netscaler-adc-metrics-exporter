@@ -34,6 +34,16 @@
         ]
     },
 
+    "sslcertkey": {
+        "counters": [
+            ["daystoexpiration", "ssl_cert_days_to_expire"]
+        ],
+        "guages": [],
+        "labels": [
+            ["certkey", "cert_key"]
+        ]
+    },
+
     "protocolhttp": {
         "counters": [
             ["httptotrequests", "http_tot_requests"],
@@ -312,7 +322,7 @@
 
     "lbvserver_binding": {
         "counters": [
-            ["percentup","lb_members_up_total"]
+            ["percentup", "lb_members_up_total"]
         ],
 
         "labels": [
@@ -376,7 +386,7 @@
         ]
     },
 
-   "ns": {
+    "ns": {
         "gauges": [
             ["rxmbitsrate", "througput_rx_mbits_rate"]
         ]
