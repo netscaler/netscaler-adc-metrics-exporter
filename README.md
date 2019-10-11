@@ -189,7 +189,7 @@ It is preferable to create specific user for data scraping from Citrix ADC with 
 
 ```
 # Create a new Command Policy which is only allowed to run the stat command
-add system cmdPolicy stats-policy ALLOW (^stat.*|show ns license|show serviceGroup)
+add system cmdPolicy stats-policy ALLOW (^stat.*|show ns license|show serviceGroup|show ssl certKey)
 
 # Create a new user  
 # Change the 'password' in accordance with your password policy
