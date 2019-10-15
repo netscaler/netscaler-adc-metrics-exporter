@@ -31,7 +31,7 @@ def validate_ns_session(protocol, nsip, username, password):
     try:
         response = requests.get(url, verify=False, auth=HTTPBasicAuth(username, password))
         if (response.status_code == requests.status_codes.codes.unauthorized):
-            logger.error('Invalid username or password!, Unaurthorized Err : {}'.format(response.status_code))
+            logger.error('Invalid username or password for Citrix Adc!, Unaurthorized Err : {}'.format(response.status_code))
             return False
     except requests.exceptions.RequestException as err:
         logger.error('{}'.format(err))
@@ -44,6 +44,8 @@ def collect_data(nsip, entity, username, password, protocol, nitro_timeout):
 
     # Login credentials
     headers = {'X-NITRO-USER': username, 'X-NITRO-PASS': password}
+
+    # nitro call for all entities lbvserver bindings
     if (entity == 'lbvserver_binding'):
         url_lbvserver = '%s://%s/nitro/v1/config/lbvserver' % (protocol, nsip)
 
@@ -68,7 +70,7 @@ def collect_data(nsip, entity, username, password, protocol, nitro_timeout):
                         else:
                             total_down += 1
                 if total != 0:
-                    percentup = (total_up/total) * 100
+                    percentup = (total_up/float(total)) * 100
                 else:
                     percentup = 0
 
@@ -77,6 +79,10 @@ def collect_data(nsip, entity, username, password, protocol, nitro_timeout):
         teste = json.dumps(lbvserver_binding_status_up)
         data = json.loads(teste)
         return data['lbvserver_binding']
+
+    # this is to fetch lb status for ingress/services in k8s enviroment
+    if(entity == 'k8s_ingress_lbvs'):
+        entity = 'lbvserver'
 
     # nitro call for all entities except 'services' (ie. servicegroups)
     if (entity != 'services'):
@@ -113,18 +119,37 @@ def collect_data(nsip, entity, username, password, protocol, nitro_timeout):
 
 
 def update_lbvs_label(k8s_cic_prefix, label_values, ns_metric_name, log_prefix_match):
-    '''Updates lbvserver lables for ingress and services'''
-    if (str(label_values).find("_svc") != -1): 
-        cur_prefix = str(label_values[0].split("_")[0].split("-", 1)[0])
-        if cur_prefix == k8s_cic_prefix:
-            label_values[0] = label_values[0].split("_")[0].split("-", 1)[1]
-            label_values[2] = label_values[2].split("_")[3].split("-", 1)[1]
-            return True
+    '''Updates lbvserver lables for ingress and services for k8s_cic_ingress_service_stat dashboard'''
+    try:
+        # If lbvs name ends with expected _svc, then label values are updated with ingress/service info.
+        if (str(label_values).find("_svc") != -1):
+            cur_prefix = str(label_values[0].split("_")[0].split("-", 1)[0])
+            # update lables only if prefix provided is same as CIC prefix used
+            if cur_prefix == k8s_cic_prefix:
+                # return if ingress name as a service
+                if label_values[0].split("_")[3] == 'svc':
+                    if log_prefix_match:
+                        logger.info('k8s_ingress_service_stat Ingress dashboard cannot be used without ingress')
+                    return False
+                # update label "citrixadc_k8s_ing_lb_ingress_name" with ingress name
+                label_values[0] = label_values[0].split("_")[0].split("-", 1)[1]
+                # update label "citrixadc_k8s_ing_lb_ingress_port" with ingress port
+                label_values[1] = label_values[1].split("_")[2]
+                # update label "citrixadc_k8s_ing_lb_service_name" with service name
+                label_values[2] = label_values[2].split("_")[3].split("-", 1)[1]
+                # update label "citrixadc_k8s_ing_lb_ingress_port" with service port
+                label_values[3] = label_values[3].split("_")[5]
+                return True
+            else:
+                if log_prefix_match:
+                    logger.info('k8s_cic_ingress_service_stat Ingress dashboard cannot be used for CIC prefix "%s"', cur_prefix)
+                return False
         else:
             if log_prefix_match:
-                logger.info('k8s_ingress_service_stat Ingress dashboard cannot be used for CIC prefix "%s"', cur_prefix)
+                logger.info('k8s_cic_ingress_service_stat Ingress dashboard cannot be used for non-CIC(or < CIC 1.2) ingress/lb"',)
             return False
-    else:
+    except Exception as e:
+        logger.error('Unable to update k8s label: (%s)', e)
         return False
 
 
@@ -174,17 +199,21 @@ class CitrixAdcCollector(object):
                             continue
 
                         if ns_metric_name not in data_item.keys():
-                            logger.warning('Counter stats for %s not enabled in netscalar %s, so could not add to %s' % (ns_metric_name, nsip, entity_name))
+                            logger.warning('Counter stats for %s not enabled in adc  %s, so could not add to %s' % (ns_metric_name, nsip, entity_name))
                             break
 
                         if('labels' in entity.keys()):
                             label_values = [data_item[key] for key in [v[0] for v in entity['labels']]]
-                            if os.environ.get('KUBERNETES_SERVICE_HOST') is not None:
-                                if entity_name == "lbvserver":
+
+                            # populate and update k8s_ingress_lbvs metrics if in k8s-CIC enviroment
+                            if entity_name == "k8s_ingress_lbvs":
+                                if os.environ.get('KUBERNETES_SERVICE_HOST') is not None:
                                     prefix_match = update_lbvs_label(self.k8s_cic_prefix, label_values, ns_metric_name, log_prefix_match)
                                     if not prefix_match:
                                         log_prefix_match = False
-
+                                        continue
+                                else:
+                                    continue
                             label_values.append(nsip)
                         else:
                             label_values = [nsip]
@@ -207,17 +236,21 @@ class CitrixAdcCollector(object):
                         if not data_item:
                             continue
                         if ns_metric_name not in data_item.keys():
-                            logger.warning('Gauge stats for %s not enabled in netscalar %s, so could not add to %s' % (ns_metric_name, nsip, entity_name))
+                            logger.warning('Gauge stats for %s not enabled in adc  %s, so could not add to %s' % (ns_metric_name, nsip, entity_name))
                             break
 
                         if('labels' in entity.keys()):
                             label_values = [data_item[key] for key in [v[0] for v in entity['labels']]]
 
-                            if os.environ.get('KUBERNETES_SERVICE_HOST') is not None:
-                                if entity_name == "lbvserver":
+                            # populate and update k8s_ingress_lbvs metrics if in k8s-CIC enviroment
+                            if entity_name == "k8s_ingress_lbvs":
+                                if os.environ.get('KUBERNETES_SERVICE_HOST') is not None:
                                     prefix_match = update_lbvs_label(self.k8s_cic_prefix, label_values, ns_metric_name, log_prefix_match)
                                     if not prefix_match:
                                         log_prefix_match = False
+                                        continue
+                                else:
+                                    continue
 
                             label_values.append(nsip)
                         else:
@@ -307,7 +340,7 @@ if __name__ == '__main__':
     except Exception as e:
         logger.error('Error while loading metrics::%s', e)
 
-    # validating netscalar access
+    # validating ADC access
     secure = args.secure.lower()
     if secure == 'yes':
         ns_protocol = 'https'
@@ -318,12 +351,12 @@ if __name__ == '__main__':
     for nsip in args.target_nsip:
         res = validate_ns_session(ns_protocol, nsip, ns_user, ns_password)
         if res is False:
-            logger.error('Exiting since NS access test failed for nsip {}'.format(nsip))
-            sys.exit()
+            logger.error('Citrix adc access test failed for ip {}'.format(nsip))
+        else:
+            logger.info('Exporter connected to adc {}'.format(nsip))
 
     if not args.k8sCICprefix.isalnum():
         logger.error('Invalid k8sCICprefix : non-alphanumeric not accepted')
-        sys.exit()
 
     # Register the exporter as a stat collector
     logger.info('Registering collector for %s' % args.target_nsip)
@@ -332,8 +365,7 @@ if __name__ == '__main__':
         REGISTRY.register(CitrixAdcCollector(nsips=args.target_nsip, metrics=metrics_json, username=ns_user,
                                              password=ns_password, protocol=ns_protocol, nitro_timeout=args.timeout, k8s_cic_prefix=args.k8sCICprefix))
     except Exception as e:
-        logger.error('Exiting: invalid arguments! could not register collector for {}::{}'.format(args.target_nsip, e))
-        sys.exit()
+        logger.error('Exiting: Invalid arguments! could not register collector for {}::{}'.format(args.target_nsip, e))
 
     # Forever
     while True:

@@ -15,45 +15,96 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 10,
-  "iteration": 1559384152647,
+  "id": 2,
+  "iteration": 1570702304855,
   "links": [],
   "panels": [
     {
-      "alert": {
-        "conditions": [
-          {
-            "evaluator": {
-              "params": [
-                25
-              ],
-              "type": "gt"
-            },
-            "operator": {
-              "type": "and"
-            },
-            "query": {
-              "params": [
-                "A",
-                "1m",
-                "now"
-              ]
-            },
-            "reducer": {
-              "params": [],
-              "type": "last"
-            },
-            "type": "query"
-          }
-        ],
-        "executionErrorState": "alerting",
-        "for": "2m",
-        "frequency": "1m",
-        "handler": 1,
-        "name": "Panel Title alert",
-        "noDataState": "alerting",
-        "notifications": []
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "$datasource_prometheus",
+      "fill": 1,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
       },
+      "id": 10,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {},
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "citrixadc_k8s_ing_lb_hits_total {citrixadc_k8s_ing_lb_service_name=~\"$Service\"}",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "service requests",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
@@ -63,10 +114,10 @@
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 0,
+        "x": 12,
         "y": 0
       },
-      "id": 13,
+      "id": 12,
       "legend": {
         "avg": false,
         "current": false,
@@ -91,101 +142,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "((citrixadc_througput_rx_mbits_rate*0.001)/citrixadc_allocated_licensed_bandwidth_total)*100",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "refId": "A"
-        }
-      ],
-      "thresholds": [
-        {
-          "colorMode": "critical",
-          "fill": true,
-          "line": true,
-          "op": "gt",
-          "value": 25,
-          "yaxis": "left"
-        }
-      ],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Licensed Throughput rate ",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "percent",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "$datasource_prometheus",
-      "fill": 1,
-      "gridPos": {
-        "h": 9,
-        "w": 12,
-        "x": 12,
-        "y": 0
-      },
-      "id": 11,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "options": {},
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "citrixadc_memory_usage_percent",
+          "expr": "citrixadc_k8s_ing_lb_surge_queue_requests_count {citrixadc_k8s_ing_lb_service_name=~\"$Service\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -195,7 +152,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Memory Utilization Percentage",
+      "title": "surge queue",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -233,19 +190,74 @@
       }
     },
     {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "$datasource_prometheus",
-      "fill": 1,
+      "datasource": "prometheus",
       "gridPos": {
-        "h": 9,
+        "h": 8,
         "w": 12,
         "x": 0,
         "y": 8
       },
-      "id": 3,
+      "id": 14,
+      "links": [],
+      "options": {
+        "fieldOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "defaults": {
+            "decimals": null,
+            "max": 100,
+            "min": 0,
+            "unit": "none"
+          },
+          "mappings": [],
+          "override": {},
+          "thresholds": [
+            {
+              "color": "green",
+              "index": 0,
+              "value": null
+            },
+            {
+              "color": "red",
+              "index": 1,
+              "value": 80
+            }
+          ],
+          "values": false
+        },
+        "orientation": "auto",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "6.2.2",
+      "targets": [
+        {
+          "expr": "citrixadc_k8s_ing_lb_request_rate {citrixadc_k8s_ing_lb_service_name=~\"$Service\"}",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "RPS",
+      "type": "gauge"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "prometheus",
+      "fill": 1,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 16,
       "legend": {
         "avg": false,
         "current": false,
@@ -261,7 +273,7 @@
       "nullPointMode": "null",
       "options": {},
       "percentage": false,
-      "pointradius": 5,
+      "pointradius": 2,
       "points": false,
       "renderer": "flot",
       "seriesOverrides": [],
@@ -270,7 +282,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "citrixadc_packet_cpu_usage_percent",
+          "expr": "citrixadc_k8s_ing_lb_invalid_response_request_total {citrixadc_k8s_ing_lb_service_name=~\"$Service\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -280,7 +292,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "CPU Utilization Percentage",
+      "title": "Invalid Request/Response",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -340,12 +352,77 @@
         "regex": "prometheus.*",
         "skipUrlSync": false,
         "type": "datasource"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "hotdrinks-ing-sni-cpx",
+          "value": [
+            "hotdrinks-ing-sni-cpx"
+          ]
+        },
+        "datasource": "$datasource_prometheus",
+        "definition": "label_values(citrixadc_k8s_ing_lb_ingress_name)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Ingress",
+        "multi": true,
+        "name": "Ingress",
+        "options": [],
+        "query": "label_values(citrixadc_k8s_ing_lb_ingress_name)",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "lb_vserver_name",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "frontend-hotdrinks",
+          "value": [
+            "frontend-hotdrinks"
+          ]
+        },
+        "datasource": "prometheus",
+        "definition": "label_values({citrixadc_k8s_ing_lb_ingress_name=~\"$Ingress\"}, citrixadc_k8s_ing_lb_service_name)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Service",
+        "multi": true,
+        "name": "Service",
+        "options": [
+          {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          },
+          {
+            "selected": true,
+            "text": "frontend-hotdrinks",
+            "value": "frontend-hotdrinks"
+          }
+        ],
+        "query": "label_values({citrixadc_k8s_ing_lb_ingress_name=~\"$Ingress\"}, citrixadc_k8s_ing_lb_service_name)",
+        "refresh": 0,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       }
     ]
   },
   "time": {
-    "from": "now-5m",
-    "to": "now"
+    "from": "2019-10-10T09:40:38.332Z",
+    "to": "2019-10-10T10:10:38.332Z"
   },
   "timepicker": {
     "refresh_intervals": [
@@ -375,7 +452,10 @@
     ]
   },
   "timezone": "",
-  "title": "System Stats",
-  "uid": "NT3Z0MJkk",
-  "version": 2
+  "title": "Ingress service stats",
+  "uid": "ITZydChZz",
+  "version": 1
 }
+
+
+

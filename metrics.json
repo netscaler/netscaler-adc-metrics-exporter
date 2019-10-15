@@ -1,431 +1,486 @@
 {
     "system": {
         "counters": [
-            ["numcpus", "cpu_number"]
+            ["numcpus", "citrixadc_cpu_number"]
         ],
 
         "gauges": [
-            ["cpuusagepcnt", "cpu_usage_percent"],
-            ["memusagepcnt", "memory_usage_percent"],
-            ["mgmtcpuusagepcnt", "management_cpu_usage_percent"],
-            ["pktcpuusagepcnt", "packet_cpu_usage_percent"],
-            ["rescpuusagepcnt", "res_cpu_usage_percent"]
+            ["cpuusagepcnt", "citrixadc_cpu_usage_percent"],
+            ["memusagepcnt", "citrixadc_memory_usage_percent"],
+            ["mgmtcpuusagepcnt", "citrixadc_management_cpu_usage_percent"],
+            ["pktcpuusagepcnt", "citrixadc_packet_cpu_usage_percent"],
+            ["rescpuusagepcnt", "citrixadc_res_cpu_usage_percent"]
         ]
     },
 
     "ssl": {
         "counters": [
-            ["ssltottlsv11sessions", "ssl_tot_tlsv11_sessions"],
-            ["ssltotsslv2sessions", "ssl_tot_v2_sessions"],
-            ["ssltotsessions", "ssl_tot_sessions"],
-            ["ssltotsslv2handshakes", "ssl_tot_v2_handshakes"],
-            ["ssltotenc", "ssl_tot_encode"],
-            ["sslcryptoutilizationstat", "ssl_crypto_untilization_stat"],
-            ["ssltotnewsessions", "ssl_tot_new_sessions"]
-
+            ["ssltottlsv11sessions", "citrixadc_ssl_tot_tlsv11_sessions"],
+            ["ssltotsslv2sessions", "citrixadc_ssl_tot_v2_sessions"],
+            ["ssltotsessions", "citrixadc_ssl_tot_sessions"],
+            ["ssltotsslv2handshakes", "citrixadc_ssl_tot_v2_handshakes"],
+            ["ssltotenc", "citrixadc_ssl_tot_encode"],
+            ["sslcryptoutilizationstat", "citrixadc_ssl_crypto_untilization_stat"], 
+            ["ssltotnewsessions", "citrixadc_ssl_tot_new_sessions"]
         ],
 
         "gauges": [
-            ["sslsessionsrate", "ssl_session_rate"],
-            ["ssldecrate", "ssl_dec_rate"],
-            ["sslencrate", "ssl_encode_rate"],
-            ["sslsslv2handshakesrate", "ssl_v2_handshakes_rate"],
-            ["sslnewsessionsrate", "new_sessions_rate"]
+            ["sslsessionsrate", "citrixadc_ssl_session_rate"],
+            ["ssldecrate", "citrixadc_ssl_dec_rate"],
+            ["sslencrate", "citrixadc_ssl_encode_rate"],
+            ["sslsslv2handshakesrate", "citrixadc_ssl_v2_handshakes_rate"],
+            ["sslnewsessionsrate", "citrixadc_new_sessions_rate"]
         ]
     },
 
     "sslcertkey": {
         "counters": [
-            ["daystoexpiration", "ssl_cert_days_to_expire"]
+            ["daystoexpiration", "citrixadc_ssl_cert_days_to_expire"]
         ],
         "guages": [],
         "labels": [
-            ["certkey", "cert_key"]
+            ["certkey", "citrixadc_cert_key"]
         ]
     },
 
     "protocolhttp": {
         "counters": [
-            ["httptotrequests", "http_tot_requests"],
-            ["httptotresponses", "http_tot_responses"],
-            ["httptotposts", "http_tot_posts"],
-            ["httptotgets", "http_tot_gets"],
-            ["httptotothers", "http_tot_others"],
-            ["spdytotstreams", "http_tot_spdy_streams"],
-            ["spdyv2totstreams", "http_spdy_v2_streams"],
-            ["spdyv3totstreams", "http_spdy_v3_streams"],
-            ["httptotrxrequestbytes", "http_tot_rx_request_bytes"],
-            ["httptotrxresponsebytes", "http_tot_rx_resposnse_bytes"],
-            ["httptot10requests", "http_tot_10_requests"],
-            ["httptot11requests", "http_tot_11_requests"],
-            ["httptotchunkedrequests", "http_tot_chunked_requests"]
+            ["httptotrequests", "citrixadc_http_tot_requests"],
+            ["httptotresponses", "citrixadc_http_tot_responses"],
+            ["httptotposts", "citrixadc_http_tot_posts"],
+            ["httptotgets", "citrixadc_http_tot_gets"],
+            ["httptotothers", "citrixadc_http_tot_others"],
+            ["spdytotstreams", "citrixadc_http_tot_spdy_streams"],
+            ["spdyv2totstreams", "citrixadc_http_spdy_v2_streams"],
+            ["spdyv3totstreams", "citrixadc_http_spdy_v3_streams"],
+            ["httptotrxrequestbytes", "citrixadc_http_tot_rx_request_bytes"],
+            ["httptotrxresponsebytes", "citrixadc_http_tot_rx_resposnse_bytes"],
+            ["httptot10requests", "citrixadc_http_tot_10_requests"],
+            ["httptot11requests", "citrixadc_http_tot_11_requests"],
+            ["httptotchunkedrequests", "citrixadc_http_tot_chunked_requests"]
         ],
 
         "gauges": [
-            ["httprequestsrate", "http_requests_rate"],
-            ["spdystreamsrate", "http_spdy_streams_rate"],
-            ["httpresponsesrate", "http_responses_rate"],
-            ["httppostsrate", "http_posts_rate"],
-            ["httpgetsrate", "http_gets_rate"],
-            ["httpothersrate", "http_others_rate"],
-            ["httpchunkedresponsesrate", "http_chunked_responses_rate"],
-            ["httpchunkedrequestsrate", "http_chunked_requests_rate"],
-            ["http10responsesrate", "http_10_responses_rate"],
-            ["http11responsesrate", "http_11_responses_rate"]
+            ["httprequestsrate", "citrixadc_http_requests_rate"],
+            ["spdystreamsrate", "citrixadc_http_spdy_streams_rate"],
+            ["httpresponsesrate", "citrixadc_http_responses_rate"],
+            ["httppostsrate", "citrixadc_http_posts_rate"],
+            ["httpgetsrate", "citrixadc_http_gets_rate"],
+            ["httpothersrate", "citrixadc_http_others_rate"],
+            ["httpchunkedresponsesrate", "citrixadc_http_chunked_responses_rate"],
+            ["httpchunkedrequestsrate", "citrixadc_http_chunked_requests_rate"],
+            ["http10responsesrate", "citrixadc_http_10_responses_rate"],
+            ["http11responsesrate", "citrixadc_http_11_responses_rate"]
         ]
     },
 
     "protocoltcp": {
         "counters": [
-            ["tcptotrxpkts", "tcp_tot_rx_packets"],
-            ["tcptotrxbytes", "tcp_tot_rx_bytes"],
-            ["tcptottxbytes", "tcp_tx_bytes"],
-            ["tcptottxpkts", "tcp_tot_tx_packets"],
-            ["tcptotclientconnopened", "tcp_tot_client_connections_opened"],
-            ["tcptotserverconnopened", "tcp_tot_server_connections_opened"],
-            ["tcptotsyn", "tcp_tot_syn"],
-            ["tcptotsynprobe", "tcp_tot_syn_probe"],
-            ["tcptotsvrfin", "tcp_tot_server_fin"],
-            ["tcptotcltfin", "tcp_tot_client_fin"]
+            ["tcptotrxpkts", "citrixadc_tcp_tot_rx_packets"],
+            ["tcptotrxbytes", "citrixadc_tcp_tot_rx_bytes"],
+            ["tcptottxbytes", "citrixadc_tcp_tx_bytes"],
+            ["tcptottxpkts", "citrixadc_tcp_tot_tx_packets"],
+            ["tcptotclientconnopened", "citrixadc_tcp_tot_client_connections_opened"],
+            ["tcptotserverconnopened", "citrixadc_tcp_tot_server_connections_opened"],
+            ["tcptotsyn", "citrixadc_tcp_tot_syn"],
+            ["tcptotsynprobe", "citrixadc_tcp_tot_syn_probe"],
+            ["tcptotsvrfin", "citrixadc_tcp_tot_server_fin"],
+            ["tcptotcltfin", "citrixadc_tcp_tot_client_fin"]
         ],
 
         "gauges": [
-            ["tcpactiveserverconn", "tcp_active_server_connection"],
-            ["tcpcurclientconnestablished", "tcp_current_client_connections_est"],
-            ["tcpcurserverconnestablished", "tcp_current_server_connections_est"],
-            ["tcprxpktsrate", "tcp_rx_packets_rate"],
-            ["tcptxpktsrate", "tcp_tx_packets_rate"],
-            ["tcptxbytesrate", "tcp_tx_bytes_rate"],
-            ["tcpclientconnopenedrate", "tcp_client_connection_opened_rate"],
-            ["tcperrbadchecksum", "tcp_err_badchecksum"],
-            ["tcperrbadchecksumrate", "tcp_err_badchecksum_rate"],
-            ["tcperranyportfail", "tcp_err_any_port_fail"],
-            ["tcperripportfail", "tcp_err_ip_port_fail"],
-            ["tcperrbadstateconn", "tcp_err_bad_connection_state"],
-            ["tcperrrstthreshold", "tcp_err_reset_threshold"],
-            ["tcpsynrate", "tcp_syn_rate"],
-            ["tcpsynproberate", "tcp_syn_probe_rate"]
+            ["tcpactiveserverconn", "citrixadc_tcp_active_server_connection"],
+            ["tcpcurclientconnestablished", "citrixadc_tcp_current_client_connections_est"],
+            ["tcpcurserverconnestablished", "citrixadc_tcp_current_server_connections_est"],
+            ["tcprxpktsrate", "citrixadc_tcp_rx_packets_rate"],
+            ["tcptxpktsrate", "citrixadc_tcp_tx_packets_rate"],
+            ["tcptxbytesrate", "citrixadc_tcp_tx_bytes_rate"],
+            ["tcpclientconnopenedrate", "citrixadc_tcp_client_connection_opened_rate"],
+            ["tcperrbadchecksum", "citrixadc_tcp_err_badchecksum"],
+            ["tcperrbadchecksumrate", "citrixadc_tcp_err_badchecksum_rate"],
+            ["tcperranyportfail", "citrixadc_tcp_err_any_port_fail"],
+            ["tcperripportfail", "citrixadc_tcp_err_ip_port_fail"],
+            ["tcperrbadstateconn", "citrixadc_tcp_err_bad_connection_state"],
+            ["tcperrrstthreshold", "citrixadc_tcp_err_reset_threshold"],
+            ["tcpsynrate", "citrixadc_tcp_syn_rate"],
+            ["tcpsynproberate", "citrixadc_tcp_syn_probe_rate"]
         ]
     },
 
     "protocolip": {
         "counters": [
-            ["iptotrxpkts", "ip_tot_rx_packets"],
-            ["iptotrxbytes", "ip_tot_rx_bytes"],
-            ["iptottxpkts", "ip_tx_packets"],
-            ["iptottxbytes", "ip_tx_bytes"],
-            ["iptotrxmbits", "ip_rx_mbits"],
-            ["iptottxmbits", "ip_tx_mbits"],
-            ["iptotroutedpkts", "ip_tot_routed_packets"],
-            ["iptotroutedmbits", "ip_tot_routed_mbits"],
-            ["iptotfragments", "ip_tot_fragments"],
-            ["iptotsuccreassembly", "ip_tot_successful_assembly"],
-            ["iptotaddrlookup", "ip_tot_address_lookup"],
-            ["iptotaddrlookupfail", "ip_tot_address_lookup_fail"],
-            ["iptotudpfragmentsfwd", "ip_tot_udp_fragments_forwarded"],
-            ["iptottcpfragmentsfwd", "ip_tot_tcp_fragments_forwarded"],
-            ["iptotbadchecksums", "ip_tot_bad_checksums"],
-            ["iptotunsuccreassembly", "ip_tot_unsuccessful_assembly"],
-            ["iptottoobig", "ip_tot_too_big"],
-            ["iptotdupfragments", "ip_tot_udp_fragments"],
-            ["iptotoutoforderfrag", "ip_tot_out_of_order_fragments"],
-            ["iptotvipdown", "ip_tot_vipo_down"],
-            ["iptotttlexpired", "ip__tot_ttl_expired"],
-            ["iptotmaxclients", "ip_tot_max_clients"],
-            ["iptotunknownsvcs", "ip_tot_unkown_services"],
-            ["iptotinvalidheadersz", "ip_tot_invalid_header_size"],
-            ["iptotinvalidpacketsize", "ip_tot_invalid_packet_size"],
-            ["iptottruncatedpackets", "ip_tot_truncated_packets"],
-            ["noniptottruncatedpackets", "non_ip_tot_truncated_packets"],
-            ["iptotbadmacaddrs", "ip_tot_bad_mac_addresses"]
+            ["iptotrxpkts", "citrixadc_ip_tot_rx_packets"],
+            ["iptotrxbytes", "citrixadc_ip_tot_rx_bytes"],
+            ["iptottxpkts", "citrixadc_ip_tx_packets"],
+            ["iptottxbytes", "citrixadc_ip_tx_bytes"],
+            ["iptotrxmbits", "citrixadc_ip_rx_mbits"],
+            ["iptottxmbits", "citrixadc_ip_tx_mbits"],
+            ["iptotroutedpkts", "citrixadc_ip_tot_routed_packets"],
+            ["iptotroutedmbits", "citrixadc_ip_tot_routed_mbits"],
+            ["iptotfragments", "citrixadc_ip_tot_fragments"],
+            ["iptotsuccreassembly", "citrixadc_ip_tot_successful_assembly"],
+            ["iptotaddrlookup", "citrixadc_ip_tot_address_lookup"],
+            ["iptotaddrlookupfail", "citrixadc_ip_tot_address_lookup_fail"],
+            ["iptotudpfragmentsfwd", "citrixadc_ip_tot_udp_fragments_forwarded"],
+            ["iptottcpfragmentsfwd", "citrixadc_ip_tot_tcp_fragments_forwarded"],
+            ["iptotbadchecksums", "citrixadc_ip_tot_bad_checksums"],
+            ["iptotunsuccreassembly", "citrixadc_ip_tot_unsuccessful_assembly"],
+            ["iptottoobig", "citrixadc_ip_tot_too_big"],
+            ["iptotdupfragments", "citrixadc_ip_tot_udp_fragments"],
+            ["iptotoutoforderfrag", "citrixadc_ip_tot_out_of_order_fragments"],
+            ["iptotvipdown", "citrixadc_ip_tot_vipo_down"],
+            ["iptotttlexpired", "citrixadc_ip__tot_ttl_expired"],
+            ["iptotmaxclients", "citrixadc_ip_tot_max_clients"],
+            ["iptotunknownsvcs", "citrixadc_ip_tot_unkown_services"],
+            ["iptotinvalidheadersz", "citrixadc_ip_tot_invalid_header_size"],
+            ["iptotinvalidpacketsize", "citrixadc_ip_tot_invalid_packet_size"],
+            ["iptottruncatedpackets", "citrixadc_ip_tot_truncated_packets"],
+            ["noniptottruncatedpackets", "citrixadc_non_ip_tot_truncated_packets"],
+            ["iptotbadmacaddrs", "citrixadc_ip_tot_bad_mac_addresses"]
         ],
 
         "gauges": [
-            ["iprxpktsrate", "ip_rx_packets_rate"],
-            ["iprxbytesrate", "ip_rx_bytes_rate"],
-            ["iptxpktsrate", "ip_tx_packets_rate"],
-            ["iptxbytesrate", "ip_bytes_rate"],
-            ["iprxmbitsrate", "ip_rx_mbits_rate"],
-            ["iptxmbitsrate", "ip_tx_mbits_rate"],
-            ["iproutedpktsrate", "ip_routed_packets_rate"],
-            ["iproutedmbitsrate", "ip_routed_mbits_rate"]
+            ["iprxpktsrate", "citrixadc_ip_rx_packets_rate"],
+            ["iprxbytesrate", "citrixadc_ip_rx_bytes_rate"],
+            ["iptxpktsrate", "citrixadc_ip_tx_packets_rate"],
+            ["iptxbytesrate", "citrixadc_ip_bytes_rate"],
+            ["iprxmbitsrate", "citrixadc_ip_rx_mbits_rate"],
+            ["iptxmbitsrate", "citrixadc_ip_tx_mbits_rate"],
+            ["iproutedpktsrate", "citrixadc_ip_routed_packets_rate"],
+            ["iproutedmbitsrate", "citrixadc_ip_routed_mbits_rate"]
         ]
     },
 
     "services": {
         "counters": [
-            ["totalresponses", "services_tot_responses"],
-            ["totsvrttlbtransactions", "services_tot_srv_ttlb_transactions"],
-            ["totalrequests", "services_tot_requests"],
-            ["totalresponsebytes", "services_tot_response_bytes"],
-            ["totalrequestbytes", "services_tot_request_bytes"]
+            ["totalresponses", "citrixadc_services_tot_responses"],
+            ["totsvrttlbtransactions", "citrixadc_services_tot_srv_ttlb_transactions"],
+            ["totalrequests", "citrixadc_services_tot_requests"],
+            ["totalresponsebytes", "citrixadc_services_tot_response_bytes"],
+            ["totalrequestbytes", "citrixadc_services_tot_request_bytes"]
         ],
 
         "gauges": [
-            ["avgsvrttfb", "services_avg_server_ttfb"],
-            ["requestsrate", "services_requests_rate"],
-            ["cursrvrconnections", "services_current_server_connections"],
-            ["responsesrate", "services_responses_rate"],
-            ["toleratingttlbtransactions", "services_tolerating_ttlb_transactions"],
-            ["responsebytesrate", "services_response_bytes_rate"],
-            ["requestbytesrate", "services_request_bytes_rate"]
+            ["avgsvrttfb", "citrixadc_services_avg_server_ttfb"],
+            ["requestsrate", "citrixadc_services_requests_rate"],
+            ["cursrvrconnections", "citrixadc_services_current_server_connections"],
+            ["responsesrate", "citrixadc_services_responses_rate"],
+            ["toleratingttlbtransactions", "citrixadc_services_tolerating_ttlb_transactions"],
+            ["responsebytesrate", "citrixadc_services_response_bytes_rate"],
+            ["requestbytesrate", "citrixadc_services_request_bytes_rate"]
         ],
 
         "labels": [
-            ["_manual_servicegroup_name", "servicegroup_name"],
-            ["servicetype", "service_type"],
-            ["state", "service_state"],
-            ["primaryipaddress", "service_ip"]
+            ["_manual_servicegroup_name", "citrixadc_servicegroup_name"],
+            ["servicetype", "citrixadc_service_type"],
+            ["state", "citrixadc_service_state"],
+            ["primaryipaddress", "citrixadc_service_ip"]
         ]
     },
 
     "service": {
         "counters": [
-            ["throughput", "service_throughput"],
-            ["totalrequests", "service_tot_requests"],
-            ["totalresponses", "service_tot_responses"],
-            ["totalrequestbytes", "service_tot_request_bytes"],
-            ["totalresponsebytes", "service_tot_response_bytes"],
-            ["surgecount", "service_surge_count"],
-            ["svrestablishedconn", "service_server_established_connections"],
-            ["maxclients", "service_max_clients"],
-            ["vsvrservicehits", "service_vsvr_hits"]
+            ["throughput", "citrixadc_service_throughput"],
+            ["totalrequests", "citrixadc_service_tot_requests"],
+            ["totalresponses", "citrixadc_service_tot_responses"],
+            ["totalrequestbytes", "citrixadc_service_tot_request_bytes"],
+            ["totalresponsebytes", "citrixadc_service_tot_response_bytes"],
+            ["surgecount", "citrixadc_service_surge_count"],
+            ["svrestablishedconn", "citrixadc_service_server_established_connections"],
+            ["maxclients", "citrixadc_service_max_clients"],
+            ["vsvrservicehits", "citrixadc_service_vsvr_hits"]
         ],
 
         "gauges": [
-            ["throughputrate", "service_throughput_rate"],
-            ["avgsvrttfb", "service_average_server_ttfb"],
-            ["responsesrate", "service_responses_rate"],
-            ["requestbytesrate", "service_request_bytes_rate"],
-            ["responsebytesrate", "service_response_bytes_rate"],
-            ["curclntconnections", "service_current_client_connections"],
-            ["cursrvrconnections", "service_current_server_connections"],
-            ["curreusepool", "service_current_pool_use"],
-            ["curload", "service_curent_load"],
-            ["curtflags", "service_current_flags"],
-            ["vsvrservicehitsrate", "service_vsvr_hits_rate"],
-            ["activetransactions", "service_active_transactions"]
+            ["throughputrate", "citrixadc_service_throughput_rate"],
+            ["avgsvrttfb", "citrixadc_service_average_server_ttfb"],
+            ["responsesrate", "citrixadc_service_responses_rate"],
+            ["requestbytesrate", "citrixadc_service_request_bytes_rate"],
+            ["responsebytesrate", "citrixadc_service_response_bytes_rate"],
+            ["curclntconnections", "citrixadc_service_current_client_connections"],
+            ["cursrvrconnections", "citrixadc_service_current_server_connections"],
+            ["curreusepool", "citrixadc_service_current_pool_use"],
+            ["curload", "citrixadc_service_curent_load"],
+            ["curtflags", "citrixadc_service_current_flags"],
+            ["vsvrservicehitsrate", "citrixadc_service_vsvr_hits_rate"],
+            ["activetransactions", "citrixadc_service_active_transactions"]
         ],
 
         "labels": [
-            ["name", "service_name"],
-            ["servicetype", "service_type"],
-            ["state", "service_state"]
+            ["name", "citrixadc_service_name"],
+            ["servicetype", "citrixadc_service_type"],
+            ["state", "citrixadc_service_state"]
         ]
     },
 
     "Interface": {
         "counters": [
-            ["nictotmulticastpkts", "interface_tot_multicast_packets"],
-            ["rxcrcerrors", "interface_rx_crc_errors"],
-            ["totmacmoved", "interface_tot_mac_moved"],
-            ["trunkpktstransmitted", "interface_trunk_packets_transmitted"],
-            ["errdroppedrxpkts", "interface_err_dropped_rx_packets"],
-            ["linkreinits", "interface_link_reinitializations"],
-            ["errifindiscards", "interface_err_ifin_discards"],
-            ["errdroppedtxpkts", "interface_err_dropped_tx_packets"],
-            ["tottxbytes", "interface_tot_tx_bytes"],
-            ["jumbopktstransmitted", "interface_jumbo_packets_transmitted"],
-            ["totnetscalerpkts", "interface_tot_packets"],
-            ["errpkttx", "interface_err_tx_packets"],
-            ["totrxbytes", "interface_tot_rx_bytes"],
-            ["trunkpktsreceived", "interface_trunk_packets_received"],
-            ["errpktrx", "interface_err_rx_packets"],
-            ["txlacpdu", "interface_tx_lacpdu"],
-            ["jumbopktsreceived", "interface_jumbo_packets_received"],
-            ["totrxpkts", "interface_tot_rx_packets"],
-            ["tottxpkts", "interface_tot_tx_packets"]
+            ["nictotmulticastpkts", "citrixadc_interface_tot_multicast_packets"],
+            ["rxcrcerrors", "citrixadc_interface_rx_crc_errors"],
+            ["totmacmoved", "citrixadc_interface_tot_mac_moved"],
+            ["trunkpktstransmitted", "citrixadc_interface_trunk_packets_transmitted"],
+            ["errdroppedrxpkts", "citrixadc_interface_err_dropped_rx_packets"],
+            ["linkreinits", "citrixadc_interface_link_reinitializations"],
+            ["errifindiscards", "citrixadc_interface_err_ifin_discards"],
+            ["errdroppedtxpkts", "citrixadc_interface_err_dropped_tx_packets"],
+            ["tottxbytes", "citrixadc_interface_tot_tx_bytes"],
+            ["jumbopktstransmitted", "citrixadc_interface_jumbo_packets_transmitted"],
+            ["totnetscalerpkts", "citrixadc_interface_tot_packets"],
+            ["errpkttx", "citrixadc_interface_err_tx_packets"],
+            ["totrxbytes", "citrixadc_interface_tot_rx_bytes"],
+            ["trunkpktsreceived", "citrixadc_interface_trunk_packets_received"],
+            ["errpktrx", "citrixadc_interface_err_rx_packets"],
+            ["txlacpdu", "citrixadc_interface_tx_lacpdu"],
+            ["jumbopktsreceived", "citrixadc_interface_jumbo_packets_received"],
+            ["totrxpkts", "citrixadc_interface_tot_rx_packets"],
+            ["tottxpkts", "citrixadc_interface_tot_tx_packets"]
         ],
 
         "gauges": [
-            ["errpktrxrate", "interface_err_packets_rx_rate"],
-            ["rxlacpdurate", "interface_rx_lacpdu_rate"],
-            ["errdroppedtxpktsrate", "interface_err_dropped_tx_packets_rate"],
-            ["rxpktsrate", "interface_rx_packets_rate"],
-            ["errifindiscardsrate", "interface_err_ifin_discards_rate"],
-            ["nicerrifoutdiscardsrate", "interface_err_if_out_discards_rate"],
-            ["macmovedrate", "interface_mac_moved_rate"],
-            ["rxcrcerrorsrate", "interface_rx_crc_errors_rate"],
-            ["jumbopktstransmittedrate", "interface_jumbo_packets_transmitted_rate"],
-            ["jumbopktsreceivedrate", "interface_jumbo_packets_received_rate"],
-            ["rxbytesrate", "interface_rx_bytes_rate"],
-            ["errdroppedrxpktsrate", "interface_err_dropped_rx_packets_rate"],
-            ["trunkpktsreceivedrate", "interface_trunk_packets_received_rate"],
-            ["txlacpdurate", "interface_tx_lacpdu_rate"],
-            ["txbytesrate", "interface_tx_bytes_rate"],
-            ["txpktsrate", "interface_tx_packets_rate"],
-            ["netscalerpktsrate", "interface_packets_rate"],
-            ["trunkpktstransmittedrate", "interface_trunk_packets_transmitted_rate"]
+            ["errpktrxrate", "citrixadc_interface_err_packets_rx_rate"],
+            ["rxlacpdurate", "citrixadc_interface_rx_lacpdu_rate"],
+            ["errdroppedtxpktsrate", "citrixadc_interface_err_dropped_tx_packets_rate"],
+            ["rxpktsrate", "citrixadc_interface_rx_packets_rate"],
+            ["errifindiscardsrate", "citrixadc_interface_err_ifin_discards_rate"],
+            ["nicerrifoutdiscardsrate", "citrixadc_interface_err_if_out_discards_rate"],
+            ["macmovedrate", "citrixadc_interface_mac_moved_rate"],
+            ["rxcrcerrorsrate", "citrixadc_interface_rx_crc_errors_rate"],
+            ["jumbopktstransmittedrate", "citrixadc_interface_jumbo_packets_transmitted_rate"],
+            ["jumbopktsreceivedrate", "citrixadc_interface_jumbo_packets_received_rate"],
+            ["rxbytesrate", "citrixadc_interface_rx_bytes_rate"],
+            ["errdroppedrxpktsrate", "citrixadc_interface_err_dropped_rx_packets_rate"],
+            ["trunkpktsreceivedrate", "citrixadc_interface_trunk_packets_received_rate"],
+            ["txlacpdurate", "citrixadc_interface_tx_lacpdu_rate"],
+            ["txbytesrate", "citrixadc_interface_tx_bytes_rate"],
+            ["txpktsrate", "citrixadc_interface_tx_packets_rate"],
+            ["netscalerpktsrate", "citrixadc_interface_packets_rate"],
+            ["trunkpktstransmittedrate", "citrixadc_interface_trunk_packets_transmitted_rate"]
         ],
 
         "labels": [
-            ["interfacealias", "interface_alias"]
+            ["interfacealias", "citrixadc_interface_alias"]
         ]
     },
 
     "lbvserver": {
         "counters": [
-            ["totalpktssent", "lb_packets_sent_total"],
-            ["tothits", "lb_hits_total"],
-            ["totalrequestbytes", "lb_request_bytes_total"],
-            ["totalpktsrecvd", "lb_packets_received_total"],
-            ["totalresponses", "lb_responses_total"],
-            ["surgecount", "lb_surge_count"],
-            ["toleratingttlbtransactionsrate", "lb_tolerable_transactions_count"],
-            ["totcltttlbtransactions", "lb_ttlb_calculated_transactions_total"],
-            ["deferredreq", "lb_deffered_requests_total"],
-            ["totspillovers", "lb_spillover_count_total"],
-            ["invalidrequestresponse", "lb_invalid_response_request_total"],
-            ["totalrequests", "lb_requests_total"],
-            ["invalidrequestresponsedropped", "lb_invalid_response_request_dropped_total"],
-            ["frustratingttlbtransactions", "lb_frustrating_transactions_total"],
-            ["toleratingttlbtransactions", "lb_tolerable_transactions_total"],
-            ["totvserverdownbackuphits", "lb_backup_server_divert_count_total"],
-            ["totalresponsebytes", "lb_response_bytes_received_total"],
-            ["totalsvrbusyerr", "lb_busy_error_total"]
+            ["totalpktssent", "citrixadc_lb_packets_sent_total"],
+            ["tothits", "citrixadc_lb_hits_total"],
+            ["totalrequestbytes", "citrixadc_lb_request_bytes_total"],
+            ["totalpktsrecvd", "citrixadc_lb_packets_received_total"],
+            ["totalresponses", "citrixadc_lb_responses_total"],
+            ["surgecount", "citrixadc_lb_surge_count"],
+            ["toleratingttlbtransactionsrate", "citrixadc_lb_tolerable_transactions_count"],
+            ["totcltttlbtransactions", "citrixadc_lb_ttlb_calculated_transactions_total"],
+            ["deferredreq", "citrixadc_lb_deffered_requests_total"],
+            ["totspillovers", "citrixadc_lb_spillover_count_total"],
+            ["invalidrequestresponse", "citrixadc_lb_invalid_response_request_total"],
+            ["totalrequests", "citrixadc_lb_requests_total"],
+            ["invalidrequestresponsedropped", "citrixadc_lb_invalid_response_request_dropped_total"],
+            ["frustratingttlbtransactions", "citrixadc_lb_frustrating_transactions_total"],
+            ["toleratingttlbtransactions", "citrixadc_lb_tolerable_transactions_total"],
+            ["totvserverdownbackuphits", "citrixadc_lb_backup_server_divert_count_total"],
+            ["totalresponsebytes", "citrixadc_lb_response_bytes_received_total"],
+            ["totalsvrbusyerr", "citrixadc_lb_busy_error_total"]
         ],
 
         "gauges": [
-            ["requestbytesrate", "lb_request_rate_bytes"],
-            ["requestsrate", "lb_request_rate"],
-            ["pktsrecvdrate", "lb_packets_received_rate"],
-            ["frustratingttlbtransactionsrate", "lb_frustrating_transactions_rate"],
-            ["cltresponsetimeapdex", "lb_client_response_time_adex"],
-            ["sothreshold", "lb_spill_over_threshold"],
-            ["cursrvrconnections", "lb_actual_servers_current_connections"],
-            ["svcsurgecount", "lb_surge_queue_requests_count"],
-            ["labelledconn", "lb_labelled_connections_count"],
-            ["curmptcpsessions", "lb_current_mtcp_sessions_count"],
-            ["deferredreqrate", "lb_deffered_requets_rate"],
-            ["avgcltttlb", "lb_avergage_ttlb"],
-            ["cltttlbtransactionsrate", "lb_ttlb_transactions_rate"],
-            ["responsesrate", "lb_total_responses_rate"],
-            ["actsvcs", "lb_active_sessions_count"],
-            ["pktssentrate", "lb_total_packets_sent_rate"],
-            ["cursubflowconn", "lb_current_mtcp_subflows_count"],
-            ["curclntconnections", "lb_current_client_connection_count"],
-            ["pushlabel", "lb_push_label_count"],
-            ["hitsrate", "lb_hits_rate"],
-            ["establishedconn", "lb_established_connections_count"],
-            ["responsebytesrate", "lb_response_bytes_received_rate"],
-            ["inactsvcs", "lb_inactive_services_count"],
-            ["svrbusyerrrate", "lb_busy_error_rate"]
+            ["requestbytesrate", "citrixadc_lb_request_rate_bytes"],
+            ["requestsrate", "citrixadc_lb_request_rate"],
+            ["pktsrecvdrate", "citrixadc_lb_packets_received_rate"],
+            ["frustratingttlbtransactionsrate", "citrixadc_lb_frustrating_transactions_rate"],
+            ["cltresponsetimeapdex", "citrixadc_lb_client_response_time_adex"],
+            ["sothreshold", "citrixadc_lb_spill_over_threshold"],
+            ["cursrvrconnections", "citrixadc_lb_actual_servers_current_connections"],
+            ["svcsurgecount", "citrixadc_lb_surge_queue_requests_count"],
+            ["labelledconn", "citrixadc_lb_labelled_connections_count"],
+            ["curmptcpsessions", "citrixadc_lb_current_mtcp_sessions_count"],
+            ["deferredreqrate", "citrixadc_lb_deffered_requets_rate"],
+            ["avgcltttlb", "citrixadc_lb_avergage_ttlb"],
+            ["cltttlbtransactionsrate", "citrixadc_lb_ttlb_transactions_rate"],
+            ["responsesrate", "citrixadc_lb_total_responses_rate"],
+            ["actsvcs", "citrixadc_lb_active_sessions_count"],
+            ["pktssentrate", "citrixadc_lb_total_packets_sent_rate"],
+            ["cursubflowconn", "citrixadc_lb_current_mtcp_subflows_count"],
+            ["curclntconnections", "citrixadc_lb_current_client_connection_count"],
+            ["pushlabel", "citrixadc_lb_push_label_count"],
+            ["hitsrate", "citrixadc_lb_hits_rate"],
+            ["establishedconn", "citrixadc_lb_established_connections_count"],
+            ["responsebytesrate", "citrixadc_lb_response_bytes_received_rate"],
+            ["inactsvcs", "citrixadc_lb_inactive_services_count"],
+            ["svrbusyerrrate", "citrixadc_lb_busy_error_rate"]
         ],
 
         "labels": [
-            ["name", "lb_ingress_name"],
-            ["type", "lb_type"],
-            ["name", "lb_service_name"],
-            ["name", "lb_name"]
+            ["type", "citrixadc_lb_type"],
+            ["name", "citrixadc_lb_name"]
         ]
     },
 
     "lbvserver_binding": {
         "counters": [
-            ["percentup", "lb_members_up_total"]
+            ["percentup", "citrixadc_lb_members_up_total"]
         ],
 
         "labels": [
-            ["name", "lb_name"]
+            ["name", "citrixadc_lb_name"]
         ]
     },
 
     "csvserver": {
         "counters": [
-            ["totalpktssent", "cs_packets_sent_total"],
-            ["tothits", "cs_hits_total"],
-            ["totalrequestbytes", "cs_request_bytes_total"],
-            ["totalpktsrecvd", "cs_packets_received_total"],
-            ["totalresponses", "cs_responses_total"],
-            ["toleratingttlbtransactionsrate", "cs_tolerable_transactions_count"],
-            ["totcltttlbtransactions", "cs_ttlb_calculated_transactions_total"],
-            ["deferredreq", "cs_deffered_requests_total"],
-            ["totspillovers", "cs_spillover_count_total"],
-            ["invalidrequestresponse", "cs_invalid_response_request_total"],
-            ["totalrequests", "cs_requests_total"],
-            ["invalidrequestresponsedropped", "cs_invalid_response_request_dropped_total"],
-            ["frustratingttlbtransactions", "cs_frustrating_transactions_total"],
-            ["toleratingttlbtransactions", "cs_tolerable_transactions_total"],
-            ["totvserverdownbackuphits", "cs_backup_server_divert_count_total"],
-            ["totalresponsebytes", "cs_response_bytes_received_total"]
+            ["totalpktssent", "citrixadc_cs_packets_sent_total"],
+            ["tothits", "citrixadc_cs_hits_total"],
+            ["totalrequestbytes", "citrixadc_cs_request_bytes_total"],
+            ["totalpktsrecvd", "citrixadc_cs_packets_received_total"],
+            ["totalresponses", "citrixadc_cs_responses_total"],
+            ["toleratingttlbtransactionsrate", "citrixadc_cs_tolerable_transactions_count"],
+            ["totcltttlbtransactions", "citrixadc_cs_ttlb_calculated_transactions_total"],
+            ["deferredreq", "citrixadc_cs_deffered_requests_total"],
+            ["totspillovers", "citrixadc_cs_spillover_count_total"],
+            ["invalidrequestresponse", "citrixadc_cs_invalid_response_request_total"],
+            ["totalrequests", "citrixadc_cs_requests_total"],
+            ["invalidrequestresponsedropped", "citrixadc_cs_invalid_response_request_dropped_total"],
+            ["frustratingttlbtransactions", "citrixadc_cs_frustrating_transactions_total"],
+            ["toleratingttlbtransactions", "citrixadc_cs_tolerable_transactions_total"],
+            ["totvserverdownbackuphits", "citrixadc_cs_backup_server_divert_count_total"],
+            ["totalresponsebytes", "citrixadc_cs_response_bytes_received_total"]
         ],
         "gauges": [
-            ["requestbytesrate", "cs_request_rate_bytes"],
-            ["requestsrate", "cs_request_rate"],
-            ["pktsrecvdrate", "cs_packets_received_rate"],
-            ["frustratingttlbtransactionsrate", "cs_frustrating_transactions_rate"],
-            ["cltresponsetimeapdex", "cs_client_response_time_adex"],
-            ["sothreshold", "cs_spill_over_threshold"],
-            ["cursrvrconnections", "cs_actual_servers_current_connections"],
-            ["labelledconn", "cs_labelled_connections_count"],
-            ["curmptcpsessions", "cs_current_mtcp_sessions_count"],
-            ["deferredreqrate", "cs_deffered_requets_rate"],
-            ["avgcltttlb", "cs_avergage_ttlb"],
-            ["cltttlbtransactionsrate", "cs_ttlb_transactions_rate"],
-            ["responsesrate", "cs_total_responses_rate"],
-            ["pktssentrate", "cs_total_packets_sent_rate"],
-            ["cursubflowconn", "cs_current_mtcp_subflows_count"],
-            ["curclntconnections", "cs_current_client_connection_count"],
-            ["pushlabel", "cs_push_label_count"],
-            ["hitsrate", "cs_hits_rate"],
-            ["establishedconn", "cs_established_connections_count"],
-            ["responsebytesrate", "cs_response_bytes_received_rate"]
+            ["requestbytesrate", "citrixadc_cs_request_rate_bytes"],
+            ["requestsrate", "citrixadc_cs_request_rate"],
+            ["pktsrecvdrate", "citrixadc_cs_packets_received_rate"],
+            ["frustratingttlbtransactionsrate", "citrixadc_cs_frustrating_transactions_rate"],
+            ["cltresponsetimeapdex", "citrixadc_cs_client_response_time_adex"],
+            ["sothreshold", "citrixadc_cs_spill_over_threshold"],
+            ["cursrvrconnections", "citrixadc_cs_actual_servers_current_connections"],
+            ["labelledconn", "citrixadc_cs_labelled_connections_count"],
+            ["curmptcpsessions", "citrixadc_cs_current_tcp_sessions_count"],
+            ["deferredreqrate", "citrixadc_cs_deffered_requets_rate"],
+            ["avgcltttlb", "citrixadc_cs_avergage_ttlb"],
+            ["cltttlbtransactionsrate", "citrixadc_cs_ttlb_transactions_rate"],
+            ["responsesrate", "citrixadc_cs_total_responses_rate"],
+            ["pktssentrate", "citrixadc_cs_total_packets_sent_rate"],
+            ["cursubflowconn", "citrixadc_cs_current_tcp_subflows_count"],
+            ["curclntconnections", "citrixadc_cs_current_client_connection_count"],
+            ["pushlabel", "citrixadc_cs_push_label_count"],
+            ["hitsrate", "citrixadc_cs_hits_rate"],
+            ["establishedconn", "citrixadc_cs_established_connections_count"],
+            ["responsebytesrate", "citrixadc_cs_response_bytes_received_rate"]
         ],
         "labels": [
-            ["name", "cs_name"],
-            ["type", "cs_type"]
+            ["name", "citrixadc_cs_name"],
+            ["type", "citrixadc_cs_type"]
         ]
     },
 
     "nscapacity": {
         "counters": [
-            ["maxbandwidth", "max_bandwidth"],
-            ["minbandwidth", "min_bandwidth"],
-            ["actualbandwidth", "actual_bandwidth"],
-            ["bandwidth", "allocated_licensed_bandwidth"]
+            ["maxbandwidth", "citrixadc_max_bandwidth"],
+            ["minbandwidth", "citrixadc_min_bandwidth"],
+            ["actualbandwidth", "citrixadc_actual_bandwidth"],
+            ["bandwidth", "citrixadc_allocated_licensed_bandwidth"]
         ]
     },
 
     "ns": {
         "gauges": [
-            ["rxmbitsrate", "througput_rx_mbits_rate"]
+            ["rxmbitsrate", "citrixadc_througput_rx_mbits_rate"]
         ]
     },
 
     "aaa": {
         "counters": [
-            ["aaaauthsuccess", "aaa_auth_success"],
-            ["aaaauthfail", "aaa_auth_fail"],
-            ["aaaauthonlyhttpsuccess", "aaa_auth_only_http_success"],
-            ["aaaauthonlyhttpfail", "aaa_auth_only_http_fail"],
-            ["aaaauthnonhttpsuccess", "aaa_auth_non_http_success"],
-            ["aaaauthnonhttpfail", "aaa_auth_non_http_fail"],
-            ["aaatotsessions", "aaa_tot_sessions"],
-            ["aaatotsessiontimeout", "aaa_tot_sessiontimeout"],
-            ["aaatottmsessions", "aaa_tot_tm_sessions"]
+            ["aaaauthsuccess", "citrixadc_aaa_auth_success"],
+            ["aaaauthfail", "citrixadc_aaa_auth_fail"],
+            ["aaaauthonlyhttpsuccess", "citrixadc_aaa_auth_only_http_success"],
+            ["aaaauthonlyhttpfail", "citrixadc_aaa_auth_only_http_fail"],
+            ["aaaauthnonhttpsuccess", "citrixadc_aaa_auth_non_http_success"],
+            ["aaaauthnonhttpfail", "citrixadc_aaa_auth_non_http_fail"],
+            ["aaatotsessions", "citrixadc_aaa_tot_sessions"],
+            ["aaatotsessiontimeout", "citrixadc_aaa_tot_sessiontimeout"],
+            ["aaatottmsessions", "citrixadc_aaa_tot_tm_sessions"]
         ],
 
         "gauges": [
-            ["aaacuricasessions", "aaa_cur_ica_sessions"],
-            ["aaacuricaonlyconn", "aaa_cur_ica_only_conn"],
-            ["aaacuricaconn", "aaa_cur_ica_conn"],
-            ["aaacurtmsessions", "aaa_cur_tm_sessions"],
-            ["aaacursessions", "aaa_cur_sessions"],
-            ["aaacuricasessions", "aaa_cur_ica_sessions"],
-            ["aaaauthsuccessrate", "aaa_auth_success_rate"],
-            ["aaaauthfailrate", "aaa_auth_fail_rate"],
-            ["aaaauthonlyhttpsuccessrate", "aaa_auth_only_http_success_rate"],
-            ["aaaauthonlyhttpfailrate", "aaa_auth_only_http_fail_rate"],
-            ["aaaauthnonhttpsuccessrate", "aaa_auth_non_http_success_rate"],
-            ["aaaauthnonhttpfailrate", "aaa_auth_non_http_fail_rate"],
-            ["aaacursessionsrate", "aaa_cur_sessions_rate"],
-            ["aaasessionsrate", "aaa_sessions_rate"],
-            ["aaasessiontimeoutrate", "aaa_session_timeout_rate"],
-            ["aaacuricasessionsrate", "aaa_cur_ica_sessions_rate"],
-            ["aaacuricaonlyconnrate", "aaa_cur_ica_only_conn_rate"],
-            ["aaacuricaconnrate", "aaa_cur_ica_conn_rate"],
-            ["aaacurtmsessionsrate", "aaa_cur_tm_sessions_rate"],
-            ["aaatmsessionsrate", "aaa_tm_sessions_rate"]
+            ["aaacuricasessions", "citrixadc_aaa_cur_ica_sessions"],
+            ["aaacuricaonlyconn", "citrixadc_aaa_cur_ica_only_conn"],
+            ["aaacuricaconn", "citrixadc_aaa_cur_ica_conn"],
+            ["aaacurtmsessions", "citrixadc_aaa_cur_tm_sessions"],
+            ["aaacursessions", "citrixadc_aaa_cur_sessions"],
+            ["aaacuricasessions", "citrixadc_aaa_cur_ica_sessions"],
+            ["aaaauthsuccessrate", "citrixadc_aaa_auth_success_rate"],
+            ["aaaauthfailrate", "citrixadc_aaa_auth_fail_rate"],
+            ["aaaauthonlyhttpsuccessrate", "citrixadc_aaa_auth_only_http_success_rate"],
+            ["aaaauthonlyhttpfailrate", "citrixadc_aaa_auth_only_http_fail_rate"],
+            ["aaaauthnonhttpsuccessrate", "citrixadc_aaa_auth_non_http_success_rate"],
+            ["aaaauthnonhttpfailrate", "citrixadc_aaa_auth_non_http_fail_rate"],
+            ["aaacursessionsrate", "citrixadc_aaa_cur_sessions_rate"],
+            ["aaasessionsrate", "citrixadc_aaa_sessions_rate"],
+            ["aaasessiontimeoutrate", "citrixadc_aaa_session_timeout_rate"],
+            ["aaacuricasessionsrate", "citrixadc_aaa_cur_ica_sessions_rate"],
+            ["aaacuricaonlyconnrate", "citrixadc_aaa_cur_ica_only_conn_rate"],
+            ["aaacuricaconnrate", "citrixadc_aaa_cur_ica_conn_rate"],
+            ["aaacurtmsessionsrate", "citrixadc_aaa_cur_tm_sessions_rate"],
+            ["aaatmsessionsrate", "citrixadc_aaa_tm_sessions_rate"]
+        ]
+    },
+
+    "k8s_ingress_lbvs": {
+        "counters": [
+            ["totalpktssent", "citrixadc_k8s_ing_lb_packets_sent_total"],
+            ["tothits", "citrixadc_k8s_ing_lb_hits_total"],
+            ["totalrequestbytes", "citrixadc_k8s_ing_lb_request_bytes_total"],
+            ["totalpktsrecvd", "citrixadc_k8s_ing_lb_packets_received_total"],
+            ["totalresponses", "citrixadc_k8s_ing_lb_responses_total"],
+            ["surgecount", "citrixadc_k8s_ing_lb_surge_count"],
+            ["toleratingttlbtransactionsrate", "citrixadc_k8s_ing_lb_tolerable_transactions_count"],
+            ["totcltttlbtransactions", "citrixadc_k8s_ing_lb_ttlb_calculated_transactions_total"],
+            ["deferredreq", "citrixadc_k8s_ing_lb_deffered_requests_total"],
+            ["totspillovers", "citrixadc_k8s_ing_lb_spillover_count_total"],
+            ["invalidrequestresponse", "citrixadc_k8s_ing_lb_invalid_response_request_total"],
+            ["totalrequests", "citrixadc_k8s_ing_lb_requests_total"],
+            ["invalidrequestresponsedropped", "citrixadc_k8s_ing_lb_invalid_response_request_dropped_total"],
+            ["frustratingttlbtransactions", "citrixadc_k8s_ing_lb_frustrating_transactions_total"],
+            ["toleratingttlbtransactions", "citrixadc_k8s_ing_lb_tolerable_transactions_total"],
+            ["totvserverdownbackuphits", "citrixadc_k8s_ing_lb_backup_server_divert_count_total"],
+            ["totalresponsebytes", "citrixadc_k8s_ing_lb_response_bytes_received_total"],
+            ["totalsvrbusyerr", "citrixadc_k8s_ing_lb_busy_error_total"]
+        ],
+
+        "gauges": [
+            ["requestbytesrate", "citrixadc_k8s_ing_lb_request_rate_bytes"],
+            ["requestsrate", "citrixadc_k8s_ing_lb_request_rate"],
+            ["pktsrecvdrate", "citrixadc_k8s_ing_lb_packets_received_rate"],
+            ["frustratingttlbtransactionsrate", "citrixadc_k8s_ing_lb_frustrating_transactions_rate"],
+            ["cltresponsetimeapdex", "citrixadc_k8s_ing_lb_client_response_time_adex"],
+            ["sothreshold", "citrixadc_k8s_ing_lb_spill_over_threshold"],
+            ["cursrvrconnections", "citrixadc_k8s_ing_lb_actual_servers_current_connections"],
+            ["svcsurgecount", "citrixadc_k8s_ing_lb_surge_queue_requests_count"],
+            ["labelledconn", "citrixadc_k8s_ing_lb_labelled_connections_count"],
+            ["curmptcpsessions", "citrixadc_k8s_ing_lb_current_mtcp_sessions_count"],
+            ["deferredreqrate", "citrixadc_k8s_ing_lb_deffered_requets_rate"],
+            ["avgcltttlb", "citrixadc_k8s_ing_lb_avergage_ttlb"],
+            ["cltttlbtransactionsrate", "citrixadc_k8s_ing_lb_ttlb_transactions_rate"],
+            ["responsesrate", "citrixadc_k8s_ing_lb_total_responses_rate"],
+            ["actsvcs", "citrixadc_k8s_ing_lb_active_sessions_count"],
+            ["pktssentrate", "citrixadc_k8s_ing_lb_total_packets_sent_rate"],
+            ["cursubflowconn", "citrixadc_k8s_ing_lb_current_mtcp_subflows_count"],
+            ["curclntconnections", "citrixadc_k8s_ing_lb_current_client_connection_count"],
+            ["pushlabel", "citrixadc_k8s_ing_lb_push_label_count"],
+            ["hitsrate", "citrixadc_k8s_ing_lb_hits_rate"],
+            ["establishedconn", "citrixadc_k8s_ing_lb_established_connections_count"],
+            ["responsebytesrate", "citrixadc_k8s_ing_lb_response_bytes_received_rate"],
+            ["inactsvcs", "citrixadc_k8s_ing_lb_inactive_services_count"],
+            ["svrbusyerrrate", "citrixadc_k8s_ing_lb_busy_error_rate"]
+        ],
+
+        "labels": [
+            ["name", "citrixadc_k8s_ing_lb_ingress_name"],
+            ["name", "citrixadc_k8s_ing_lb_ingress_port"],
+            ["name", "citrixadc_k8s_ing_lb_service_name"],
+            ["name", "citrixadc_k8s_ing_lb_service_port"],
+            ["type", "citrixadc_k8s_ing_lb_type"]
         ]
     }
 }

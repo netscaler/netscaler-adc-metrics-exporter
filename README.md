@@ -71,15 +71,15 @@ The user can then access the exported metrics directly thorugh port 8888 on the 
 <summary>Usage as a Container</summary>
 <br>
 
-In order to use the exporter as a container, the image ```quay.io/citrix/citrix-adc-metrics-exporter:1.2``` will need to be pulled using;
+In order to use the exporter as a container, the image ```quay.io/citrix/citrix-adc-metrics-exporter:1.3``` will need to be pulled using;
 ```
-docker pull quay.io/citrix/citrix-adc-metrics-exporter:1.2
+docker pull quay.io/citrix/citrix-adc-metrics-exporter:1.3
 ```
 **NOTE:** It can also be build locally using ```docker build -f Dockerfile -t <image_name>:<tag> ./```
 
 Now, the exporter can be run using:
 ```
-docker run -dt -p <host_port>:<container_port> quay.io/citrix/citrix-adc-metrics-exporter:1.2 [flags]
+docker run -dt -p <host_port>:<container_port> quay.io/citrix/citrix-adc-metrics-exporter:1.3 [flags]
 ```
 where the flags are:
 
@@ -102,7 +102,7 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 
 To setup the exporter as given in the diagram, the following command can be used:
 ```
-docker run -dt -p 8888:8888 --name citrix-adc-exporter quay.io/citrix/citrix-adc-metrics-exporter:1.2 --target-nsip=10.0.0.1:80 --target-nsip=10.0.0.2:80 --target-nsip=172.17.0.2:80 --port 8888
+docker run -dt -p 8888:8888 --name citrix-adc-exporter quay.io/citrix/citrix-adc-metrics-exporter:1.3 --target-nsip=10.0.0.1:80 --target-nsip=10.0.0.2:80 --target-nsip=172.17.0.2:80 --port 8888
 ```
 This directs the exporter container to scrape the 10.0.0.1, 10.0.0.2, and 172.17.0.2, IPs on port 80, and the expose the stats it collects on port 8888. The user can then access the exported metrics directly thorugh port 8888 on the machine where the exporter is running, or Prometheus and Grafana can be setup to view the exported metrics though their GUI.
 
@@ -128,7 +128,7 @@ metadata:
 spec:
   containers:
     - name: exporter
-      image: quay.io/citrix/citrix-adc-metrics-exporter:1.2
+      image: quay.io/citrix/citrix-adc-metrics-exporter:1.3
       args:
         - "--target-nsip=10.0.0.1:80"
         - "--target-nsip=10.0.0.2:80"
@@ -238,73 +238,71 @@ For example, to  export ```aaa``` stats, the lines given between ```-.-.-.-``` c
 {
     "system": {
         "counters": [
-            ["numcpus", "cpu_number"]
+            ["numcpus", "citrixadc_cpu_number"]
         ],
 
         "gauges": [
-            ["cpuusagepcnt", "cpu_usage_percent"],
-            ["mgmtcpuusagepcnt", "cpu_management_cpu_usage_percent"],
-            ["pktcpuusagepcnt", "cpu_packet_cpu_usage_percent"],
-            ["rescpuusagepcnt", "cpu_res_cpu_usage_percent"]
+            ["cpuusagepcnt", "citrixadc_cpu_usage_percent"],
+            ["mgmtcpuusagepcnt", "citrixadc_cpu_management_cpu_usage_percent"],
+            ["pktcpuusagepcnt", "citrixadc_cpu_packet_cpu_usage_percent"],
+            ["rescpuusagepcnt", "citrixadc_cpu_res_cpu_usage_percent"]
         ]
     },
 
 -.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
     "aaa": {
             "counters": [
-                ["aaatotsessions", "aaa_tot_sessions"],
-                ["aaatotsessiontimeout", "aaa_tot_session_timeout"]
+                ["aaatotsessions", "citrixadc_aaa_tot_sessions"],
+                ["aaatotsessiontimeout", "citrixadc_aaa_tot_session_timeout"]
             ],
             "gauges": [
-                ["aaasessionsrate', 'aaa_sessions_rate"],
-                ["aaasessiontimeoutrate ', 'aaa_session_timeout_rate"]
+                ["aaasessionsrate', 'citrixadc_aaa_sessions_rate"],
+                ["aaasessiontimeoutrate ', 'citrixadc_aaa_session_timeout_rate"]
             ]
       },
 -.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
 
     "protocolhttp": {
         "counters": [
-            ["httptotrequests", "http_tot_requests"],
-            ["httptotresponses", "http_tot_responses"],
-            ["httptotposts", "http_tot_posts"],
-            ["httptotgets", "http_tot_gets"],
+            ["httptotrequests", "citrixadc_http_tot_requests"],
+            ["httptotresponses", "citrixadc_http_tot_responses"],
+            ["httptotposts", "citrixadc_http_tot_posts"],
+            ["httptotgets", "citrixadc_http_tot_gets"],
             ...
             ...
-            ["httptotchunkedrequests", "http_tot_chunked_requests"]
+            ["httptotchunkedrequests", "citrixadc_http_tot_chunked_requests"]
         ],
 
         "gauges": [
-            ["httprequestsrate", "http_requests_rate"],
-            ["spdystreamsrate", "http_spdy_streams_rate"],
+            ["httprequestsrate", "citrixadc_http_requests_rate"],
+            ["spdystreamsrate", "citrixadc_http_spdy_streams_rate"],
             ...
             ...
-            ["http11responsesrate", "http_11_responses_rate"]
+            ["http11responsesrate", "citrixadc_http_11_responses_rate"]
         ]
     },
 
     "lbvserver": {
         "counters": [
-            ["totalpktssent", "lb_packets_sent_total"],
-            ["tothits", "lb_hits_total"],
-            ["totalrequestbytes", "lb_request_bytes_total"],
+            ["totalpktssent", "citrixadc_lb_packets_sent_total"],
+            ["tothits", "citrixadc_lb_hits_total"],
+            ["totalrequestbytes", "citrixadc_lb_request_bytes_total"],
             ...
             ... 
-            ["totalresponsebytes", "lb_response_bytes_received_total"]
+            ["totalresponsebytes", "citrixadc_lb_response_bytes_received_total"]
         ],
 
         "gauges": [
-            ["requestbytesrate", "lb_request_rate_bytes"],
-            ["requestsrate", "lb_request_rate"],
+            ["requestbytesrate", "citrixadc_lb_request_rate_bytes"],
+            ["requestsrate", "citrixadc_lb_request_rate"],
             ...
             ...
-            ["inactsvcs", "lb_inactive_services_count"]
+            ["inactsvcs", "citrixadc_lb_inactive_services_count"]
         ],
 
         
-            ["name", "lb_ingress_name"],
-            ["type", "lb_type"],
-            ["name", "lb_service_name"],
-            ["name", "lb_name"]
+            ["name", "citrixadc_lb_name"],
+            ["type", "citrixadc_lb_type"],
         ]
     },
 
@@ -444,7 +442,7 @@ The steps bellow can be followed to setup up a Grafana container with a sample d
 <img src="images/grafana-datasource-1.png" width="200">
 <img src="images/grafana-datasource-2.png" width="300">
 
-5. Usage of Dashboard: For K8s CIC set up(providing K8sCICPrefix), with "k8s_ingress_services_stats.json",dashboard shows service requests, surque queue, RPS and Invalid Request/Response. User can select any of the configured services and then apply filter for a given ingress from the drop down menu for ingress. And with "sample_system_stats.json", dashboard shows CPU utilization, Memory Utilization and bandwidth capacity utilization where user can also set an alert. The dashboard can be expanded to include graphs of any other stats which the exporter is collecting. For more information on modifying the Grafana dashboard, please take a look at their [documentation](http://docs.grafana.org/) or demo [videos](https://www.youtube.com/watch?v=mgcJPREl3CU).
+5. Usage of Dashboard: For K8s CIC set up(providing K8sCICPrefix), with "k8s_cic_ingress_services_stats.json",dashboard shows service requests, surque queue, RPS and Invalid Request/Response. User can select any of the configured ingress  and then apply filter for a given ingress from the drop down menu for ingress.Fro non-k8s setup, one can use "sample_lb_stats.json" for all lbvservers configured on ADC for some counters. And with "sample_system_stats.json", dashboard shows CPU utilization, Memory Utilization and bandwidth capacity utilization where user can also set an alert. The dashboard can be expanded to include graphs of any other stats which the exporter is collecting. For more information on modifying the Grafana dashboard, please take a look at their [documentation](http://docs.grafana.org/) or demo [videos](https://www.youtube.com/watch?v=mgcJPREl3CU).
 
 <img src="images/k8s-service-stats-dashboard.png" width="400"> <img src="images/system-stats-dashboard.png" width="400">
 
