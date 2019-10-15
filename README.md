@@ -16,7 +16,9 @@ To monitor stats and counters of Citrix ADC instances, citrix-adc-metric-exporte
 
    You can discuss bugs/feature requests on our Slack channel. To request an invitation to participate in the Citrix ADC Cloud Native Slack channel(citrixadccloudnative.slack.com), please supply your email address using this form: https://podio.com/webforms/22979270/1633242
 
+## Release notes
 
+Click [here](https://github.com/citrix/citrix-adc-metrics-exporter/releases) for the release notes of the latest Citrix adc metrix exporter release
 
 Usage:
 ---
