@@ -13,6 +13,15 @@
         ]
     },
 
+    "systemcpu": {
+        "gauges": [
+            ["percpuuse", "citrixadc_cpu_core_usage_percent"]
+        ],
+        "labels": [
+            ["id", "citrixadc_cpu_core_id"]
+        ]
+    },
+
     "ssl": {
         "counters": [
             ["ssltottlsv11sessions", "citrixadc_ssl_tot_tlsv11_sessions"],
@@ -37,7 +46,6 @@
         "counters": [
             ["daystoexpiration", "citrixadc_ssl_cert_days_to_expire"]
         ],
-        "guages": [],
         "labels": [
             ["certkey", "citrixadc_cert_key"]
         ]
@@ -54,23 +62,46 @@
             ["spdyv2totstreams", "citrixadc_http_spdy_v2_streams"],
             ["spdyv3totstreams", "citrixadc_http_spdy_v3_streams"],
             ["httptotrxrequestbytes", "citrixadc_http_tot_rx_request_bytes"],
-            ["httptotrxresponsebytes", "citrixadc_http_tot_rx_resposnse_bytes"],
+            ["httptotrxresponsebytes", "citrixadc_http_tot_rx_response_bytes"],
+            ["httptottxrequestbytes", "citrixadc_http_tot_tx_request_bytes"],
             ["httptot10requests", "citrixadc_http_tot_10_requests"],
             ["httptot11requests", "citrixadc_http_tot_11_requests"],
-            ["httptotchunkedrequests", "citrixadc_http_tot_chunked_requests"]
+            ["httptot10responses", "citrixadc_http_tot_10_responses"],
+            ["httptot11responses", "citrixadc_http_tot_11_responses"],
+            ["httptotchunkedrequests", "citrixadc_http_tot_chunked_requests"],
+            ["httptotchunkedresponses", "citrixadc_http_tot_chunked_responses"],
+            ["httperrnoreusemultipart", "citrixadc_http_err_tot_noreuse_multipart_responses"],
+            ["httperrincompleteheaders", "citrixadc_http_err_tot_incomplete_header_packets"],
+            ["httperrincompleterequests", "citrixadc_http_err_tot_incomplete_requests"],
+            ["httperrincompleteresponses", "citrixadc_http_err_tot_incomplete_responses"],
+            ["httperrserverbusy", "citrixadc_http_err_tot_server_responses"],
+            ["httperrlargecontent", "citrixadc_http_err_tot_large_body_packets"],
+            ["httperrlargechunk", "citrixadc_http_err_tot_large_chunk_requests"],
+            ["httperrlargectlen", "citrixadc_http_err_tot_large_content_requests"]
         ],
 
         "gauges": [
             ["httprequestsrate", "citrixadc_http_requests_rate"],
             ["spdystreamsrate", "citrixadc_http_spdy_streams_rate"],
+            ["spdyv2streamsrate", "citrixadc_http_spdy_v2_streams_rate"],
+            ["spdyv3streamsrate", "citrixadc_http_spdy_v3_streams_rate"],
+            ["httprxrequestbytesrate", "citrixadc_http_rx_request_bytes_rate"],
+            ["httprxresponsebytesrate", "citrixadc_http_rx_response_bytes_rate"],
+            ["httptxrequestbytesrate", "citrixadc_http_tot_tx_request_bytes_rate"],
             ["httpresponsesrate", "citrixadc_http_responses_rate"],
             ["httppostsrate", "citrixadc_http_posts_rate"],
             ["httpgetsrate", "citrixadc_http_gets_rate"],
             ["httpothersrate", "citrixadc_http_others_rate"],
             ["httpchunkedresponsesrate", "citrixadc_http_chunked_responses_rate"],
             ["httpchunkedrequestsrate", "citrixadc_http_chunked_requests_rate"],
+            ["http10requestsrate", "citrixadc_http_10_requests_rate"],
+            ["http11requestsrate", "citrixadc_http_11_requests_rate"],
             ["http10responsesrate", "citrixadc_http_10_responses_rate"],
-            ["http11responsesrate", "citrixadc_http_11_responses_rate"]
+            ["http11responsesrate", "citrixadc_http_11_responses_rate"],
+            ["httperrnoreusemultipartrate", "citrixadc_http_err_noreuse_multipart_responses_rate"],
+            ["httperrincompleterequestsrate", "citrixadc_http_err_incomplete_requests_rate"],
+            ["httperrincompleteresponsesrate", "citrixadc_http_err_incomplete_responses_rate"],
+            ["httperrserverbusyrate", "citrixadc_http_err_server_responses_rate"]
         ]
     },
 
@@ -93,6 +124,7 @@
             ["tcpcurclientconnestablished", "citrixadc_tcp_current_client_connections_est"],
             ["tcpcurserverconnestablished", "citrixadc_tcp_current_server_connections_est"],
             ["tcprxpktsrate", "citrixadc_tcp_rx_packets_rate"],
+            ["tcprxbytesrate", "citrixadc_tcp_rx_bytes_rate"],
             ["tcptxpktsrate", "citrixadc_tcp_tx_packets_rate"],
             ["tcptxbytesrate", "citrixadc_tcp_tx_bytes_rate"],
             ["tcpclientconnopenedrate", "citrixadc_tcp_client_connection_opened_rate"],
@@ -313,7 +345,8 @@
 
         "labels": [
             ["type", "citrixadc_lb_type"],
-            ["name", "citrixadc_lb_name"]
+            ["name", "citrixadc_lb_name"],
+            ["state", "citrixadc_lb_state"]
         ]
     },
 
@@ -370,7 +403,8 @@
         ],
         "labels": [
             ["name", "citrixadc_cs_name"],
-            ["type", "citrixadc_cs_type"]
+            ["type", "citrixadc_cs_type"],
+            ["state", "citrixadc_cs_state"]
         ]
     },
 
@@ -480,7 +514,8 @@
             ["name", "citrixadc_k8s_ing_lb_ingress_port"],
             ["name", "citrixadc_k8s_ing_lb_service_name"],
             ["name", "citrixadc_k8s_ing_lb_service_port"],
-            ["type", "citrixadc_k8s_ing_lb_type"]
+            ["type", "citrixadc_k8s_ing_lb_type"],
+            ["state", "citrixadc_k8s_ing_lb_state"]
         ]
     }
 }

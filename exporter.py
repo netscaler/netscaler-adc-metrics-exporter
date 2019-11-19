@@ -15,6 +15,8 @@ from requests.auth import HTTPBasicAuth
 
 
 def parseConfig(args):
+    '''Parses the config file for specified metrics.'''
+
     try:
         with open(args.config_file, 'r') as stream:
             config = yaml.load(stream)
@@ -26,7 +28,61 @@ def parseConfig(args):
     return args
 
 
-def validate_ns_session(protocol, nsip, username, password):
+def get_metrics_file_data(metrics_file, metric):
+    '''Loads stat types from metrics file or any specific metric.'''
+
+    try:
+        f = open(metrics_file, 'r')
+        # collect selected metrics only
+        if args.metric:
+            metrics_data = json.load(f)
+            metrics_json = {d: metrics_data[d] for d in metrics_data.keys() if d in metric}
+        # collect all default metrics
+        else:
+            metrics_json = json.load(f)
+    except Exception as e:
+        logger.error('Error while loading metrics::%s', e)
+    return metrics_json
+
+
+def set_logging_args(log_file, log_level):
+    '''Sets logging file and level as per the arguments.'''
+
+    try:
+        logging.basicConfig(
+            filename=log_file,
+            format='%(asctime)s %(levelname)-8s %(message)s',
+            datefmt='%FT%T%z',
+            level={
+                'DEBUG': logging.DEBUG,
+                'INFO': logging.INFO,
+                'WARN': logging.WARN,
+                'ERROR': logging.ERROR,
+                'CRITICAL': logging.CRITICAL,
+            }[log_level.upper()])
+    except Exception as e:
+        print('Error while setting logger configs::%s', e)
+    logging.getLogger("requests").setLevel(logging.WARNING)
+    logging.getLogger("urllib3").setLevel(logging.WARNING)
+    logger = logging.getLogger('citrix_adc_metrics_exporter')
+    return logger
+
+
+def start_exporter_server(port):
+    ''' Sets an http server for prometheus client requests.'''
+
+    logger.info('Starting the exporter on port %s.' % port)
+    try:
+        start_http_server(port)
+        print("Exporter is running...")
+    except Exception as e:
+        logger.critical('Error while opening port::%s', e)
+        print(e)
+
+
+def check_nitro_access(protocol, nsip, username, password):
+    '''Validates if exporter is able access ADC.'''
+
     url = '%s://%s/nitro/v1/config/' % (protocol, nsip)
     try:
         response = requests.get(url, verify=False, auth=HTTPBasicAuth(username, password))
@@ -39,8 +95,53 @@ def validate_ns_session(protocol, nsip, username, password):
     return True
 
 
+def get_sslcertkey_stats(protocol, nsip, username, password, nitro_timeout):
+    '''Validates if exporter is able fetch stats access from ADC when it's fully configured.'''
+
+    headers = {'X-NITRO-USER': username, 'X-NITRO-PASS': password}
+    url = '%s://%s/nitro/v1/config/sslcertkey' % (protocol, nsip)
+    try:
+        r = requests.get(url, headers=headers, verify=False, timeout=nitro_timeout)
+        data = r.json()
+        if data['sslcertkey'] is None:
+            return False
+        else:
+            return True
+    except Exception as e:
+        logger.warning("Unable to access stats, ADC still not fully configured")
+        return False
+    return True
+
+
+def verify_ns_session_access(nsip, ns_protocol, ns_user, ns_password):
+    '''Validates if exporter is able to establish session with ADC and fetch stats.'''
+
+    ns_access_success = False
+    logger.info('Attempting to connect to citrix adc with ip {}'.format(nsip))
+    while not ns_access_success:
+        ns_access_success = check_nitro_access(ns_protocol, nsip, ns_user, ns_password)
+        if ns_access_success is False:
+            logger.info('Retrying to connect to citrix adc with ip {}'.format(nsip))
+        time.sleep(1)
+    logger.info('Exporter connected to citrix adc {}'.format(nsip))
+
+
+def verify_ns_stats_access(nsip, ns_protocol, ns_user, ns_password, timeout):
+    '''Validates if exporter is able to fetch stats from ADC.'''
+
+    ns_stat_access = False
+    logger.info('Verifing stat acces for citrix adc with ip {}'.format(nsip))
+    while not ns_stat_access:
+        ns_stat_access = get_sslcertkey_stats(ns_protocol, nsip, ns_user, ns_password, timeout)
+        if ns_stat_access is False:
+            logger.info('Retrying to verify stat access for citrix adc with ip {}'.format(nsip))
+        time.sleep(4)
+    logger.info('Exporter able to acces stats for citrix adc {}'.format(nsip))
+
+
 # Function to fire nitro commands and collect data from NS
 def collect_data(nsip, entity, username, password, protocol, nitro_timeout):
+    '''Fetches stats from ADC using nitro call for different entity types.'''
 
     # Login credentials
     headers = {'X-NITRO-USER': username, 'X-NITRO-PASS': password}
@@ -119,7 +220,8 @@ def collect_data(nsip, entity, username, password, protocol, nitro_timeout):
 
 
 def update_lbvs_label(k8s_cic_prefix, label_values, ns_metric_name, log_prefix_match):
-    '''Updates lbvserver lables for ingress and services for k8s_cic_ingress_service_stat dashboard'''
+    '''Updates lbvserver lables for ingress and services for k8s_cic_ingress_service_stat dashboard.'''
+
     try:
         # If lbvs name ends with expected _svc, then label values are updated with ingress/service info.
         if (str(label_values).find("_svc") != -1):
@@ -154,9 +256,10 @@ def update_lbvs_label(k8s_cic_prefix, label_values, ns_metric_name, log_prefix_m
 
 
 class CitrixAdcCollector(object):
+    ''' Add/Update labels for metrics using prometheus apis.'''
 
-    def __init__(self, nsips, metrics, username, password, protocol, nitro_timeout, k8s_cic_prefix):
-        self.nsips = nsips
+    def __init__(self, nsip, metrics, username, password, protocol, nitro_timeout, k8s_cic_prefix):
+        self.nsip = nsip
         self.metrics = metrics
         self.username = username
         self.password = password
@@ -166,15 +269,14 @@ class CitrixAdcCollector(object):
 
     # Collect metrics from Citrix ADCs
     def collect(self):
+        nsip = self.nsip
         data = {}
-        for nsip in self.nsips:
-            data[nsip] = {}
-            for entity in self.metrics.keys():
-                logger.info('Collecting metric %s for %s' % (entity, nsip))
-                try:
-                    data[nsip][entity] = collect_data(nsip, entity, self.username, self.password, self.protocol, self.nitro_timeout)
-                except Exception as e:
-                    logger.warning('Could not collect metric: ' + str(e))
+        for entity in self.metrics.keys():
+            logger.info('Collecting metric %s for %s' % (entity, nsip))
+            try:
+                data[entity] = collect_data(nsip, entity, self.username, self.password, self.protocol, self.nitro_timeout)
+            except Exception as e:
+                logger.warning('Could not collect metric: ' + str(e))
 
         # Add labels to metrics and provide to Prometheus
         log_prefix_match = True
@@ -189,76 +291,75 @@ class CitrixAdcCollector(object):
             # Provide collected metric to Prometheus as a counter
             for ns_metric_name, prom_metric_name in entity.get('counters', []):
                 c = CounterMetricFamily(prom_metric_name, ns_metric_name, labels=label_names)
-                for nsip in self.nsips:
-                    entity_stats = data[nsip].get(entity_name, [])
-                    if(type(entity_stats) is not list):
-                        entity_stats = [entity_stats]
+                entity_stats = data.get(entity_name, [])
+                if(type(entity_stats) is not list):
+                    entity_stats = [entity_stats]
 
-                    for data_item in entity_stats:
-                        if not data_item:
-                            continue
+                for data_item in entity_stats:
+                    if not data_item:
+                        continue
 
-                        if ns_metric_name not in data_item.keys():
-                            logger.warning('Counter stats for %s not enabled in adc  %s, so could not add to %s' % (ns_metric_name, nsip, entity_name))
-                            break
+                    if ns_metric_name not in data_item.keys():
+                        logger.warning('Counter stats for %s not enabled in adc  %s, so could not add to %s' % (ns_metric_name, nsip, entity_name))
+                        break
 
-                        if('labels' in entity.keys()):
-                            label_values = [data_item[key] for key in [v[0] for v in entity['labels']]]
+                    if('labels' in entity.keys()):
+                        label_values = [data_item[key] for key in [v[0] for v in entity['labels']]]
 
-                            # populate and update k8s_ingress_lbvs metrics if in k8s-CIC enviroment
-                            if entity_name == "k8s_ingress_lbvs":
-                                if os.environ.get('KUBERNETES_SERVICE_HOST') is not None:
-                                    prefix_match = update_lbvs_label(self.k8s_cic_prefix, label_values, ns_metric_name, log_prefix_match)
-                                    if not prefix_match:
-                                        log_prefix_match = False
-                                        continue
-                                else:
+                        # populate and update k8s_ingress_lbvs metrics if in k8s-CIC enviroment
+                        if entity_name == "k8s_ingress_lbvs":
+                            if os.environ.get('KUBERNETES_SERVICE_HOST') is not None:
+                                prefix_match = update_lbvs_label(self.k8s_cic_prefix, label_values, ns_metric_name, log_prefix_match)
+                                if not prefix_match:
+                                    log_prefix_match = False
                                     continue
-                            label_values.append(nsip)
-                        else:
-                            label_values = [nsip]
-                        try:
-                            c.add_metric(label_values, float(data_item[ns_metric_name]))
-                        except Exception as e:
-                            logger.error('Caught exception while adding counter %s to %s: %s' % (ns_metric_name, entity_name, str(e)))
+                            else:
+                                continue
+                        label_values.append(nsip)
+                    else:
+                        label_values = [nsip]
+                    try:
+                        c.add_metric(label_values, float(data_item[ns_metric_name]))
+                    except Exception as e:
+                        logger.error('Caught exception while adding counter %s to %s: %s' % (ns_metric_name, entity_name, str(e)))
 
                 yield c
 
             # Provide collected metric to Prometheus as a gauge
             for ns_metric_name, prom_metric_name in entity.get('gauges', []):
                 g = GaugeMetricFamily(prom_metric_name, ns_metric_name, labels=label_names)
-                for nsip in self.nsips:
-                    entity_stats = data[nsip].get(entity_name, [])
-                    if(type(entity_stats) is not list):
-                        entity_stats = [entity_stats]
+                entity_stats = data.get(entity_name, [])
+                if(type(entity_stats) is not list):
+                    entity_stats = [entity_stats]
 
-                    for data_item in entity_stats:
-                        if not data_item:
-                            continue
-                        if ns_metric_name not in data_item.keys():
-                            logger.warning('Gauge stats for %s not enabled in adc  %s, so could not add to %s' % (ns_metric_name, nsip, entity_name))
-                            break
+                for data_item in entity_stats:
+                    if not data_item:
+                        continue
 
-                        if('labels' in entity.keys()):
-                            label_values = [data_item[key] for key in [v[0] for v in entity['labels']]]
+                    if ns_metric_name not in data_item.keys():
+                        logger.warning('Gauge stats for %s not enabled in adc  %s, so could not add to %s' % (ns_metric_name, nsip, entity_name))
+                        break
 
-                            # populate and update k8s_ingress_lbvs metrics if in k8s-CIC enviroment
-                            if entity_name == "k8s_ingress_lbvs":
-                                if os.environ.get('KUBERNETES_SERVICE_HOST') is not None:
-                                    prefix_match = update_lbvs_label(self.k8s_cic_prefix, label_values, ns_metric_name, log_prefix_match)
-                                    if not prefix_match:
-                                        log_prefix_match = False
-                                        continue
-                                else:
+                    if('labels' in entity.keys()):
+                        label_values = [data_item[key] for key in [v[0] for v in entity['labels']]]
+
+                        # populate and update k8s_ingress_lbvs metrics if in k8s-CIC enviroment
+                        if entity_name == "k8s_ingress_lbvs":
+                            if os.environ.get('KUBERNETES_SERVICE_HOST') is not None:
+                                prefix_match = update_lbvs_label(self.k8s_cic_prefix, label_values, ns_metric_name, log_prefix_match)
+                                if not prefix_match:
+                                    log_prefix_match = False
                                     continue
+                            else:
+                                continue
 
-                            label_values.append(nsip)
-                        else:
-                            label_values = [nsip]
-                        try:
-                            g.add_metric(label_values, float(data_item[ns_metric_name]))
-                        except Exception as e:
-                            logger.error('Caught exception while adding counter %s to %s: %s' % (ns_metric_name, entity_name, str(e)))
+                        label_values.append(nsip)
+                    else:
+                        label_values = [nsip]
+                    try:
+                        g.add_metric(label_values, float(data_item[ns_metric_name]))
+                    except Exception as e:
+                        logger.error('Caught exception while adding counter %s to %s: %s' % (ns_metric_name, entity_name, str(e)))
 
                 yield g
 
@@ -266,7 +367,7 @@ class CitrixAdcCollector(object):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--target-nsip', required=True, action='append', help='The IP of the Citrix ADC to gather metrics from. Required')
+    parser.add_argument('--target-nsip', required=True, type=str, help='The IP of the Citrix ADC to gather metrics from. Required')
     parser.add_argument('--start-delay', default=10, type=float, help='Start the exporter running after a delay to allow other containers to start. Default: 10s')
     parser.add_argument('--port', required=True, type=int, help='The port for the exporter to listen on. Required')
     parser.add_argument('--metric', required=False, action='append', type=str, help='Collect only the metrics specified here, may be used multiple times.')
@@ -279,43 +380,20 @@ if __name__ == '__main__':
     parser.add_argument('--log-level', required=False, default='DEBUG', type=str, choices=['DEBUG', 'INFO', 'WARN', 'ERROR', 'CRITICAL', 'debug', 'info', 'warn', 'error', 'critical'])
     parser.add_argument('--config-file', required=False, type=str)
     parser.add_argument('--k8sCICprefix', required=False, default='k8s', type=str, help='Prefix for CIC configured k8s entities')
+
+    # parse arguments provided
     args = parser.parse_args()
 
+    # set logging credentials
+    logger = set_logging_args(args.log_file, args.log_level)
 
-
-    try:
-        logging.basicConfig(
-            filename=args.log_file,
-            format='%(asctime)s %(levelname)-8s %(message)s',
-            datefmt='%FT%T%z',
-            level={
-                'DEBUG': logging.DEBUG,
-                'INFO': logging.INFO,
-                'WARN': logging.WARN,
-                'ERROR': logging.ERROR,
-                'CRITICAL': logging.CRITICAL,
-            }[args.log_level.upper()])
-    except Exception as e:
-        print('Error while setting logger configs::%s', e)
-    logging.getLogger("requests").setLevel(logging.WARNING)
-    logging.getLogger("urllib3").setLevel(logging.WARNING)
-    logger = logging.getLogger('citrix_adc_metrics_exporter')
-
+    # parse config file if provided as an argument
     if args.config_file:
         args = parseConfig(args)
 
     # Wait for other containers to start.
     logger.info('Sleeping for %s seconds.' % args.start_delay)
     time.sleep(args.start_delay)
-
-    # Start the server to expose the metrics.
-    logger.info('Starting the exporter on port %s.' % args.port)
-    try:
-        start_http_server(args.port)
-        print("Exporter is running...")
-    except Exception as e:
-        logger.critical('Error while opening port::%s', e)
-        print(e)
 
     # Get username and password of CItrix ADCs
     ns_user = os.environ.get("NS_USER")
@@ -328,19 +406,9 @@ if __name__ == '__main__':
         logger.warning('Using NS_PASSWORD Environment variable is insecure. Consider using config.yaml file and --config-file option to define password')
 
     # Load the metrics file specifying stats to be collected
-    try:
-        f = open(args.metrics_file, 'r')
-        # collect selected metrics only
-        if args.metric:
-            metrics_data = json.load(f)
-            metrics_json = {d: metrics_data[d] for d in metrics_data.keys() if d in args.metric}
-        # collect all default metrics
-        else:
-            metrics_json = json.load(f)
-    except Exception as e:
-        logger.error('Error while loading metrics::%s', e)
+    metrics_json = get_metrics_file_data(args.metrics_file, args.metric)
 
-    # validating ADC access
+    # set ADC proticol access type
     secure = args.secure.lower()
     if secure == 'yes':
         ns_protocol = 'https'
@@ -348,12 +416,15 @@ if __name__ == '__main__':
         ns_protocol = 'http'
 
     requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-    for nsip in args.target_nsip:
-        res = validate_ns_session(ns_protocol, nsip, ns_user, ns_password)
-        if res is False:
-            logger.error('Citrix adc access test failed for ip {}'.format(nsip))
-        else:
-            logger.info('Exporter connected to adc {}'.format(nsip))
+
+    # Verify ADC session access
+    verify_ns_session_access(args.target_nsip, ns_protocol, ns_user, ns_password)
+
+    # Verify ADC stats access
+    verify_ns_stats_access(args.target_nsip, ns_protocol, ns_user, ns_password, args.timeout)
+
+    # Start the server to expose the metrics.
+    start_exporter_server(args.port)
 
     if not args.k8sCICprefix.isalnum():
         logger.error('Invalid k8sCICprefix : non-alphanumeric not accepted')
@@ -362,10 +433,10 @@ if __name__ == '__main__':
     logger.info('Registering collector for %s' % args.target_nsip)
 
     try:
-        REGISTRY.register(CitrixAdcCollector(nsips=args.target_nsip, metrics=metrics_json, username=ns_user,
+        REGISTRY.register(CitrixAdcCollector(nsip=args.target_nsip, metrics=metrics_json, username=ns_user,
                                              password=ns_password, protocol=ns_protocol, nitro_timeout=args.timeout, k8s_cic_prefix=args.k8sCICprefix))
     except Exception as e:
-        logger.error('Exiting: Invalid arguments! could not register collector for {}::{}'.format(args.target_nsip, e))
+        logger.error('Invalid arguments! could not register collector for {}::{}'.format(args.target_nsip, e))
 
     # Forever
     while True:
