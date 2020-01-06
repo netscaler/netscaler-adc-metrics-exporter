@@ -29,7 +29,7 @@
             ["ssltotsessions", "citrixadc_ssl_tot_sessions"],
             ["ssltotsslv2handshakes", "citrixadc_ssl_tot_v2_handshakes"],
             ["ssltotenc", "citrixadc_ssl_tot_encode"],
-            ["sslcryptoutilizationstat", "citrixadc_ssl_crypto_untilization_stat"], 
+            ["sslcryptoutilizationstat", "citrixadc_ssl_crypto_utilization_stat"], 
             ["ssltotnewsessions", "citrixadc_ssl_tot_new_sessions"]
         ],
 
