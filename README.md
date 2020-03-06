@@ -28,10 +28,11 @@ The exporter can be run as a standalone python script, built into a container or
 <summary>Usage as a Python Script</summary>
 <br>
 
-To use the exporter as a python script, the ```prometheus_client``` and ```requests``` package needs to be installed. This can be done using 
+To use the exporter as a python script, some prerequisite package needs to be installed. This can be done using 
 ```
 pip install prometheus_client
 pip install requests
+pip install pyyaml
 ```
 Now, create a folder ```/exporter``` and copy the ```metrics.json``` file to the folder. 
 Finally, the exporter can be run as a python script using;
