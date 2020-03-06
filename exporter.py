@@ -19,7 +19,7 @@ def parseConfig(args):
 
     try:
         with open(args.config_file, 'r') as stream:
-            config = yaml.load(stream)
+            config = yaml.load(stream, Loader=yaml.FullLoader)
             for key in config.keys():
                 args.__setattr__(key.replace('-', '_'), config[key])
     except Exception as e:
