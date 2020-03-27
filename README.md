@@ -135,6 +135,8 @@ spec:
       args:
         - "--target-nsip=10.0.0.1:80"
         - "--port=8888"
+      securityContext:
+        readOnlyRootFilesystem: true
       imagePullPolicy: Always
 ---
 apiVersion: v1
