@@ -71,15 +71,15 @@ The user can then access the exported metrics directly thorugh port 8888 on the 
 <summary>Usage as a Container</summary>
 <br>
 
-In order to use the exporter as a container, the image ```quay.io/citrix/citrix-adc-metrics-exporter:1.3``` will need to be pulled using;
+In order to use the exporter as a container, the image ```quay.io/citrix/citrix-adc-metrics-exporter:1.4.0``` will need to be pulled using;
 ```
-docker pull quay.io/citrix/citrix-adc-metrics-exporter:1.3
+docker pull quay.io/citrix/citrix-adc-metrics-exporter:1.4.0
 ```
 **NOTE:** It can also be build locally using ```docker build -f Dockerfile -t <image_name>:<tag> ./```
 
 Now, the exporter can be run using:
 ```
-docker run -dt -p <host_port>:<container_port> --mount type=bind,source=<host-path-for-config-file>,target=/exporter/config.yaml quay.io/citrix/citrix-adc-metrics-exporter:1.3 [flags] --config-file=/exporter/config.yaml
+docker run -dt -p <host_port>:<container_port> --mount type=bind,source=<host-path-for-config-file>,target=/exporter/config.yaml quay.io/citrix/citrix-adc-metrics-exporter:1.4.0 [flags] --config-file=/exporter/config.yaml
 ```
 where the flags are:
 
@@ -100,7 +100,7 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 
 To setup the exporter as given in the diagram, the following command can be used:
 ```
-docker run -dt -p 8888:8888 --mount type=bind,source=/path/to/config.yaml,target=/exporter/config.yaml --name citrix-adc-exporter quay.io/citrix/citrix-adc-metrics-exporter:1.3 --target-nsip=10.0.0.1 --port=8888 --config-file=/exporter/config.yaml
+docker run -dt -p 8888:8888 --mount type=bind,source=/path/to/config.yaml,target=/exporter/config.yaml --name citrix-adc-exporter quay.io/citrix/citrix-adc-metrics-exporter:1.4.0 --target-nsip=10.0.0.1 --port=8888 --config-file=/exporter/config.yaml
 ```
 This directs the exporter container to scrape the 10.0.0.1 IP, and the expose the stats it collects on port 8888. File config.yaml should contain username and password of the ADC to which exporter connects to. For reference, refer config.yaml.example which specifies the format for providing the login credentials. Config.yaml file then needs to be mounted to the container at target specified. Login credentials can also be provided using environment variables using NS_USER, NS_PASSWORD.Though config file input is the preferred method for security concerns.The user can then access the exported metrics directly thorugh port 8888 on the machine where the exporter is running, or Prometheus and Grafana can be setup to view the exported metrics though their GUI.
 
@@ -131,7 +131,7 @@ metadata:
 spec:
   containers:
     - name: exporter
-      image: quay.io/citrix/citrix-adc-metrics-exporter:1.3
+      image: quay.io/citrix/citrix-adc-metrics-exporter:1.4.0
       args:
         - "--target-nsip=10.0.0.1"
         - "--port=8888"
