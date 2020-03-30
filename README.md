@@ -8,7 +8,7 @@ This is a simple server that scrapes [Citrix ADC](https://www.citrix.com/product
 
 ![exporter_diagram](images/Citrix-adc-exporter-workflow.png)
  
-To monitor stats and counters of Citrix ADC instance, citrix-adc-metric-exporter can be run as a container or script. It collects Citrix ADC stats such as total hits to a vserver, http request rate, ssl encryption-decryption rate, etc from the Citrix ADC instance and holds them until the Prometheus server pulls the stats and stores them with a timestamp. Grafana can then be pointed to the Prometheus server to fetch the stats, plot them, set alarms, create heat maps, generate tables, etc as needed to analyse the Citrix ADC stats. 
+To monitor stats and counters of Citrix ADC instances, citrix-adc-metric-exporter can be run as a container or script. It collects Citrix ADC stats such as total hits to a vserver, http request rate, ssl encryption-decryption rate, etc from the Citrix ADC instances and holds them until the Prometheus server pulls the stats and stores them with a timestamp. Grafana can then be pointed to the Prometheus server to fetch the stats, plot them, set alarms, create heat maps, generate tables, etc as needed to analyse the Citrix ADC stats. 
 
    Details about setting up the exporter to work in an environment as given in the figure is provided in the following sections. A note on which Citrix ADC entities/metrics the exporter scrapes by default and how to modify it is also explained.
 
@@ -28,11 +28,10 @@ The exporter can be run as a standalone python script, built into a container or
 <summary>Usage as a Python Script</summary>
 <br>
 
-To use the exporter as a python script, some prerequisite package needs to be installed. This can be done using 
+To use the exporter as a python script, the ```prometheus_client``` and ```requests``` package needs to be installed. This can be done using 
 ```
 pip install prometheus_client
 pip install requests
-pip install pyyaml
 ```
 Now, create a folder ```/exporter``` and copy the ```metrics.json``` file to the folder. 
 Finally, the exporter can be run as a python script using;
@@ -46,22 +45,20 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 --target-nsip    | Provide the &lt;IP:port&gt; of the Citrix ADC to be monitored
 --port	         | Specify on which port metrics collected by the exporter should be exposed. Agents like Prometheus will need to scrape this port of the container to collected metrics
 --metric         | Provide a specific metric to load from metrics.json file (eg: 'lbvserver', 'protocolhttp', etc). If not provided, all metric entities from metrics.json will be loaded
---secure         | Option 'yes' can be provided to collect metrics from Citrix ADC over TLS. Default: 'no'.
---username       | Provide the username of the Citrix ADC to be monitored. Default: 'nsroot'
---password       | Provide the password of the Citrix ADC to be monitored. Default: 'nsroot'
+--secure         | Option 'no' can be provided to collect metrics from Citrix ADC. Default: 'yes'.
 --start-delay    | Specify time for which exporter should sleep before starting metric collection. Default: 10s
 --timeout        | Specify timeout period for exporter to obtain response from target Citrix ADCs. Default: 15s
 --metrics-file   | The location of metrics.json file. Default: /exporter/metrics.json
 --log-file       | The location of exporter.log file. Default: /exporter/exporter.log
 --log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: ERROR
---config-file    | File with non-required configs such as ```--username```, ```--password```, ```--start-delay```, etc. Helps supply username and password through file rather than CLI.
+--config-file    | File with configs such as ```--username```, ```--password```, ```--start-delay```, etc. Helps supply username and password through file rather than CLI.
 --k8sCICprefix   | Provide the prefix if exporter is used in kubernetes enviroment with Citrix ingress controller, "k8s_ingress_service_stats" dashboard can be used only if correct CICprefix is provided and CIC version is 1.2.0 and above. Default prefix is "K8s"  
 
 The exporter can be setup as given in the diagram using;
 ```
-nohup python exporter.py --target-nsip=10.0.0.1:80 --port 8888 &
+nohup python exporter.py --target-nsip=10.0.0.1 --port 8888 --config-file=config.yaml &
 ```
-This directs the exporter container to scrape 10.0.0.1 IP on port 80, and the expose the stats it collects on port 8888. 
+This directs the exporter container to scrape 10.0.0.1 IP, and the expose the stats it collects on port 8888. File config.yaml should contain username and password of the ADC to which exporter connects to. For reference, refer config.yaml.example which specifies the format for providing the login credentials. Login credentials can also be provided using environment variables using NS_USER, NS_PASSWORD.Though config file input is the preferred method for security concerns.
 The user can then access the exported metrics directly thorugh port 8888 on the machine where the exporter is running, or Prometheus and Grafana can be setup to view the exported metrics though their GUI.
 
 **NOTE:**  If TLS is being used by providing the --secure='yes' option, then it is recommended to create a new user on the Citrix ADC having only read permission. Documentation on creating new users with required permission can be found [here](ADD_LINK).
@@ -74,15 +71,15 @@ The user can then access the exported metrics directly thorugh port 8888 on the 
 <summary>Usage as a Container</summary>
 <br>
 
-In order to use the exporter as a container, the image ```quay.io/citrix/citrix-adc-metrics-exporter:1.4.0``` will need to be pulled using;
+In order to use the exporter as a container, the image ```quay.io/citrix/citrix-adc-metrics-exporter:1.3``` will need to be pulled using;
 ```
-docker pull quay.io/citrix/citrix-adc-metrics-exporter:1.4.0
+docker pull quay.io/citrix/citrix-adc-metrics-exporter:1.3
 ```
 **NOTE:** It can also be build locally using ```docker build -f Dockerfile -t <image_name>:<tag> ./```
 
 Now, the exporter can be run using:
 ```
-docker run -dt -p <host_port>:<container_port> quay.io/citrix/citrix-adc-metrics-exporter:1.4.0 [flags]
+docker run -dt -p <host_port>:<container_port> --mount type=bind,source=<host-path-for-config-file>,target=/exporter/config.yaml quay.io/citrix/citrix-adc-metrics-exporter:1.3 [flags] --config-file=/exporter/config.yaml
 ```
 where the flags are:
 
@@ -91,23 +88,21 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 --target-nsip    | Provide the &lt;IP:port&gt; of the Citrix ADC to be monitored
 --port	         | Specify on which port metrics collected by the exporter should be exposed. Agents like Prometheus will need to scrape this port of the container to collected metrics
 --metric         | Provide a specific metric to load from metrics.json file (eg: 'lbvserver', 'protocolhttp', etc). If not provided, all metric entities from metrics.json will be loaded
---secure         | Option 'yes' can be provided to collect metrics from Citrix ADC over TLS. Default: 'no'.
---username       | Provide the username of the Citrix ADC to be monitored. Default: 'nsroot'
---password       | Provide the password of the Citrix ADC to be monitored. Default: 'nsroot'
+--secure         | Option 'no' can be provided to collect metrics from Citrix ADC. Default: 'yes'.
 --start-delay    | Specify time for which exporter should sleep before starting metric collection. Default: 10s
 --timeout        | Specify timeout period for exporter to obtain response from target Citrix ADC. Default: 15s
 --metrics-file   | The location of metrics.json file. Default: /exporter/metrics.json
 --log-file       | The location of exporter.log file. Default: /exporter/exporter.log
 --log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: ERROR
---config-file    | File with non-required configs such as ```--username```, ```--password```, ```--start-delay```, etc. Helps supply username and password through file rather than CLI.
+--config-file    | File with configs such as ```--username```, ```--password```, ```--start-delay```, etc. Helps supply username and password through file rather than CLI for secure deployment.
 --k8sCICprefix   | Provide the prefix if exporter is used in kubernetes enviroment with Citrix ingress controller, "k8s_ingress_service_stats" dashboard can be used only if correct CICprefix is provided and CIC version is 1.2.0 and above. Default prefix is "K8s"  
 
 
 To setup the exporter as given in the diagram, the following command can be used:
 ```
-docker run -dt -p 8888:8888 --name citrix-adc-exporter quay.io/citrix/citrix-adc-metrics-exporter:1.4.0 --target-nsip=10.0.0.1:80 --port 8888
+docker run -dt -p 8888:8888 --mount type=bind,source=/path/to/config.yaml,target=/exporter/config.yaml --name citrix-adc-exporter quay.io/citrix/citrix-adc-metrics-exporter:1.3 --target-nsip=10.0.0.1 --port=8888 --config-file=/exporter/config.yaml
 ```
-This directs the exporter container to scrape the 10.0.0.1 IP on port 80, and the expose the stats it collects on port 8888. The user can then access the exported metrics directly thorugh port 8888 on the machine where the exporter is running, or Prometheus and Grafana can be setup to view the exported metrics though their GUI.
+This directs the exporter container to scrape the 10.0.0.1 IP, and the expose the stats it collects on port 8888. File config.yaml should contain username and password of the ADC to which exporter connects to. For reference, refer config.yaml.example which specifies the format for providing the login credentials. Config.yaml file then needs to be mounted to the container at target specified. Login credentials can also be provided using environment variables using NS_USER, NS_PASSWORD.Though config file input is the preferred method for security concerns.The user can then access the exported metrics directly thorugh port 8888 on the machine where the exporter is running, or Prometheus and Grafana can be setup to view the exported metrics though their GUI.
 
 **NOTE:** In the command above, the value of the ```--port``` flag should be the same as the ```container_port```.
 
@@ -120,6 +115,11 @@ This directs the exporter container to scrape the 10.0.0.1 IP on port 80, and th
 <summary>Run the exporter as a Pod in Kubernetes</summary>
 <br>
 
+To provide the login credentials to access ADC, create a secret and mount the volume at mountpath "/mnt/nslogin".  
+```
+kubectl create secret generic nslogin --from-literal=username=<citrix-adc-user> --from-literal=password=<citrix-adc-password> -n <namespace>
+```
+
 The following yaml file can be used to deploy the exporter as a pod in Kuberenetes and expose it as a service. Here, the necessary flags are provided as a list in the ```args:``` section of the yaml file.
 ```
 apiVersion: v1
@@ -131,13 +131,21 @@ metadata:
 spec:
   containers:
     - name: exporter
-      image: quay.io/citrix/citrix-adc-metrics-exporter:1.4.0
+      image: quay.io/citrix/citrix-adc-metrics-exporter:1.3
       args:
-        - "--target-nsip=10.0.0.1:80"
+        - "--target-nsip=10.0.0.1"
         - "--port=8888"
+      imagePullPolicy: Always
+      volumeMounts:
+      - name: nslogin
+        mountPath: "/mnt/nslogin"
+        readOnly: true
       securityContext:
         readOnlyRootFilesystem: true
-      imagePullPolicy: Always
+  volumes:
+  - name: nslogin
+    secret:
+      secretName: nslogin
 ---
 apiVersion: v1
 kind: Service
@@ -161,17 +169,16 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 --target-nsip    | Provide the &lt;IP:port&gt; of the Citrix ADC to be monitored
 --port	         | Specify on which port metrics collected by the exporter should be exposed. Agents like Prometheus will need to scrape this port of the container to collected metrics
 --metric         | Provide a specific metric to load from metrics.json file (eg: 'lbvserver', 'protocolhttp', etc). If not provided, all metric entities from metrics.json will be loaded
---secure         | Option 'yes' can be provided to collect metrics from Citrix ADC over TLS. Default: 'no'.
---username       | Provide the username of the Citrix ADC to be monitored. Default: 'nsroot'
---password       | Provide the password of the Citrix ADC to be monitored. Default: 'nsroot'
+--secure         | Option 'no' can be provided to collect metrics from Citrix ADC. Default: 'yes'.
 --start-delay    | Specify time for which exporter should sleep before starting metric collection. Default: 10s
 --timeout        | Specify timeout period for exporter to obtain response from target Citrix ADC. Default: 15s
 --metrics-file   | The location of metrics.json file. Default: /exporter/metrics.json
 --log-file       | The location of exporter.log file. Default: /exporter/exporter.log
 --log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: ERROR
---config-file    | File with non-required configs such as ```--username```, ```--password```, ```--start-delay```, etc. Helps supply username and password through file rather than CLI.
+--config-file    | File with configs such as ```--username```, ```--password```, ```--start-delay```, etc. Helps supply username and password through file rather than CLI.
 --k8sCICprefix   | Provide the prefix if exporter is used in kubernetes enviroment with Citrix ingress controller, "k8s_ingress_service_stats" dashboard can be used only if correct CICprefix is provided and CIC version is 1.2.0 and above. Default prefix is "K8s"  
 
+Login Credentials can also be provided using environment variables NS_USER, NS_PASSWORD. Though, secret volume is the preffered method for security.
 
 **NOTE:**  If TLS is being used by providing the --secure='yes' option, then it is recommended to create a new user on the Citrix ADC having only read permission. Documentation on creating new users with required permission can be found [here](ADD_LINK).
 
@@ -340,47 +347,47 @@ where ```hostIP``` is the IP of the host on which the python script or container
 ```
 # HELP http_tot_rx_packets tcptotrxpkts
 # TYPE http_tot_rx_packets counter
-http_tot_rx_packets{nsip="10.0.0.1:80"} 2094931640.0
+http_tot_rx_packets{nsip="10.0.0.1"} 2094931640.0
 # HELP tcp_tot_rx_bytes tcptotrxbytes
 # TYPE tcp_tot_rx_bytes counter
-tcp_tot_rx_bytes{nsip="10.0.0.1:80"} 735872803514.0
+tcp_tot_rx_bytes{nsip="10.0.0.1"} 735872803514.0
 # HELP tcp_tx_bytes tcptottxbytes
 # TYPE tcp_tx_bytes counter
-tcp_tx_bytes{nsip="10.0.0.1:80"} 249210838820.0
+tcp_tx_bytes{nsip="10.0.0.1"} 249210838820.0
 # HELP tcp_tot_tx_packets tcptottxpkts
 # TYPE tcp_tot_tx_packets counter
-tcp_tot_tx_packets{nsip="10.0.0.1:80"} 2082562915.0
+tcp_tot_tx_packets{nsip="10.0.0.1"} 2082562915.0
 # HELP tcp_tot_client_connections_opened tcptotclientconnopened
 # TYPE tcp_tot_client_connections_opened counter
-tcp_tot_client_connections_opened{nsip="10.0.0.1:80"} 35606929.0
-ip_tot_bad_mac_addresses{nsip="10.0.0.1:80"} 0.0
+tcp_tot_client_connections_opened{nsip="10.0.0.1"} 35606929.0
+ip_tot_bad_mac_addresses{nsip="10.0.0.1"} 0.0
 # HELP ip_rx_packers_rate iprxpktsrate
 # TYPE ip_rx_packers_rate gauge
-ip_rx_packers_rate{nsip="10.0.0.1:80"} 17703.0
+ip_rx_packers_rate{nsip="10.0.0.1"} 17703.0
 # HELP ip_rx_bytes_rate iprxbytesrate
 # TYPE ip_rx_bytes_rate gauge
-ip_rx_bytes_rate{nsip="10.0.0.1:80"} 5797562.0
+ip_rx_bytes_rate{nsip="10.0.0.1"} 5797562.0
 # HELP ip_tx_packets_rate iptxpktsrate
 # TYPE ip_tx_packets_rate gauge
-ip_tx_packets_rate{nsip="10.0.0.1:80"} 18119.0
+ip_tx_packets_rate{nsip="10.0.0.1"} 18119.0
 # HELP ip_bytes_rate iptxbytesrate
 # TYPE ip_bytes_rate gauge
-ip_bytes_rate{nsip="10.0.0.1:80"} 1038524.0
+ip_bytes_rate{nsip="10.0.0.1"} 1038524.0
 # HELP services_tot_requests totalrequests
 # TYPE services_tot_requests counter
-services_tot_requests{nsip="10.0.0.2:80",service_ip="20.0.0.56",servicegroup_name="svcgrp"} 10.0
-services_tot_requests{nsip="10.0.0.2:80",service_ip="20.0.0.57",servicegroup_name="svcgrp"} 11.0
-services_tot_requests{nsip="10.0.0.2:80",service_ip="20.0.0.60",servicegroup_name="svcgrp2"} 4.0
+services_tot_requests{nsip="10.0.0.2",service_ip="20.0.0.56",servicegroup_name="svcgrp"} 10.0
+services_tot_requests{nsip="10.0.0.2",service_ip="20.0.0.57",servicegroup_name="svcgrp"} 11.0
+services_tot_requests{nsip="10.0.0.2",service_ip="20.0.0.60",servicegroup_name="svcgrp2"} 4.0
 # HELP services_tot_response_bytes totalresponsebytes
 # TYPE services_tot_response_bytes counter
-services_tot_response_bytes{nsip="10.0.0.2:80",service_ip="20.0.0.56",servicegroup_name="svcgrp"} 2320.0
-services_tot_response_bytes{nsip="10.0.0.2:80",service_ip="20.0.0.57",servicegroup_name="svcgrp"} 2552.0
-services_tot_response_bytes{nsip="10.0.0.2:80",service_ip="20.0.0.60",servicegroup_name="svcgrp2"} 936.0
+services_tot_response_bytes{nsip="10.0.0.2",service_ip="20.0.0.56",servicegroup_name="svcgrp"} 2320.0
+services_tot_response_bytes{nsip="10.0.0.2",service_ip="20.0.0.57",servicegroup_name="svcgrp"} 2552.0
+services_tot_response_bytes{nsip="10.0.0.2",service_ip="20.0.0.60",servicegroup_name="svcgrp2"} 936.0
 # HELP services_tot_request_bytes totalrequestbytes
 # TYPE services_tot_request_bytes counter
-services_tot_request_bytes{nsip="10.0.0.2:80",service_ip="20.0.0.56",servicegroup_name="svcgrp"} 860.0
-services_tot_request_bytes{nsip="10.0.0.2:80",service_ip="20.0.0.57",servicegroup_name="svcgrp"} 946.0
-services_tot_request_bytes{nsip="10.0.0.2:80",service_ip="20.0.0.60",servicegroup_name="svcgrp2"} 344.0
+services_tot_request_bytes{nsip="10.0.0.2",service_ip="20.0.0.56",servicegroup_name="svcgrp"} 860.0
+services_tot_request_bytes{nsip="10.0.0.2",service_ip="20.0.0.57",servicegroup_name="svcgrp"} 946.0
+services_tot_request_bytes{nsip="10.0.0.2",service_ip="20.0.0.60",servicegroup_name="svcgrp2"} 344.0
 ```
 
 </details>

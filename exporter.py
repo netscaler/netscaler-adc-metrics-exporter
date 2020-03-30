@@ -138,6 +138,36 @@ def verify_ns_stats_access(nsip, ns_protocol, ns_user, ns_password, timeout):
         time.sleep(4)
     logger.info('Exporter able to acces stats for citrix adc {}'.format(nsip))
 
+# Priority order for credentials follows the order config.yaml input > env variables
+# First env values are populated which can then be overwritten by config values if present.
+def get_login_credentials(args):
+    '''Gets the login credentials i.e ADC username and passoword'''
+
+    ns_user = os.environ.get("NS_USER")
+    ns_password = os.environ.get("NS_PASSWORD")
+
+    if os.environ.get('KUBERNETES_SERVICE_HOST') is not None:
+        if os.path.isfile("/mnt/nslogin/username"):
+            try:
+                with open("/mnt/nslogin/username", 'r') as f:
+                    ns_user = f.read().rstrip()
+            except Exception as e:
+                logger.error('Error while reading secret. Verify if secret is property mounted::%s', e)
+                
+        if os.path.isfile("/mnt/nslogin/password"):
+            try:
+                with open("/mnt/nslogin/password", 'r') as f:
+                    ns_password = f.read().rstrip()
+            except Exception as e:
+                logger.error('Error while reading secret. Verify if secret is property mounted::%s', e)
+    else:
+        if hasattr(args, 'username'):
+            ns_user = args.username
+
+        if hasattr(args, 'password'):
+            ns_password = args.password
+         
+    return ns_user, ns_password
 
 # Function to fire nitro commands and collect data from NS
 def collect_data(nsip, entity, username, password, protocol, nitro_timeout):
@@ -267,7 +297,7 @@ class CitrixAdcCollector(object):
         self.nitro_timeout = nitro_timeout
         self.k8s_cic_prefix = k8s_cic_prefix
 
-    # Collect metrics from Citrix ADCs
+    # Collect metrics from Citrix ADC
     def collect(self):
         nsip = self.nsip
         data = {}
@@ -371,9 +401,7 @@ if __name__ == '__main__':
     parser.add_argument('--start-delay', default=10, type=float, help='Start the exporter running after a delay to allow other containers to start. Default: 10s')
     parser.add_argument('--port', required=True, type=int, help='The port for the exporter to listen on. Required')
     parser.add_argument('--metric', required=False, action='append', type=str, help='Collect only the metrics specified here, may be used multiple times.')
-    parser.add_argument('--username', default='nsroot', type=str, help='The username used to access the Citrix ADC or NS_USER env var. Default: nsroot')
-    parser.add_argument('--password', default='nsroot', type=str, help='The password used to access the Citrix ADC or NS_PASSWORD env var. Default: nsroot')
-    parser.add_argument('--secure', default='no', type=str, help='yes: Use HTTPS, no: Use HTTP. Default: no')
+    parser.add_argument('--secure', default='yes', type=str, help='yes: Use HTTPS, no: Use HTTP. Default: yes')
     parser.add_argument('--timeout', default=15, type=float, help='Timeout for Nitro calls.')
     parser.add_argument('--metrics-file', required=False, default='/exporter/metrics.json', type=str, help='Location of metrics.json file. Default: /exporter/metrics.json')
     parser.add_argument('--log-file', required=False, default='/exporter/exporter.log', type=str, help='Location of exporter.log file. Default: /exporter/exporter.log')
@@ -391,19 +419,12 @@ if __name__ == '__main__':
     if args.config_file:
         args = parseConfig(args)
 
+    # Get username and password of Citrix ADC
+    ns_user, ns_password = get_login_credentials(args)
+
     # Wait for other containers to start.
     logger.info('Sleeping for %s seconds.' % args.start_delay)
     time.sleep(args.start_delay)
-
-    # Get username and password of CItrix ADCs
-    ns_user = os.environ.get("NS_USER")
-    if ns_user is None:
-        ns_user = args.username
-    ns_password = os.environ.get("NS_PASSWORD")
-    if ns_password is None:
-        ns_password = args.password
-    else:
-        logger.warning('Using NS_PASSWORD Environment variable is insecure. Consider using config.yaml file and --config-file option to define password')
 
     # Load the metrics file specifying stats to be collected
     metrics_json = get_metrics_file_data(args.metrics_file, args.metric)
