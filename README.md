@@ -42,7 +42,7 @@ where the flags are:
 
 flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description
 -----------------|--------------------
---target-nsip    | Provide the &lt;IP:port&gt; of the Citrix ADC to be monitored
+--target-nsip    | Provide the &lt;IP&gt; of the Citrix ADC to be monitored
 --port	         | Specify on which port metrics collected by the exporter should be exposed. Agents like Prometheus will need to scrape this port of the container to collected metrics
 --metric         | Provide a specific metric to load from metrics.json file (eg: 'lbvserver', 'protocolhttp', etc). If not provided, all metric entities from metrics.json will be loaded
 --secure         | Option 'no' can be provided to collect metrics from Citrix ADC. Default: 'yes'.
@@ -85,7 +85,7 @@ where the flags are:
 
 flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description
 -----------------|--------------------
---target-nsip    | Provide the &lt;IP:port&gt; of the Citrix ADC to be monitored
+--target-nsip    | Provide the &lt;IP&gt; of the Citrix ADC to be monitored
 --port	         | Specify on which port metrics collected by the exporter should be exposed. Agents like Prometheus will need to scrape this port of the container to collected metrics
 --metric         | Provide a specific metric to load from metrics.json file (eg: 'lbvserver', 'protocolhttp', etc). If not provided, all metric entities from metrics.json will be loaded
 --secure         | Option 'no' can be provided to collect metrics from Citrix ADC. Default: 'yes'.
@@ -166,7 +166,7 @@ Flags which can be provided to the exporter in the ```args:``` section are:
 
 flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description
 -----------------|--------------------
---target-nsip    | Provide the &lt;IP:port&gt; of the Citrix ADC to be monitored
+--target-nsip    | Provide the &lt;IP&gt; of the Citrix ADC to be monitored
 --port	         | Specify on which port metrics collected by the exporter should be exposed. Agents like Prometheus will need to scrape this port of the container to collected metrics
 --metric         | Provide a specific metric to load from metrics.json file (eg: 'lbvserver', 'protocolhttp', etc). If not provided, all metric entities from metrics.json will be loaded
 --secure         | Option 'no' can be provided to collect metrics from Citrix ADC. Default: 'yes'.
