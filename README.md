@@ -45,7 +45,7 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 --target-nsip    | Provide the &lt;IP&gt; of the Citrix ADC to be monitored
 --port	         | Specify on which port metrics collected by the exporter should be exposed. Agents like Prometheus will need to scrape this port of the container to collected metrics
 --metric         | Provide a specific metric to load from metrics.json file (eg: 'lbvserver', 'protocolhttp', etc). If not provided, all metric entities from metrics.json will be loaded
---secure         | Option 'no' can be provided to collect metrics from Citrix ADC. Default: 'yes'.
+--secure         | Option 'yes' can be provided to collect metrics from Citrix ADC. Default: 'no'.
 --start-delay    | Specify time for which exporter should sleep before starting metric collection. Default: 10s
 --timeout        | Specify timeout period for exporter to obtain response from target Citrix ADCs. Default: 15s
 --metrics-file   | The location of metrics.json file. Default: /exporter/metrics.json
@@ -88,7 +88,7 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 --target-nsip    | Provide the &lt;IP&gt; of the Citrix ADC to be monitored
 --port	         | Specify on which port metrics collected by the exporter should be exposed. Agents like Prometheus will need to scrape this port of the container to collected metrics
 --metric         | Provide a specific metric to load from metrics.json file (eg: 'lbvserver', 'protocolhttp', etc). If not provided, all metric entities from metrics.json will be loaded
---secure         | Option 'no' can be provided to collect metrics from Citrix ADC. Default: 'yes'.
+--secure         | Option 'yes' can be provided to collect metrics from Citrix ADC. Default: 'no'.
 --start-delay    | Specify time for which exporter should sleep before starting metric collection. Default: 10s
 --timeout        | Specify timeout period for exporter to obtain response from target Citrix ADC. Default: 15s
 --metrics-file   | The location of metrics.json file. Default: /exporter/metrics.json
@@ -169,7 +169,7 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 --target-nsip    | Provide the &lt;IP&gt; of the Citrix ADC to be monitored
 --port	         | Specify on which port metrics collected by the exporter should be exposed. Agents like Prometheus will need to scrape this port of the container to collected metrics
 --metric         | Provide a specific metric to load from metrics.json file (eg: 'lbvserver', 'protocolhttp', etc). If not provided, all metric entities from metrics.json will be loaded
---secure         | Option 'no' can be provided to collect metrics from Citrix ADC. Default: 'yes'.
+--secure         | Option 'yes' can be provided to collect metrics from Citrix ADC. Default: 'no'.
 --start-delay    | Specify time for which exporter should sleep before starting metric collection. Default: 10s
 --timeout        | Specify timeout period for exporter to obtain response from target Citrix ADC. Default: 15s
 --metrics-file   | The location of metrics.json file. Default: /exporter/metrics.json
