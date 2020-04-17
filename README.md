@@ -32,6 +32,7 @@ To use the exporter as a python script, the ```prometheus_client``` and ```reque
 ```
 pip install prometheus_client
 pip install requests
+pip install PyYAML
 ```
 Now, create a folder ```/exporter``` and copy the ```metrics.json``` file to the folder. 
 Finally, the exporter can be run as a python script using;
