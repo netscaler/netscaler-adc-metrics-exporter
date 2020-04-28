@@ -46,23 +46,32 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 --target-nsip    | Provide the &lt;IP&gt; of the Citrix ADC to be monitored
 --port	         | Specify on which port metrics collected by the exporter should be exposed. Agents like Prometheus will need to scrape this port of the container to collected metrics
 --metric         | Provide a specific metric to load from metrics.json file (eg: 'lbvserver', 'protocolhttp', etc). If not provided, all metric entities from metrics.json will be loaded
---secure         | Option 'no' can be provided to collect metrics from Citrix ADC. Default: 'yes'.
+--secure         | Ensures HTTPS connection to ADC. Option 'no'(HTTP) can be provided to collect metrics from Citrix ADC. Default: 'yes'.
 --start-delay    | Specify time for which exporter should sleep before starting metric collection. Default: 10s
 --timeout        | Specify timeout period for exporter to obtain response from target Citrix ADCs. Default: 15s
 --metrics-file   | The location of metrics.json file. Default: /exporter/metrics.json
 --log-file       | The location of exporter.log file. Default: /exporter/exporter.log
 --log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: ERROR
---config-file    | File with configs such as ```--username```, ```--password```, ```--start-delay```, etc. Helps supply username and password through file rather than CLI.
+--config-file    | File with configs such as ```username```, ```password```, ```validate-cert```, ```cacert-path```, etc. Helps supply username and password through file rather than CLI.
+--validate-cert. | Specify if ca certifcate is to be validated to access Citrix ADC. Default: 'no'. Valid value: 'yes'
+--cacert-path.   | Provide valid cert path if "-validate-cert" set to 'yes'. cert path will only be considered if '--validate-cert' is set to 'yes'.
 --k8sCICprefix   | Provide the prefix if exporter is used in kubernetes enviroment with Citrix ingress controller, "k8s_ingress_service_stats" dashboard can be used only if correct CICprefix is provided and CIC version is 1.2.0 and above. Default prefix is "K8s"  
 
 The exporter can be setup as given in the diagram using;
 ```
 nohup python exporter.py --target-nsip=10.0.0.1 --port 8888 --config-file=config.yaml &
 ```
-This directs the exporter container to scrape 10.0.0.1 IP, and the expose the stats it collects on port 8888. File config.yaml should contain username and password of the ADC to which exporter connects to. For reference, refer config.yaml.example which specifies the format for providing the login credentials. Login credentials can also be provided using environment variables using NS_USER, NS_PASSWORD.Though config file input is the preferred method for security concerns.
+This directs the exporter container to scrape 10.0.0.1 IP, and the expose the stats it collects on port 8888. 
+File 'config.yaml' should contain username and password of the ADC to which exporter connects to. For reference, refer config.yaml.example which specifies the format for providing the login credentials. 
+Login credentials can also be provided using environment variables using NS_USER, NS_PASSWORD.Though config file input is the preferred method for security concerns.
+
 The user can then access the exported metrics directly thorugh port 8888 on the machine where the exporter is running, or Prometheus and Grafana can be setup to view the exported metrics though their GUI.
 
-**NOTE:**  If TLS is being used by providing the --secure='yes' option, then it is recommended to create a new user on the Citrix ADC having only read permission. Documentation on creating new users with required permission can be found [here](ADD_LINK).
+### Additionals:
+As an optional configuration, Citrix ADC exporter allows you to validate the SSL server certificate provided by Citrix ADC. For this:
+In config.yaml, '--validate-cert' option should be set to 'yes', and certificate path should be provided using'--cacert-path' argument. Please confirm that certificate and '--cert-path' provided is valid. Additionaly, '--validate-cert(default='no')' and '--secure(default='yes')' options should be set to 'yes'.
+
+
 
 </details>
 
@@ -72,15 +81,15 @@ The user can then access the exported metrics directly thorugh port 8888 on the 
 <summary>Usage as a Container</summary>
 <br>
 
-In order to use the exporter as a container, the image ```quay.io/citrix/citrix-adc-metrics-exporter:1.4.1``` will need to be pulled using;
+In order to use the exporter as a container, the image ```quay.io/citrix/citrix-adc-metrics-exporter:1.4.2``` will need to be pulled using;
 ```
-docker pull quay.io/citrix/citrix-adc-metrics-exporter:1.4.1
+docker pull quay.io/citrix/citrix-adc-metrics-exporter:1.4.2
 ```
 **NOTE:** It can also be build locally using ```docker build -f Dockerfile -t <image_name>:<tag> ./```
 
 Now, the exporter can be run using:
 ```
-docker run -dt -p <host_port>:<container_port> --mount type=bind,source=<host-path-for-config-file>,target=/exporter/config.yaml quay.io/citrix/citrix-adc-metrics-exporter:1.4.1 [flags] --config-file=/exporter/config.yaml
+docker run -dt -p <host_port>:<container_port> --mount type=bind,source=<host-path-for-config-file>,target=/exporter/config.yaml quay.io/citrix/citrix-adc-metrics-exporter:1.4.2 [flags] --config-file=/exporter/config.yaml
 ```
 where the flags are:
 
@@ -89,25 +98,43 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 --target-nsip    | Provide the &lt;IP&gt; of the Citrix ADC to be monitored
 --port	         | Specify on which port metrics collected by the exporter should be exposed. Agents like Prometheus will need to scrape this port of the container to collected metrics
 --metric         | Provide a specific metric to load from metrics.json file (eg: 'lbvserver', 'protocolhttp', etc). If not provided, all metric entities from metrics.json will be loaded
---secure         | Option 'no' can be provided to collect metrics from Citrix ADC. Default: 'yes'.
+--secure         | Ensures HTTPS connection to ADC. Option 'no'(HTTP) can be provided to collect metrics from Citrix ADC. Default: 'yes'.
 --start-delay    | Specify time for which exporter should sleep before starting metric collection. Default: 10s
 --timeout        | Specify timeout period for exporter to obtain response from target Citrix ADC. Default: 15s
 --metrics-file   | The location of metrics.json file. Default: /exporter/metrics.json
 --log-file       | The location of exporter.log file. Default: /exporter/exporter.log
 --log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: ERROR
---config-file    | File with configs such as ```--username```, ```--password```, ```--start-delay```, etc. Helps supply username and password through file rather than CLI for secure deployment.
+--config-file    | File with configs such as ```username```, ```password```, ```validate-cert``, ```cacert-path```, etc. Helps supply username and password through file rather than CLI for secure deployment.
+--validate-cert  | Specify if ca certifcate is to be validated to access Citrix ADC. Default: 'no'. Valid value: 'yes'
+--cacert-path    | Provide valid cert path if "--validate-cert" set to 'yes'. cert path will only be considered if '--validate-cert' is set to 'yes'.
 --k8sCICprefix   | Provide the prefix if exporter is used in kubernetes enviroment with Citrix ingress controller, "k8s_ingress_service_stats" dashboard can be used only if correct CICprefix is provided and CIC version is 1.2.0 and above. Default prefix is "K8s"  
 
 
 To setup the exporter as given in the diagram, the following command can be used:
 ```
-docker run -dt -p 8888:8888 --mount type=bind,source=/path/to/config.yaml,target=/exporter/config.yaml --name citrix-adc-exporter quay.io/citrix/citrix-adc-metrics-exporter:1.4.1 --target-nsip=10.0.0.1 --port=8888 --config-file=/exporter/config.yaml
+docker run -dt -p 8888:8888 --mount type=bind,source=/path/to/config.yaml,target=/exporter/config.yaml --name citrix-adc-exporter quay.io/citrix/citrix-adc-metrics-exporter:1.4.2 --target-nsip=10.0.0.1 --port=8888 --config-file=/exporter/config.yaml
 ```
-This directs the exporter container to scrape the 10.0.0.1 IP, and the expose the stats it collects on port 8888. File config.yaml should contain username and password of the ADC to which exporter connects to. For reference, refer config.yaml.example which specifies the format for providing the login credentials. Config.yaml file then needs to be mounted to the container at target specified. Login credentials can also be provided using environment variables using NS_USER, NS_PASSWORD.Though config file input is the preferred method for security concerns.The user can then access the exported metrics directly thorugh port 8888 on the machine where the exporter is running, or Prometheus and Grafana can be setup to view the exported metrics though their GUI.
+This directs the exporter container to scrape the 10.0.0.1 IP, and the expose the stats it collects on port 8888. 
+File 'config.yaml' should contain username and password of the ADC to which exporter connects to. For reference, refer config.yaml.example which specifies the format for providing the login credentials. Config.yaml file then needs to be mounted to the container at fixed target specified('/exporter/config.yaml') only. 
+Login credentials can also be provided using environment variables using NS_USER, NS_PASSWORD.Though config file input is the preferred method for security concerns.
+
+The user can then access the exported metrics directly thorugh port 8888 on the machine where the exporter is running, or Prometheus and Grafana can be setup to view the exported metrics though their GUI.
 
 **NOTE:** In the command above, the value of the ```--port``` flag should be the same as the ```container_port```.
 
-**NOTE:**  If TLS is being used by providing the --secure='yes' option, then it is recommended to create a new user on the Citrix ADC having only read permission. Documentation on creating new users with required permission can be found [here](ADD_LINK).
+
+### Additionals:
+As an optional configuration, Citrix ADC exporter allows you to validate the SSL server certificate provided by Citrix ADC. For this:
+In config.yaml, '--validate-cert' option should be set to 'yes', and certificate path should be provided using'--cacert-path' argument. Please confirm that certificate and '--cert-path' provided is valid. Additionaly, '--validate-cert(default='no')' and '--secure(default='yes')' options are set to 'yes' for certificate to be considered.
+
+Certificate should then be mounted at the '--cacert-path' provided. For instance, if cert is 'cacert.pem' and '--cacert-path' provided in 'config.yaml' is '/exporter/cacert.pem'
+
+```
+docker run -dt -p 8888:8888 --mount type=bind,source=/path/to/config.yaml,target=/exporter/config.yaml --mount type=bind,source=/path/to/cacert.pem,target=/exporter/cacert.pem --name citrix-adc-exporter exporter:latest --target-nsip=10.0.0.1 --port=8888 --config-file=/exporter/config.yaml
+``` 
+Cert validation options can also be provided using environment variables using NS_VALIDATE_CERT, NS_CACERT_PATH. Thoughconfig file input is the preferred method.
+
+
 
 </details>
 
@@ -132,7 +159,7 @@ metadata:
 spec:
   containers:
     - name: exporter
-      image: quay.io/citrix/citrix-adc-metrics-exporter:1.4.1
+      image: quay.io/citrix/citrix-adc-metrics-exporter:1.4.2
       args:
         - "--target-nsip=10.0.0.1"
         - "--port=8888"
@@ -163,6 +190,9 @@ spec:
   selector:
     app: exporter
 ```
+
+Login Credentials can also be provided using environment variables NS_USER, NS_PASSWORD. Though, secret volume is the preffered method for security.
+
 Flags which can be provided to the exporter in the ```args:``` section are:
 
 flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description
@@ -170,18 +200,79 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 --target-nsip    | Provide the &lt;IP&gt; of the Citrix ADC to be monitored
 --port	         | Specify on which port metrics collected by the exporter should be exposed. Agents like Prometheus will need to scrape this port of the container to collected metrics
 --metric         | Provide a specific metric to load from metrics.json file (eg: 'lbvserver', 'protocolhttp', etc). If not provided, all metric entities from metrics.json will be loaded
---secure         | Option 'no' can be provided to collect metrics from Citrix ADC. Default: 'yes'.
+--secure         | Ensures HTTPS connection to ADC. Option 'no'(HTTP) can be provided to collect metrics from Citrix ADC. Default: 'yes'.
 --start-delay    | Specify time for which exporter should sleep before starting metric collection. Default: 10s
 --timeout        | Specify timeout period for exporter to obtain response from target Citrix ADC. Default: 15s
 --metrics-file   | The location of metrics.json file. Default: /exporter/metrics.json
 --log-file       | The location of exporter.log file. Default: /exporter/exporter.log
 --log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: ERROR
---config-file    | File with configs such as ```--username```, ```--password```, ```--start-delay```, etc. Helps supply username and password through file rather than CLI.
+--config-file    | File with configs such as ```username```, ```password```, ```validate-cert```, ```cacert-path```, etc. Helps supply username and password through file rather than CLI.
+--validate-cert  | Specify if ca certifcate is to be validated to access Citrix ADC. Default: 'no'. Valid value: 'yes'
+--cacert-path    | Provide valid cert path if "--validate-cert" set to 'yes'. cert path will only be considered if '--validate-cert' is set to 'yes'.
 --k8sCICprefix   | Provide the prefix if exporter is used in kubernetes enviroment with Citrix ingress controller, "k8s_ingress_service_stats" dashboard can be used only if correct CICprefix is provided and CIC version is 1.2.0 and above. Default prefix is "K8s"  
 
-Login Credentials can also be provided using environment variables NS_USER, NS_PASSWORD. Though, secret volume is the preffered method for security.
 
-**NOTE:**  If TLS is being used by providing the --secure='yes' option, then it is recommended to create a new user on the Citrix ADC having only read permission. Documentation on creating new users with required permission can be found [here](ADD_LINK).
+### Additionals:
+As an optional configuration, Citrix ADC exporter allows you to validate the SSL server certificate provided by Citrix ADC. For this:
+User need to first mount the secret at any valid path inside pod. For instance, for CA certificate 'cacert.pem' and name give as 'exp-ca-cert'
+
+```
+kubectl create secret generic exp-ca-cert --from-file=./cacert.pem"
+```
+
+In args section of yaml, '--validate-cert' option should be set to 'yes', and certificate path should be provided using'--cacert-path' argument. Please confirm that mounted certificate and '--cert-path' provided are valid. Additionaly, '--validate-cert(default='no')' and '--secure(default='yes')' options are set to 'yes' for certificate to be considered.
+ 
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: exporter
+  labels:
+    app: exporter
+spec:
+  containers:
+    - name: exporter
+      image: quay.io/citrix/citrix-adc-metrics-exporter:1.4.2
+      args:
+        - "--target-nsip=10.0.0.1"
+        - "--port=8888"
+        - "--validate-cert=yes"
+        - "--cacert-path=/mnt/certs/cacert.pem"
+      imagePullPolicy: Always
+      volumeMounts:
+      - name: nslogin
+        mountPath: "/mnt/nslogin"
+        readOnly: true
+      - name: exp-ca-cert
+        mountPath: "/mnt/certs/"
+        readOnly: true
+      securityContext:
+        readOnlyRootFilesystem: true
+  volumes:
+  - name: nslogin
+    secret:
+      secretName: nslogin
+  - name: exp-ca-cert
+    secret:
+      secretName: exp-ca-cert
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: exporter
+  labels:
+    app: exporter
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8888
+    targetPort: 8888
+    name: exporter-port
+  selector:
+    app: exporter
+```
+Cert Credentials can also be provided using environment variables NS_VALIDATE_CERT, NS_CACERT_PATH instead of args '--validate-cert', '--cacert-path' respectively.
+
 
 </details>
 
@@ -512,3 +603,4 @@ ii. The metric being fetched does not exist in the Citrix ADC. Possibly due to i
 		
 
 **NOTE:** The exporter is designed to catch and handle all exceptions that could arise duriing its operation. This is a requirement for the [Citrix Ingress Controller's](https://github.com/citrix/citrix-k8s-ingress-controller) [metrics-visualizer](https://github.com/citrix/citrix-k8s-ingress-controller/tree/master/metrics-visualizer). To debug errors the exporter might have run into, provide the ```--log-level=DEBUG``` flag.
+

@@ -11,6 +11,7 @@ import sys
 from prometheus_client import start_http_server
 from prometheus_client.core import GaugeMetricFamily, CounterMetricFamily, REGISTRY
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
+from requests.packages.urllib3.exceptions import SubjectAltNameWarning
 from requests.auth import HTTPBasicAuth
 
 
@@ -51,6 +52,7 @@ def set_logging_args(log_file, log_level):
     try:
         logging.basicConfig(
             filename=log_file,
+            filemode='w',
             format='%(asctime)s %(levelname)-8s %(message)s',
             datefmt='%FT%T%z',
             level={
@@ -76,16 +78,16 @@ def start_exporter_server(port):
         start_http_server(port)
         print("Exporter is running...")
     except Exception as e:
-        logger.critical('Error while opening port::%s', e)
+        logger.critical('Error while opening port: {}', format(e))
         print(e)
 
 
-def check_nitro_access(protocol, nsip, username, password):
+def check_nitro_access(protocol, nsip, username, password, ns_cert):
     '''Validates if exporter is able access ADC.'''
 
     url = '%s://%s/nitro/v1/config/' % (protocol, nsip)
     try:
-        response = requests.get(url, verify=False, auth=HTTPBasicAuth(username, password))
+        response = requests.get(url, verify=ns_cert, auth=HTTPBasicAuth(username, password))
         if (response.status_code == requests.status_codes.codes.unauthorized):
             logger.error('Invalid username or password for Citrix Adc!, Unaurthorized Err : {}'.format(response.status_code))
             return False
@@ -95,13 +97,13 @@ def check_nitro_access(protocol, nsip, username, password):
     return True
 
 
-def get_sslcertkey_stats(protocol, nsip, username, password, nitro_timeout):
+def get_sslcertkey_stats(protocol, nsip, username, password, nitro_timeout, ns_cert):
     '''Validates if exporter is able fetch stats access from ADC when it's fully configured.'''
 
     headers = {'X-NITRO-USER': username, 'X-NITRO-PASS': password}
     url = '%s://%s/nitro/v1/config/sslcertkey' % (protocol, nsip)
     try:
-        r = requests.get(url, headers=headers, verify=False, timeout=nitro_timeout)
+        r = requests.get(url, headers=headers, verify=ns_cert, timeout=nitro_timeout)
         data = r.json()
         if data['sslcertkey'] is None:
             return False
@@ -113,26 +115,26 @@ def get_sslcertkey_stats(protocol, nsip, username, password, nitro_timeout):
     return True
 
 
-def verify_ns_session_access(nsip, ns_protocol, ns_user, ns_password):
+def verify_ns_session_access(nsip, ns_protocol, ns_user, ns_password, ns_cert):
     '''Validates if exporter is able to establish session with ADC and fetch stats.'''
 
     ns_access_success = False
     logger.info('Attempting to connect to citrix adc with ip {}'.format(nsip))
     while not ns_access_success:
-        ns_access_success = check_nitro_access(ns_protocol, nsip, ns_user, ns_password)
+        ns_access_success = check_nitro_access(ns_protocol, nsip, ns_user, ns_password, ns_cert)
         if ns_access_success is False:
             logger.info('Retrying to connect to citrix adc with ip {}'.format(nsip))
         time.sleep(1)
     logger.info('Exporter connected to citrix adc {}'.format(nsip))
 
 
-def verify_ns_stats_access(nsip, ns_protocol, ns_user, ns_password, timeout):
+def verify_ns_stats_access(nsip, ns_protocol, ns_user, ns_password, timeout, ns_cert):
     '''Validates if exporter is able to fetch stats from ADC.'''
 
     ns_stat_access = False
     logger.info('Verifing stat acces for citrix adc with ip {}'.format(nsip))
     while not ns_stat_access:
-        ns_stat_access = get_sslcertkey_stats(ns_protocol, nsip, ns_user, ns_password, timeout)
+        ns_stat_access = get_sslcertkey_stats(ns_protocol, nsip, ns_user, ns_password, timeout, ns_cert)
         if ns_stat_access is False:
             logger.info('Retrying to verify stat access for citrix adc with ip {}'.format(nsip))
         time.sleep(4)
@@ -169,126 +171,56 @@ def get_login_credentials(args):
          
     return ns_user, ns_password
 
-# Function to fire nitro commands and collect data from NS
-def collect_data(nsip, entity, username, password, protocol, nitro_timeout):
-    '''Fetches stats from ADC using nitro call for different entity types.'''
-
-    # Login credentials
-    headers = {'X-NITRO-USER': username, 'X-NITRO-PASS': password}
-
-    # nitro call for all entities lbvserver bindings
-    if (entity == 'lbvserver_binding'):
-        url_lbvserver = '%s://%s/nitro/v1/config/lbvserver' % (protocol, nsip)
-
-        responselbvserver = requests.get(url_lbvserver, headers=headers, verify=False, timeout=nitro_timeout)
-        rlbvserver = responselbvserver.json()
-
-        lbvserver_binding_status_up = {'lbvserver_binding': []}
-
-        for lbvserver in rlbvserver['lbvserver']:
-            url = '%s://%s/nitro/v1/config/lbvserver_binding/%s' % (protocol, nsip, lbvserver['name'])
-            r = requests.get(url, headers=headers, verify=False, timeout=nitro_timeout)
-            values = r.json()
-            total = 0
-            total_down = 0
-            total_up = 0
-            for lbvserver_binding in values['lbvserver_binding']:
-                if ('lbvserver_servicegroupmember_binding' in lbvserver_binding):
-                    for lbvserver_binding_servers in lbvserver_binding['lbvserver_servicegroupmember_binding']:
-                        total += 1
-                        if lbvserver_binding_servers['curstate'] == "UP":
-                            total_up += 1
-                        else:
-                            total_down += 1
-                if total != 0:
-                    percentup = (total_up/float(total)) * 100
-                else:
-                    percentup = 0
-
-                lbvserver_binding_status_up['lbvserver_binding'].append(({'name': lbvserver['name'], 'percentup': percentup}))
-
-        teste = json.dumps(lbvserver_binding_status_up)
-        data = json.loads(teste)
-        return data['lbvserver_binding']
-
-    # this is to fetch lb status for ingress/services in k8s enviroment
-    if(entity == 'k8s_ingress_lbvs'):
-        entity = 'lbvserver'
-
-    # nitro call for all entities except 'services' (ie. servicegroups)
-    if (entity != 'services'):
-        if(entity != 'nscapacity' and entity != 'sslcertkey'):
-            url = '%s://%s/nitro/v1/stat/%s' % (protocol, nsip, entity)
-        else:
-            url = '%s://%s/nitro/v1/config/%s' % (protocol, nsip, entity)
-        r = requests.get(url, headers=headers, verify=False, timeout=nitro_timeout)
-        data = r.json()
-        if data['errorcode'] == 0:
-            return data[entity]
-    # nitro call for 'services' entity (ie. servicegroups)
-
+def get_ns_session_protocol(args):
+    'Get ns session protocol to access ADC'
+    secure = args.secure.lower()
+    if secure == 'yes':
+        ns_protocol = 'https'
     else:
-        url = '%s://%s/nitro/v1/stat/servicegroup?statbindings=yes' % (protocol, nsip)
-        # get dict with all servicegroups
-        r = requests.get(url, headers=headers, verify=False, timeout=nitro_timeout)
-        servicegroup_list_ds = r.json()
-        if servicegroup_list_ds['errorcode'] == 0:
-            servicegroup_data = []
-            for servicegroups_ds in servicegroup_list_ds['servicegroup']:
-                _manual_servicegroup_name = servicegroups_ds['servicegroupname']
-                url = '%s://%s/nitro/v1/stat/servicegroup/%s?statbindings=yes' % (protocol, nsip, _manual_servicegroup_name)
-                # get dict with stats of all services bound to a particular servicegroup
-                r = requests.get(url, headers=headers, verify=False, timeout=nitro_timeout)
-                data_tmp = r.json()
-                if data_tmp['errorcode'] == 0:
-                    # create a list with stats of all services bound to NS of all servicegroups
-                    for individual_servicebinding_data in data_tmp['servicegroup'][0]['servicegroupmember']:
-                        # manually adding key:value '_manual_servicegroup_name':_manual_servicegroup_name to stats of a particular service
-                        individual_servicebinding_data['_manual_servicegroup_name'] = _manual_servicegroup_name
-                        servicegroup_data.append(individual_servicebinding_data)
-            return servicegroup_data
+        ns_protocol = 'http'
+    return ns_protocol
 
+def get_ns_cert_path(args):
+    'Get ns cert path if protocol is secure option is set' 
+    if args.cacert_path:
+        ns_cacert_path = args.cacert_path
+    else:
+        ns_cacert_path = os.environ.get("NS_CACERT_PATH", None)
 
-def update_lbvs_label(k8s_cic_prefix, label_values, ns_metric_name, log_prefix_match):
-    '''Updates lbvserver lables for ingress and services for k8s_cic_ingress_service_stat dashboard.'''
+    if not ns_cacert_path:
+        logger.error('EXITING : Certificate Validation enabled but cert path not provided')
+        sys.exit()
 
-    try:
-        # If lbvs name ends with expected _svc, then label values are updated with ingress/service info.
-        if (str(label_values).find("_svc") != -1):
-            cur_prefix = str(label_values[0].split("_")[0].split("-", 1)[0])
-            # update lables only if prefix provided is same as CIC prefix used
-            if cur_prefix == k8s_cic_prefix:
-                # return if ingress name as a service
-                if label_values[0].split("_")[3] == 'svc':
-                    if log_prefix_match:
-                        logger.info('k8s_ingress_service_stat Ingress dashboard cannot be used without ingress')
-                    return False
-                # update label "citrixadc_k8s_ing_lb_ingress_name" with ingress name
-                label_values[0] = label_values[0].split("_")[0].split("-", 1)[1]
-                # update label "citrixadc_k8s_ing_lb_ingress_port" with ingress port
-                label_values[1] = label_values[1].split("_")[2]
-                # update label "citrixadc_k8s_ing_lb_service_name" with service name
-                label_values[2] = label_values[2].split("_")[3].split("-", 1)[1]
-                # update label "citrixadc_k8s_ing_lb_ingress_port" with service port
-                label_values[3] = label_values[3].split("_")[5]
-                return True
-            else:
-                if log_prefix_match:
-                    logger.info('k8s_cic_ingress_service_stat Ingress dashboard cannot be used for CIC prefix "%s"', cur_prefix)
-                return False
+    if not os.path.isfile(ns_cacert_path):
+        logger.error('EXITING: ADC Cert validation enabled but CA cert does not exist {}'.format(ns_cacert_path))
+        sys.exit()
+         
+    logger.info('CA certificate path found for validation')
+    return ns_cacert_path
+
+def get_cert_validation_args(args, ns_protocol):
+    'Get ns validation args, if validation set, then fetch cert path'
+    if args.validate_cert:
+        ns_cert_validation = args.validate_cert.lower()
+    else:
+        ns_cert_validation = os.environ.get("NS_VALIDATE_CERT", 'no').lower()
+
+    if ns_cert_validation == 'yes':
+        if ns_protocol == 'https':
+            logger.info('Cert Validation Enabled')
+            ns_cert = get_ns_cert_path(args)
         else:
-            if log_prefix_match:
-                logger.info('k8s_cic_ingress_service_stat Ingress dashboard cannot be used for non-CIC(or < CIC 1.2) ingress/lb"',)
-            return False
-    except Exception as e:
-        logger.error('Unable to update k8s label: (%s)', e)
-        return False
-
+            logger.error('EXITING: Cert validation enabled on insecure session')
+            sys.exit()
+    else:
+        ns_cert = False # Set ns_sert as False for no cert validation
+    return ns_cert
 
 class CitrixAdcCollector(object):
     ''' Add/Update labels for metrics using prometheus apis.'''
 
-    def __init__(self, nsip, metrics, username, password, protocol, nitro_timeout, k8s_cic_prefix):
+    def __init__(self, nsip, metrics, username, password, protocol, 
+                 nitro_timeout, k8s_cic_prefix, ns_cert):
         self.nsip = nsip
         self.metrics = metrics
         self.username = username
@@ -296,6 +228,7 @@ class CitrixAdcCollector(object):
         self.protocol = protocol
         self.nitro_timeout = nitro_timeout
         self.k8s_cic_prefix = k8s_cic_prefix
+        self.ns_cert = ns_cert
 
     # Collect metrics from Citrix ADC
     def collect(self):
@@ -304,7 +237,7 @@ class CitrixAdcCollector(object):
         for entity in self.metrics.keys():
             logger.info('Collecting metric %s for %s' % (entity, nsip))
             try:
-                data[entity] = collect_data(nsip, entity, self.username, self.password, self.protocol, self.nitro_timeout)
+                data[entity] = self.collect_data(entity)
             except Exception as e:
                 logger.warning('Could not collect metric: ' + str(e))
 
@@ -339,7 +272,7 @@ class CitrixAdcCollector(object):
                         # populate and update k8s_ingress_lbvs metrics if in k8s-CIC enviroment
                         if entity_name == "k8s_ingress_lbvs":
                             if os.environ.get('KUBERNETES_SERVICE_HOST') is not None:
-                                prefix_match = update_lbvs_label(self.k8s_cic_prefix, label_values, ns_metric_name, log_prefix_match)
+                                prefix_match = self.update_lbvs_label(label_values, ns_metric_name, log_prefix_match)
                                 if not prefix_match:
                                     log_prefix_match = False
                                     continue
@@ -376,7 +309,7 @@ class CitrixAdcCollector(object):
                         # populate and update k8s_ingress_lbvs metrics if in k8s-CIC enviroment
                         if entity_name == "k8s_ingress_lbvs":
                             if os.environ.get('KUBERNETES_SERVICE_HOST') is not None:
-                                prefix_match = update_lbvs_label(self.k8s_cic_prefix, label_values, ns_metric_name, log_prefix_match)
+                                prefix_match = self.update_lbvs_label(label_values, ns_metric_name, log_prefix_match)
                                 if not prefix_match:
                                     log_prefix_match = False
                                     continue
@@ -393,6 +326,121 @@ class CitrixAdcCollector(object):
 
                 yield g
 
+    # Function to fire nitro commands and collect data from NS
+    def collect_data(self, entity):
+        '''Fetches stats from ADC using nitro call for different entity types.'''
+
+        # nitro call for all entities lbvserver bindings
+        if (entity == 'lbvserver_binding'):
+            return self.get_lbvs_bindings_status()
+
+        # this is to fetch lb status for ingress/services in k8s enviroment
+        if(entity == 'k8s_ingress_lbvs'):
+            entity = 'lbvserver'
+
+        # nitro call for all entities except 'services' (ie. servicegroups)
+        if (entity != 'services'):
+            if(entity != 'nscapacity' and entity != 'sslcertkey'):
+                url = '%s://%s/nitro/v1/stat/%s' % (self.protocol, self.nsip, entity)
+            else:
+                url = '%s://%s/nitro/v1/config/%s' % (self.protocol, self.nsip, entity)
+            data = self.get_entity_stat(url)
+            return data[entity]
+        else:
+            # nitro call for 'services' entity (ie. servicegroups)
+            return self.get_svc_grp_services_stats()
+
+    def get_svc_grp_services_stats(self):
+        '''Fetches stats for services'''
+
+        url = '%s://%s/nitro/v1/stat/servicegroup' % (self.protocol, self.nsip)
+        # get dict with all servicegroups
+        servicegroup_list_ds = self.get_entity_stat(url)
+        if servicegroup_list_ds:
+            servicegroup_data = []
+            for servicegroups_ds in servicegroup_list_ds['servicegroup']:
+                _manual_servicegroup_name = servicegroups_ds['servicegroupname']
+                url = '%s://%s/nitro/v1/stat/servicegroup/%s?statbindings=yes' % (self.protocol, self.nsip, _manual_servicegroup_name)
+                data_tmp = self.get_entity_stat(url)
+                if data_tmp:
+                    if 'servicegroupmember' in data_tmp['servicegroup'][0]:
+                    # create a list with stats of all services bound to NS of all servicegroups
+                        for individual_svc_binding_data in data_tmp['servicegroup'][0]['servicegroupmember']:
+                            # manually adding stats of a particular service
+                            individual_svc_binding_data['_manual_servicegroup_name'] = _manual_servicegroup_name
+                            servicegroup_data.append(individual_svc_binding_data)
+            return servicegroup_data
+
+    def get_lbvs_bindings_status(self):
+        '''Fetches percentage of lbvs bindings up status'''
+
+        url_lbvserver = '%s://%s/nitro/v1/stat/lbvserver' % (self.protocol, self.nsip)
+        rlbvserver = self.get_entity_stat(url_lbvserver)
+
+        lbvserver_binding_status_up = {'lbvserver_binding': []}
+        for lbvserver in rlbvserver['lbvserver']:
+            total_up = int(lbvserver['actsvcs'])
+            total_down = int(lbvserver['inactsvcs'])
+            total = total_up + total_down
+            if total != 0:
+                percentup = (total_up/float(total)) * 100
+            else:
+                percentup = 0
+
+            lbvserver_binding_status_up['lbvserver_binding'].append(({'name': lbvserver['name'], 'percentup': percentup}))
+
+        teste = json.dumps(lbvserver_binding_status_up)
+        data = json.loads(teste)
+        return data['lbvserver_binding']
+
+    def get_entity_stat(self, url):
+        '''Fetches stats from ADC using nitro using for a particular entity.'''
+
+        headers = {'X-NITRO-USER': self.username, 'X-NITRO-PASS': self.password}
+        try:
+            r = requests.get(url, headers=headers, verify=self.ns_cert, timeout=self.nitro_timeout)
+            data = r.json()
+            if data['errorcode'] == 0:
+                return data
+        except Exception as e:
+            logger.error("Unable to access stats from ADC")
+            return None
+
+    def update_lbvs_label(self, label_values, ns_metric_name, log_prefix_match):
+        '''Updates lbvserver lables for ingress and services for k8s_cic_ingress_service_stat dashboard.'''
+
+        try:
+            # If lbvs name ends with expected _svc, then label values are updated with ingress/service info.
+            if (str(label_values).find("_svc") != -1):
+                cur_prefix = str(label_values[0].split("_")[0].split("-", 1)[0])
+                # update lables only if prefix provided is same as CIC prefix used
+                if cur_prefix == self.k8s_cic_prefix:
+                    # return if ingress name as a service
+                    if label_values[0].split("_")[3] == 'svc':
+                        if log_prefix_match:
+                            logger.info('k8s_ingress_service_stat Ingress dashboard cannot be used without ingress')
+                        return False
+                    # update label "citrixadc_k8s_ing_lb_ingress_name" with ingress name
+                    label_values[0] = label_values[0].split("_")[0].split("-", 1)[1]
+                    # update label "citrixadc_k8s_ing_lb_ingress_port" with ingress port
+                    label_values[1] = label_values[1].split("_")[2]
+                    # update label "citrixadc_k8s_ing_lb_service_name" with service name
+                    label_values[2] = label_values[2].split("_")[3].split("-", 1)[1]
+                    # update label "citrixadc_k8s_ing_lb_ingress_port" with service port
+                    label_values[3] = label_values[3].split("_")[5]
+                    return True
+                else:
+                    if log_prefix_match:
+                        logger.info('k8s_cic_ingress_service_stat Ingress dashboard cannot be used for CIC prefix "%s"', cur_prefix)
+                    return False
+            else:
+                if log_prefix_match:
+                    logger.info('k8s_cic_ingress_service_stat dashboard cannot be used for non-CIC ingress/lb')
+                return False
+        except Exception as e:
+            logger.error('Unable to update k8s label: (%s)', e)
+            return False
+
 
 if __name__ == '__main__':
 
@@ -401,7 +449,9 @@ if __name__ == '__main__':
     parser.add_argument('--start-delay', default=10, type=float, help='Start the exporter running after a delay to allow other containers to start. Default: 10s')
     parser.add_argument('--port', required=True, type=int, help='The port for the exporter to listen on. Required')
     parser.add_argument('--metric', required=False, action='append', type=str, help='Collect only the metrics specified here, may be used multiple times.')
-    parser.add_argument('--secure', default='yes', type=str, help='yes: Use HTTPS, no: Use HTTP. Default: yes')
+    parser.add_argument('--secure', default='yes', type=str, help='yes: Use HTTPS, no: Use HTTP. Default: no')
+    parser.add_argument('--validate-cert', required=False, type=str, help='yes: Validate Cert, no: Do not validate cert. Default: no')
+    parser.add_argument('--cacert-path', required=False, type=str, help='Certificate path for secure validation')
     parser.add_argument('--timeout', default=15, type=float, help='Timeout for Nitro calls.')
     parser.add_argument('--metrics-file', required=False, default='/exporter/metrics.json', type=str, help='Location of metrics.json file. Default: /exporter/metrics.json')
     parser.add_argument('--log-file', required=False, default='/exporter/exporter.log', type=str, help='Location of exporter.log file. Default: /exporter/exporter.log')
@@ -429,20 +479,20 @@ if __name__ == '__main__':
     # Load the metrics file specifying stats to be collected
     metrics_json = get_metrics_file_data(args.metrics_file, args.metric)
 
-    # set ADC proticol access type
-    secure = args.secure.lower()
-    if secure == 'yes':
-        ns_protocol = 'https'
-    else:
-        ns_protocol = 'http'
+    # Get protocol type to access ADC
+    ns_protocol = get_ns_session_protocol(args) 
 
+    # Get cert validation args provided 
+    ns_cert = get_cert_validation_args(args, ns_protocol) 
+       
     requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+    requests.packages.urllib3.disable_warnings(SubjectAltNameWarning)
 
     # Verify ADC session access
-    verify_ns_session_access(args.target_nsip, ns_protocol, ns_user, ns_password)
+    verify_ns_session_access(args.target_nsip, ns_protocol, ns_user, ns_password, ns_cert)
 
     # Verify ADC stats access
-    verify_ns_stats_access(args.target_nsip, ns_protocol, ns_user, ns_password, args.timeout)
+    verify_ns_stats_access(args.target_nsip, ns_protocol, ns_user, ns_password, args.timeout, ns_cert)
 
     # Start the server to expose the metrics.
     start_exporter_server(args.port)
@@ -455,7 +505,8 @@ if __name__ == '__main__':
 
     try:
         REGISTRY.register(CitrixAdcCollector(nsip=args.target_nsip, metrics=metrics_json, username=ns_user,
-                                             password=ns_password, protocol=ns_protocol, nitro_timeout=args.timeout, k8s_cic_prefix=args.k8sCICprefix))
+                                             password=ns_password, protocol=ns_protocol, 
+                                             nitro_timeout=args.timeout, k8s_cic_prefix=args.k8sCICprefix,                                                          ns_cert=ns_cert))
     except Exception as e:
         logger.error('Invalid arguments! could not register collector for {}::{}'.format(args.target_nsip, e))
 
