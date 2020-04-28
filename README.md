@@ -61,14 +61,18 @@ The exporter can be setup as given in the diagram using;
 ```
 nohup python exporter.py --target-nsip=10.0.0.1 --port 8888 --config-file=config.yaml &
 ```
-This directs the exporter container to scrape 10.0.0.1 IP, and the expose the stats it collects on port 8888. 
+This directs the exporter container to scrape 10.0.0.1 IP, and the expose the stats it collects on port 8888.
+
 File 'config.yaml' should contain username and password of the ADC to which exporter connects to. For reference, refer config.yaml.example which specifies the format for providing the login credentials. 
+
 Login credentials can also be provided using environment variables using NS_USER, NS_PASSWORD.Though config file input is the preferred method for security concerns.
 
 The user can then access the exported metrics directly thorugh port 8888 on the machine where the exporter is running, or Prometheus and Grafana can be setup to view the exported metrics though their GUI.
 
 ### Additionals:
-As an optional configuration, Citrix ADC exporter allows you to validate the SSL server certificate provided by Citrix ADC. For this:
+As an optional configuration, Citrix ADC exporter allows you to validate the SSL server certificate provided by Citrix ADC. 
+
+For this:
 In config.yaml, '--validate-cert' option should be set to 'yes', and certificate path should be provided using'--cacert-path' argument. Please confirm that certificate and '--cert-path' provided is valid. Additionaly, '--validate-cert(default='no')' and '--secure(default='yes')' options should be set to 'yes'.
 
 
@@ -114,8 +118,10 @@ To setup the exporter as given in the diagram, the following command can be used
 ```
 docker run -dt -p 8888:8888 --mount type=bind,source=/path/to/config.yaml,target=/exporter/config.yaml --name citrix-adc-exporter quay.io/citrix/citrix-adc-metrics-exporter:1.4.2 --target-nsip=10.0.0.1 --port=8888 --config-file=/exporter/config.yaml
 ```
-This directs the exporter container to scrape the 10.0.0.1 IP, and the expose the stats it collects on port 8888. 
-File 'config.yaml' should contain username and password of the ADC to which exporter connects to. For reference, refer config.yaml.example which specifies the format for providing the login credentials. Config.yaml file then needs to be mounted to the container at fixed target specified('/exporter/config.yaml') only. 
+This directs the exporter container to scrape the 10.0.0.1 IP, and the expose the stats it collects on port 8888.
+
+File 'config.yaml' should contain username and password of the ADC to which exporter connects to. For reference, refer config.yaml.example which specifies the format for providing the login credentials. Config.yaml file then needs to be mounted to the container at fixed target specified('/exporter/config.yaml') only.
+
 Login credentials can also be provided using environment variables using NS_USER, NS_PASSWORD.Though config file input is the preferred method for security concerns.
 
 The user can then access the exported metrics directly thorugh port 8888 on the machine where the exporter is running, or Prometheus and Grafana can be setup to view the exported metrics though their GUI.
@@ -124,8 +130,10 @@ The user can then access the exported metrics directly thorugh port 8888 on the 
 
 
 ### Additionals:
-As an optional configuration, Citrix ADC exporter allows you to validate the SSL server certificate provided by Citrix ADC. For this:
-In config.yaml, '--validate-cert' option should be set to 'yes', and certificate path should be provided using'--cacert-path' argument. Please confirm that certificate and '--cert-path' provided is valid. Additionaly, '--validate-cert(default='no')' and '--secure(default='yes')' options are set to 'yes' for certificate to be considered.
+As an optional configuration, Citrix ADC exporter allows you to validate the SSL server certificate provided by Citrix ADC.
+
+For this:
+In config.yaml, '--validate-cert' option should be set to 'yes', and certificate path should be provided using'--cacert-path' argument. Please confirm that certificate and '--cert-path' provided is valid. Additionaly, '--validate-cert(default='no')' and '--secure(default='yes')' options should be set to 'yes' for certificate to be considered.
 
 Certificate should then be mounted at the '--cacert-path' provided. For instance, if cert is 'cacert.pem' and '--cacert-path' provided in 'config.yaml' is '/exporter/cacert.pem'
 
