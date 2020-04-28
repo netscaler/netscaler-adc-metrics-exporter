@@ -138,7 +138,7 @@ In config.yaml, '--validate-cert' option should be set to 'yes', and certificate
 Certificate should then be mounted at the '--cacert-path' provided. For instance, if cert is 'cacert.pem' and '--cacert-path' provided in 'config.yaml' is '/exporter/cacert.pem'
 
 ```
-docker run -dt -p 8888:8888 --mount type=bind,source=/path/to/config.yaml,target=/exporter/config.yaml --mount type=bind,source=/path/to/cacert.pem,target=/exporter/cacert.pem --name citrix-adc-exporter exporter:latest --target-nsip=10.0.0.1 --port=8888 --config-file=/exporter/config.yaml
+docker run -dt -p 8888:8888 --mount type=bind,source=/path/to/config.yaml,target=/exporter/config.yaml --mount type=bind,source=/path/to/cacert.pem,target=/exporter/cacert.pem --name citrix-adc-exporter quay.io/citrix/citrix-adc-metrics-exporter:1.4.2 --target-nsip=10.0.0.1 --port=8888 --config-file=/exporter/config.yaml
 ``` 
 Cert validation options can also be provided using environment variables using NS_VALIDATE_CERT, NS_CACERT_PATH. Thoughconfig file input is the preferred method.
 
