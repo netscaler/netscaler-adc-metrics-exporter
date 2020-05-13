@@ -33,6 +33,7 @@ To use the exporter as a python script, the ```prometheus_client``` and ```reque
 pip install prometheus_client
 pip install requests
 pip install PyYAML
+pip install retrying
 ```
 Now, create a folder ```/exporter``` and copy the ```metrics.json``` file to the folder. 
 Finally, the exporter can be run as a python script using;
@@ -85,15 +86,15 @@ In config.yaml, '--validate-cert' option should be set to 'yes', and certificate
 <summary>Usage as a Container</summary>
 <br>
 
-In order to use the exporter as a container, the image ```quay.io/citrix/citrix-adc-metrics-exporter:1.4.2``` will need to be pulled using;
+In order to use the exporter as a container, the image ```quay.io/citrix/citrix-adc-metrics-exporter:1.4.3``` will need to be pulled using;
 ```
-docker pull quay.io/citrix/citrix-adc-metrics-exporter:1.4.2
+docker pull quay.io/citrix/citrix-adc-metrics-exporter:1.4.3
 ```
 **NOTE:** It can also be build locally using ```docker build -f Dockerfile -t <image_name>:<tag> ./```
 
 Now, the exporter can be run using:
 ```
-docker run -dt -p <host_port>:<container_port> --mount type=bind,source=<host-path-for-config-file>,target=/exporter/config.yaml quay.io/citrix/citrix-adc-metrics-exporter:1.4.2 [flags] --config-file=/exporter/config.yaml
+docker run -dt -p <host_port>:<container_port> --mount type=bind,source=<host-path-for-config-file>,target=/exporter/config.yaml quay.io/citrix/citrix-adc-metrics-exporter:1.4.3 [flags] --config-file=/exporter/config.yaml
 ```
 where the flags are:
 
@@ -116,7 +117,7 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 
 To setup the exporter as given in the diagram, the following command can be used:
 ```
-docker run -dt -p 8888:8888 --mount type=bind,source=/path/to/config.yaml,target=/exporter/config.yaml --name citrix-adc-exporter quay.io/citrix/citrix-adc-metrics-exporter:1.4.2 --target-nsip=10.0.0.1 --port=8888 --config-file=/exporter/config.yaml
+docker run -dt -p 8888:8888 --mount type=bind,source=/path/to/config.yaml,target=/exporter/config.yaml --name citrix-adc-exporter quay.io/citrix/citrix-adc-metrics-exporter:1.4.3 --target-nsip=10.0.0.1 --port=8888 --config-file=/exporter/config.yaml
 ```
 This directs the exporter container to scrape the 10.0.0.1 IP, and the expose the stats it collects on port 8888.
 
@@ -138,7 +139,7 @@ In config.yaml, '--validate-cert' option should be set to 'yes', and certificate
 Certificate should then be mounted at the '--cacert-path' provided. For instance, if cert is 'cacert.pem' and '--cacert-path' provided in 'config.yaml' is '/exporter/cacert.pem'
 
 ```
-docker run -dt -p 8888:8888 --mount type=bind,source=/path/to/config.yaml,target=/exporter/config.yaml --mount type=bind,source=/path/to/cacert.pem,target=/exporter/cacert.pem --name citrix-adc-exporter quay.io/citrix/citrix-adc-metrics-exporter:1.4.2 --target-nsip=10.0.0.1 --port=8888 --config-file=/exporter/config.yaml
+docker run -dt -p 8888:8888 --mount type=bind,source=/path/to/config.yaml,target=/exporter/config.yaml --mount type=bind,source=/path/to/cacert.pem,target=/exporter/cacert.pem --name citrix-adc-exporter quay.io/citrix/citrix-adc-metrics-exporter:1.4.3 --target-nsip=10.0.0.1 --port=8888 --config-file=/exporter/config.yaml
 ``` 
 Cert validation options can also be provided using environment variables using NS_VALIDATE_CERT, NS_CACERT_PATH. Thoughconfig file input is the preferred method.
 
@@ -167,7 +168,7 @@ metadata:
 spec:
   containers:
     - name: exporter
-      image: quay.io/citrix/citrix-adc-metrics-exporter:1.4.2
+      image: quay.io/citrix/citrix-adc-metrics-exporter:1.4.3
       args:
         - "--target-nsip=10.0.0.1"
         - "--port=8888"
@@ -240,7 +241,7 @@ metadata:
 spec:
   containers:
     - name: exporter
-      image: quay.io/citrix/citrix-adc-metrics-exporter:1.4.2
+      image: quay.io/citrix/citrix-adc-metrics-exporter:1.4.3
       args:
         - "--target-nsip=10.0.0.1"
         - "--port=8888"

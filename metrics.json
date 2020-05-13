@@ -1,7 +1,11 @@
 {
     "system": {
         "counters": [
-            ["numcpus", "citrixadc_cpu_number"]
+            ["numcpus", "citrixadc_cpu_number"],
+            ["disk1avail", "citrixadc_var_partition_free_mb"],
+            ["disk1used", "citrixadc_var_partition_used_mb"],
+            ["disk0avail", "citrixadc_flash_partition_free_mb"],
+            ["disk0used", "citrixadc_flash_partition_used_mb"]
         ],
 
         "gauges": [
@@ -9,7 +13,9 @@
             ["memusagepcnt", "citrixadc_memory_usage_percent"],
             ["mgmtcpuusagepcnt", "citrixadc_management_cpu_usage_percent"],
             ["pktcpuusagepcnt", "citrixadc_packet_cpu_usage_percent"],
-            ["rescpuusagepcnt", "citrixadc_res_cpu_usage_percent"]
+            ["rescpuusagepcnt", "citrixadc_res_cpu_usage_percent"],
+            ["disk1perusage", "citrixadc_var_partition_used_percent"],
+            ["disk0perusage", "citrixadc_flash_partition_used_percent"]
         ]
     },
 

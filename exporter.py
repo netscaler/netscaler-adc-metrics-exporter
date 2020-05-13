@@ -13,8 +13,15 @@ from prometheus_client.core import GaugeMetricFamily, CounterMetricFamily, REGIS
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from requests.packages.urllib3.exceptions import SubjectAltNameWarning
 from requests.auth import HTTPBasicAuth
+from retrying  import RetryError
+from retrying import retry
 
-
+NS_USERNAME_FILE = '/mnt/nslogin/username'
+NS_PASSWORD_FILE = '/mnt/nslogin/password'
+DEPLOYMENT_WITH_CPX = 'sidecar'
+CPX_CRED_DIR = '/var/deviceinfo'
+CPX_CRED_FILE = '/var/deviceinfo/random_id'
+ 
 def parseConfig(args):
     '''Parses the config file for specified metrics.'''
 
@@ -92,7 +99,10 @@ def check_nitro_access(protocol, nsip, username, password, ns_cert):
             logger.error('Invalid username or password for Citrix Adc!, Unaurthorized Err : {}'.format(response.status_code))
             return False
     except requests.exceptions.RequestException as err:
-        logger.error('{}'.format(err))
+        logger.error('Nitroc Access Error {}'.format(err))
+        return False
+    except Exception as e: 
+        logger.error("Unable to authenticated ADC nitro credentials {}".format(e))
         return False
     return True
 
@@ -132,13 +142,52 @@ def verify_ns_stats_access(nsip, ns_protocol, ns_user, ns_password, timeout, ns_
     '''Validates if exporter is able to fetch stats from ADC.'''
 
     ns_stat_access = False
-    logger.info('Verifing stat acces for citrix adc with ip {}'.format(nsip))
+    logger.info('Verifying stat acces for citrix adc with ip {}'.format(nsip))
     while not ns_stat_access:
         ns_stat_access = get_sslcertkey_stats(ns_protocol, nsip, ns_user, ns_password, timeout, ns_cert)
         if ns_stat_access is False:
             logger.info('Retrying to verify stat access for citrix adc with ip {}'.format(nsip))
         time.sleep(4)
     logger.info('Exporter able to acces stats for citrix adc {}'.format(nsip))
+
+
+def retry_cpx_password_read(ns_password):
+    if ns_password is not None:
+        return False
+    return True
+
+# Generally in the side car mode, credentials should be immediately available.
+# Credential file availability cannot take more than a minute in SIDECAR mode even when nodes are highly engaged.
+# Wait for credentials max upto 120 seconds.
+# There is no need to wait indefinetely even if credentials are not available after two minutes.
+@retry(stop_max_attempt_number=120, wait_fixed=1000, retry_on_result=retry_cpx_password_read)
+def read_cpx_credentials(ns_password):
+    if os.path.isdir(CPX_CRED_DIR):
+        if os.path.isfile(CPX_CRED_FILE) and os.path.getsize(CPX_CRED_FILE):
+            try:
+                with open(CPX_CRED_FILE, 'r') as fr:
+                    ns_password = fr.read()
+                    if ns_password is not None:
+                        logger.info("SIDECAR Mode: Successfully read crendetials for CPX")
+                    else:
+                        logger.debug("SIDECAR Mode: None password while reading CPX crednetials from file")
+            except IOError as e:
+                logger.debug("SIDECAR Mode: IOError {}, while reading CPX crednetials from file".format(e))
+    return ns_password
+
+
+def get_cpx_credentials(ns_user, ns_password):
+    'Get ns credenttials when CPX mode'
+
+    logger.info("SIDECAR Mode: Trying to get credentials for CPX")
+    try:
+        ns_password = read_cpx_credentials(ns_password)
+    except RetryError:
+        logger.error("SIDECAR Mode: Unable to fetch CPX credentials")
+
+    if ns_password is not None:
+        ns_user = 'nsroot'
+    return ns_user, ns_password
 
 # Priority order for credentials follows the order config.yaml input > env variables
 # First env values are populated which can then be overwritten by config values if present.
@@ -148,20 +197,31 @@ def get_login_credentials(args):
     ns_user = os.environ.get("NS_USER")
     ns_password = os.environ.get("NS_PASSWORD")
 
+    deployment_mode = os.environ.get("NS_DEPLOYMENT_MODE", "")
+    if deployment_mode.lower() == 'sidecar':
+        logger.info('ADC is running as sidecar')
+    else:
+        logger.info('ADC is running as standalone')   
+
     if os.environ.get('KUBERNETES_SERVICE_HOST') is not None:
-        if os.path.isfile("/mnt/nslogin/username"):
+        if os.path.isfile(NS_USERNAME_FILE):
             try:
-                with open("/mnt/nslogin/username", 'r') as f:
+                with open(NS_USERNAME_FILE, 'r') as f:
                     ns_user = f.read().rstrip()
             except Exception as e:
                 logger.error('Error while reading secret. Verify if secret is property mounted::%s', e)
                 
-        if os.path.isfile("/mnt/nslogin/password"):
+        if os.path.isfile(NS_PASSWORD_FILE):
             try:
-                with open("/mnt/nslogin/password", 'r') as f:
+                with open(NS_PASSWORD_FILE, 'r') as f:
                     ns_password = f.read().rstrip()
             except Exception as e:
                 logger.error('Error while reading secret. Verify if secret is property mounted::%s', e)
+
+        if ns_user is None and ns_password is None:
+            if deployment_mode.lower() == DEPLOYMENT_WITH_CPX:
+                ns_user, ns_password = get_cpx_credentials(ns_user, ns_password)
+         
     else:
         if hasattr(args, 'username'):
             ns_user = args.username
@@ -171,6 +231,7 @@ def get_login_credentials(args):
          
     return ns_user, ns_password
 
+
 def get_ns_session_protocol(args):
     'Get ns session protocol to access ADC'
     secure = args.secure.lower()
@@ -179,6 +240,7 @@ def get_ns_session_protocol(args):
     else:
         ns_protocol = 'http'
     return ns_protocol
+
 
 def get_ns_cert_path(args):
     'Get ns cert path if protocol is secure option is set' 
@@ -229,11 +291,14 @@ class CitrixAdcCollector(object):
         self.nitro_timeout = nitro_timeout
         self.k8s_cic_prefix = k8s_cic_prefix
         self.ns_cert = ns_cert
-
+        self.ns_session = requests.Session()
+        
     # Collect metrics from Citrix ADC
     def collect(self):
         nsip = self.nsip
         data = {}
+        self.ns_session_login()
+
         for entity in self.metrics.keys():
             logger.info('Collecting metric %s for %s' % (entity, nsip))
             try:
@@ -241,6 +306,7 @@ class CitrixAdcCollector(object):
             except Exception as e:
                 logger.warning('Could not collect metric: ' + str(e))
 
+        self.ns_session_logout()
         # Add labels to metrics and provide to Prometheus
         log_prefix_match = True
 
@@ -396,15 +462,16 @@ class CitrixAdcCollector(object):
     def get_entity_stat(self, url):
         '''Fetches stats from ADC using nitro using for a particular entity.'''
 
-        headers = {'X-NITRO-USER': self.username, 'X-NITRO-PASS': self.password}
         try:
-            r = requests.get(url, headers=headers, verify=self.ns_cert, timeout=self.nitro_timeout)
+            r = self.ns_session.get(url, verify=self.ns_cert, timeout=self.nitro_timeout)
             data = r.json()
             if data['errorcode'] == 0:
                 return data
-        except Exception as e:
-            logger.error("Unable to access stats from ADC")
-            return None
+        except requests.exceptions.RequestException as err:
+            logger.error('Stat Access Error {}'.format(err))
+        except Exception as e: 
+            logger.error("Unable to access stats from ADC {}".format(e))
+
 
     def update_lbvs_label(self, label_values, ns_metric_name, log_prefix_match):
         '''Updates lbvserver lables for ingress and services for k8s_cic_ingress_service_stat dashboard.'''
@@ -441,7 +508,54 @@ class CitrixAdcCollector(object):
             logger.error('Unable to update k8s label: (%s)', e)
             return False
 
+    def ns_session_login(self):
+        ''' Login to ADC and get a session id for stat access'''
 
+        payload={"login": {'username': self.username, 'password': self.password}}
+        url = '%s://%s/nitro/v1/config/login' % (self.protocol, self.nsip)
+        ns_login = False
+        while not ns_login:
+            try:
+                response = self.ns_session.post(url, json=payload, verify=ns_cert)
+                data = response.json() 
+                if data['errorcode'] == 0 :
+                    logger.info("ADC Session Login Successful")
+                    ns_login = True
+                else:
+                    logger.error("ADC Session Login Failed")
+            except requests.exceptions.RequestException as err:
+                logger.error('Session Login Error {}'.format(err))
+            except Exception as e:
+                logger.error("Login Session Try Failed{}".format(e))
+            if ns_login is False:
+                logger.info('Retrying to Login to citrix adc')
+                time.sleep(1)
+
+    def ns_session_logout(self):
+        ''' Logout of ADC session'''
+
+        payload={"logout": {}}
+        url = '%s://%s/nitro/v1/config/logout' % (self.protocol, self.nsip)
+        ns_logout = False
+        while not ns_logout:
+            try:
+                response = self.ns_session.post(url, json=payload, verify=ns_cert)
+                if response.status_code == 201 or response.status_code == 200:
+                     ns_logout = True
+                     self.ns_session.close()
+                     logger.info("ADC Session Logout Successful")
+                     break
+                else:
+                    logger.error("ADC Session Logout Failed")
+            except requests.exceptions.RequestException as err:
+                logger.error('Session Logout Error {}'.format(err))
+            except Exception as e:
+                logger.error("Logout Session Try Failed{}".format(e))
+            if ns_logout is False:
+                logger.info('Retrying to Logout of citrix adc')
+                time.sleep(1)
+ 
+ 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
