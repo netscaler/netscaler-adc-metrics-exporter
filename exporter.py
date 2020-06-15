@@ -292,13 +292,17 @@ class CitrixAdcCollector(object):
         self.k8s_cic_prefix = k8s_cic_prefix
         self.ns_cert = ns_cert
         self.ns_session = requests.Session()
+        self.current_session = False
         
     # Collect metrics from Citrix ADC
     def collect(self):
         nsip = self.nsip
         data = {}
-        self.ns_session_login()
 
+        if self.current_session:
+            return
+
+        self.ns_session_login()
         for entity in self.metrics.keys():
             logger.info('Collecting metric %s for %s' % (entity, nsip))
             try:
@@ -425,15 +429,19 @@ class CitrixAdcCollector(object):
         if servicegroup_list_ds:
             servicegroup_data = []
             for servicegroups_ds in servicegroup_list_ds['servicegroup']:
-                _manual_servicegroup_name = servicegroups_ds['servicegroupname']
-                url = '%s://%s/nitro/v1/stat/servicegroup/%s?statbindings=yes' % (self.protocol, self.nsip, _manual_servicegroup_name)
+                _servicegroup_name = servicegroups_ds['servicegroupname']
+                url = '%s://%s/nitro/v1/stat/servicegroup/%s?statbindings=yes' % (self.protocol, self.nsip, _servicegroup_name)
                 data_tmp = self.get_entity_stat(url)
                 if data_tmp:
                     if 'servicegroupmember' in data_tmp['servicegroup'][0]:
                     # create a list with stats of all services bound to NS of all servicegroups
                         for individual_svc_binding_data in data_tmp['servicegroup'][0]['servicegroupmember']:
                             # manually adding stats of a particular service
-                            individual_svc_binding_data['_manual_servicegroup_name'] = _manual_servicegroup_name
+                            individual_svc_binding_data['_servicegroup_name'] = _servicegroup_name
+                            svcgroupname = individual_svc_binding_data['servicegroupname']
+                            if svcgroupname.find('?'):
+                                servername = svcgroupname.split('?')[1]
+                            individual_svc_binding_data['server_name'] = servername
                             servicegroup_data.append(individual_svc_binding_data)
             return servicegroup_data
 
@@ -521,6 +529,7 @@ class CitrixAdcCollector(object):
                 if data['errorcode'] == 0 :
                     logger.info("ADC Session Login Successful")
                     ns_login = True
+                    self.current_session = True
                 else:
                     logger.error("ADC Session Login Failed")
             except requests.exceptions.RequestException as err:
@@ -543,6 +552,7 @@ class CitrixAdcCollector(object):
                 if response.status_code == 201 or response.status_code == 200:
                      ns_logout = True
                      self.ns_session.close()
+                     self.current_session = False
                      logger.info("ADC Session Logout Successful")
                      break
                 else:
@@ -598,7 +608,7 @@ if __name__ == '__main__':
 
     # Get cert validation args provided 
     ns_cert = get_cert_validation_args(args, ns_protocol) 
-       
+
     requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
     requests.packages.urllib3.disable_warnings(SubjectAltNameWarning)
 

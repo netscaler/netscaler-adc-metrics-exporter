@@ -1,7 +1,7 @@
 FROM alpine:latest
 RUN apk update
 RUN apk add python py-pip
-RUN apk add curl
+RUN apk add curl iputils
 RUN pip install prometheus_client requests pyyaml retrying
 COPY version/VERSION /exporter/
 COPY exporter.py /exporter/

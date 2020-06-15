@@ -209,10 +209,11 @@
         ],
 
         "labels": [
-            ["_manual_servicegroup_name", "citrixadc_servicegroup_name"],
+            ["_servicegroup_name", "citrixadc_servicegroup_name"],
             ["servicetype", "citrixadc_service_type"],
             ["state", "citrixadc_service_state"],
-            ["primaryipaddress", "citrixadc_service_ip"]
+            ["primaryipaddress", "citrixadc_service_ip"],
+            ["server_name", "citrixadc_server_name"]
         ]
     },
 
@@ -522,6 +523,39 @@
             ["name", "citrixadc_k8s_ing_lb_service_port"],
             ["type", "citrixadc_k8s_ing_lb_type"],
             ["state", "citrixadc_k8s_ing_lb_state"]
+        ]
+    },
+
+     "sslvserver": {
+        "counters": [
+            ["sslctxtotdecbytes", "citrixadc_sslvserver_decrypt_bytes_total"],
+            ["sslctxtotencbytes", "citrixadc_sslvserver_encrypt_bytes_total"],
+            ["sslctxtothwdec_bytes", "citrixadc_sslvserver_decrypt_hardware_bytes_total"],
+            ["sslctxtothwencbytes", "citrixadc_sslvserver_encrypt_hardware_bytes_total"],
+            ["sslctxtotsessionnew", "citrixadc_sslvserver_session_new_total"],
+            ["sslctxtotsessionhits", "citrixadc_sslvserver_session_hits_total"],
+            ["ssltotclientauthsuccess", "citrixadc_sslvserver_auth_success_total"],
+            ["ssltotclientauthfailure", "citrixadc_sslvserver_auth_failure_total"]
+        ],
+
+        "gauges": [
+            ["vslbhealth", "citrixadc_sslvserver_health"],
+            ["actsvcs", "citrixadc_sslvserver_active_services"],
+            ["sslclientauthsuccessrate", "citrixadc_sslvserver_auth_success_rate"],
+            ["sslclientauthfailurerate", "citrixadc_sslvserver_auth_failure_rate"],
+            ["sslctxencbytesrate", "citrixadc_sslvserver_encrypt_bytes_rate"],
+            ["sslctxdecbytesrate", "citrixadc_sslvserver_decrypt_bytes_rate"],
+            ["sslctxhwencbytesrate", "citrixadc_sslvserver_hw_encrypt_bytes_rate"],
+            ["sslctxhwdec_bytesrate", "citrixadc_sslvserver_hw_decrypt_bytes_rate"],
+            ["sslctxsessionnewrate", "citrixadc_sslvserver_session_new_rate"],
+            ["sslctxsessionhitsrate", "citrixadc_sslvserver_session_hits_rate"]
+        ],
+
+        "labels": [
+            ["vservername", "citrixadc_sslvserver_name"],
+            ["type", "citrixadc_sslvserver_type"],
+            ["primaryipaddress", "citrixadc_sslvserver_ip"],
+            ["state", "citrixadc_sslvserver_state"]
         ]
     }
 }
