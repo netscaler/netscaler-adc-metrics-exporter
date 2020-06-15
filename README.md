@@ -134,7 +134,9 @@ The user can then access the exported metrics directly thorugh port 8888 on the 
 As an optional configuration, Citrix ADC exporter allows you to validate the SSL server certificate provided by Citrix ADC.
 
 For this:
-In config.yaml, '--validate-cert' option should be set to 'yes', and certificate path should be provided using'--cacert-path' argument. Please confirm that certificate and '--cert-path' provided is valid. Additionaly, '--validate-cert(default='no')' and '--secure(default='yes')' options should be set to 'yes' for certificate to be considered.
+In config.yaml, '--validate-cert' option should be set to 'yes', and certificate path should be provided using'--cacert-path' argument. 
+Please confirm that certificate and '--cert-path' provided is valid. 
+Additionaly, '--validate-cert(default='no')' and '--secure(default='yes')' options should be set to 'yes' for certificate to be considered.
 
 Certificate should then be mounted at the '--cacert-path' provided. For instance, if cert is 'cacert.pem' and '--cacert-path' provided in 'config.yaml' is '/exporter/cacert.pem'
 
@@ -229,7 +231,9 @@ User need to first mount the secret at any valid path inside pod. For instance, 
 kubectl create secret generic exp-ca-cert --from-file=./cacert.pem"
 ```
 
-In args section of yaml, '--validate-cert' option should be set to 'yes', and certificate path should be provided using'--cacert-path' argument. Please confirm that mounted certificate and '--cert-path' provided are valid. Additionaly, '--validate-cert(default='no')' and '--secure(default='yes')' options are set to 'yes' for certificate to be considered.
+In args section of yaml, '--validate-cert' option should be set to 'yes', and certificate path should be provided using'--cacert-path' argument. 
+Please confirm that mounted certificate and '--cert-path' provided are valid. 
+Additionaly, '--validate-cert(default='no')' and '--secure(default='yes')' options should be set to 'yes' for certificate to be considered.
  
 ```
 apiVersion: v1
