@@ -74,6 +74,7 @@ The user can then access the exported metrics directly thorugh port 8888 on the 
 As an optional configuration, Citrix ADC exporter allows you to validate the SSL server certificate provided by Citrix ADC. 
 
 For this:
+
 -- In config.yaml, '--validate-cert' option should be set to 'yes', and certificate path should be provided using'--cacert-path' argument. 
 
 -- Please confirm that certificate and '--cert-path' provided is valid.
