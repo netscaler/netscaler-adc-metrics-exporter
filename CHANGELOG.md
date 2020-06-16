@@ -7,5 +7,5 @@ All notable changes to this project will be documented in this file.
  - SSLvserver metrics
  - New Label "citrix_server_name" for configured servicegroups under "services" stats.
  - Bug Fix for serial ADC connection 
- - Added package "iputils" in contaniner image for debugging at runtime
+ - Added package "iputils" in container image for debugging at runtime
  
