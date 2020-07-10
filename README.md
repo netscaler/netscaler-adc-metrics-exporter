@@ -52,7 +52,7 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 --timeout        | Specify timeout period for exporter to obtain response from target Citrix ADCs. Default: 15s
 --metrics-file   | The location of metrics.json file. Default: /exporter/metrics.json
 --log-file       | The location of exporter.log file. Default: /exporter/exporter.log
---log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: ERROR
+--log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: DEBUG
 --config-file    | File with configs such as ```username```, ```password```, ```validate-cert```, ```cacert-path```, etc. Helps supply username and password through file rather than CLI.
 --validate-cert. | Specify if ca certifcate is to be validated to access Citrix ADC. Default: 'no'. Valid value: 'yes'
 --cacert-path.   | Provide valid cert path if "-validate-cert" set to 'yes'. cert path will only be considered if '--validate-cert' is set to 'yes'.
@@ -113,7 +113,7 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 --timeout        | Specify timeout period for exporter to obtain response from target Citrix ADC. Default: 15s
 --metrics-file   | The location of metrics.json file. Default: /exporter/metrics.json
 --log-file       | The location of exporter.log file. Default: /exporter/exporter.log
---log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: ERROR
+--log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: DEBUG
 --config-file    | File with configs such as ```username```, ```password```, ```validate-cert``, ```cacert-path```, etc. Helps supply username and password through file rather than CLI for secure deployment.
 --validate-cert  | Specify if ca certifcate is to be validated to access Citrix ADC. Default: 'no'. Valid value: 'yes'
 --cacert-path    | Provide valid cert path if "--validate-cert" set to 'yes'. cert path will only be considered if '--validate-cert' is set to 'yes'.
@@ -224,7 +224,7 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 --timeout        | Specify timeout period for exporter to obtain response from target Citrix ADC. Default: 15s
 --metrics-file   | The location of metrics.json file. Default: /exporter/metrics.json
 --log-file       | The location of exporter.log file. Default: /exporter/exporter.log
---log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: ERROR
+--log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: DEBUG
 --config-file    | File with configs such as ```username```, ```password```, ```validate-cert```, ```cacert-path```, etc. Helps supply username and password through file rather than CLI.
 --validate-cert  | Specify if ca certifcate is to be validated to access Citrix ADC. Default: 'no'. Valid value: 'yes'
 --cacert-path    | Provide valid cert path if "--validate-cert" set to 'yes'. cert path will only be considered if '--validate-cert' is set to 'yes'.
