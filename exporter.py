@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import os
 import yaml
 import json
@@ -10,9 +10,11 @@ import argparse
 import sys
 from prometheus_client import start_http_server
 from prometheus_client.core import GaugeMetricFamily, CounterMetricFamily, REGISTRY
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
-from requests.packages.urllib3.exceptions import SubjectAltNameWarning
+from urllib3.exceptions import InsecureRequestWarning
+from urllib3.exceptions import SubjectAltNameWarning
+from urllib3.util.retry import Retry
 from requests.auth import HTTPBasicAuth
+from requests.adapters import HTTPAdapter
 from retrying  import RetryError
 from retrying import retry
 
@@ -21,7 +23,114 @@ NS_PASSWORD_FILE = '/mnt/nslogin/password'
 DEPLOYMENT_WITH_CPX = 'sidecar'
 CPX_CRED_DIR = '/var/deviceinfo'
 CPX_CRED_FILE = '/var/deviceinfo/random_id'
- 
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--target-nsip', required=True, type=str, help='The IP of the Citrix ADC to gather metrics from. Required')
+    parser.add_argument('--start-delay', default=10, type=float, help='Start the exporter running after a delay to allow other containers to start. Default: 10s')
+    parser.add_argument('--port', required=True, type=int, help='The port for the exporter to listen on. Required')
+    parser.add_argument('--metric', required=False, action='append', type=str, help='Collect only the metrics specified here, may be used multiple times.')
+    parser.add_argument('--secure', default='yes', type=str, help='yes: Use HTTPS, no: Use HTTP. Default: no')
+    parser.add_argument('--validate-cert', required=False, type=str, help='yes: Validate Cert, no: Do not validate cert. Default: no')
+    parser.add_argument('--cacert-path', required=False, type=str, help='Certificate path for secure validation')
+    parser.add_argument('--timeout', default=15, type=float, help='Timeout for Nitro calls.')
+    parser.add_argument('--metrics-file', required=False, default='/exporter/metrics.json', type=str, help='Location of metrics.json file. Default: /exporter/metrics.json')
+    parser.add_argument('--log-file', required=False, default='/exporter/exporter.log', type=str, help='Location of exporter.log file. Default: /exporter/exporter.log')
+    parser.add_argument('--log-level', required=False, default='DEBUG', type=str, choices=['DEBUG', 'INFO', 'WARN', 'ERROR', 'CRITICAL', 'debug', 'info', 'warn', 'error', 'critical'])
+    parser.add_argument('--config-file', required=False, type=str)
+    parser.add_argument('--k8sCICprefix', required=False, default='k8s', type=str, help='Prefix for CIC configured k8s entities')
+
+    # parse arguments provided
+    args = parser.parse_args()
+
+    # set logging credentials
+    global logger
+    logger = set_logging_args(args.log_file, args.log_level)
+
+    # parse config file if provided as an argument
+    if args.config_file:
+        args = parseConfig(args)
+
+    # Get username and password of Citrix ADC
+    ns_user, ns_password = get_login_credentials(args)
+
+    # Wait for other containers to start.
+    logger.info('Sleeping for %s seconds.' % args.start_delay)
+    time.sleep(args.start_delay)
+
+    # Load the metrics file specifying stats to be collected
+    metrics_json = get_metrics_file_data(args.metrics_file, args.metric)
+
+    # Get protocol type to access ADC
+    ns_protocol = get_ns_session_protocol(args) 
+
+    # Get cert validation args provided 
+    ns_cert = get_cert_validation_args(args, ns_protocol) 
+
+    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+    requests.packages.urllib3.disable_warnings(SubjectAltNameWarning)
+
+    # Creates the global session with default timeout
+    ns_session = newSession(timeout=args.timeout)
+
+    # Start the server to expose the metrics.
+    start_exporter_server(args.port)
+
+    if not args.k8sCICprefix.isalnum():
+        logger.error('Invalid k8sCICprefix : non-alphanumeric not accepted')
+
+    # Register the exporter as a stat collector
+    logger.info('Registering collector for %s' % args.target_nsip)
+
+    try:
+        REGISTRY.register(CitrixAdcCollector(nsip=args.target_nsip, metrics=metrics_json, username=ns_user,
+                                             password=ns_password, protocol=ns_protocol, 
+                                             k8s_cic_prefix=args.k8sCICprefix, ns_cert=ns_cert,
+                                             ns_session=ns_session))
+    except Exception as e:
+        logger.error('Invalid arguments! could not register collector for {}::{}'.format(args.target_nsip, e))
+
+    # Forever
+    while True:
+        signal.pause()
+
+
+class TimeoutHTTPAdapter(HTTPAdapter):
+    def __init__(self, *args, **kwargs):
+        if "timeout" in kwargs:
+            self.timeout = kwargs["timeout"]
+            del kwargs["timeout"]
+        if "max_retries" in kwargs:
+            self.max_retries = kwargs["max_retries"]
+            del kwargs["max_retries"]
+        super(HTTPAdapter, self).__init__(*args, **kwargs)
+
+    def get(self, request, **kwargs):
+        timeout = kwargs.get("timeout")
+        if timeout is None:
+            kwargs["timeout"] = self.timeout
+        return super(HTTPAdapter, self).get(request, **kwargs)
+    
+    def post(self, request, **kwargs):
+        timeout = kwargs.get("timeout")
+        if timeout is None:
+            kwargs["timeout"] = self.timeout
+        return super(HTTPAdapter, self).post(request, **kwargs)
+
+
+def newSession(retries=3, backoff_factor=1, timeout=None, session=None):
+    session = session or requests.Session()
+    timeout = timeout or 15
+    retry = Retry(
+            total=retries,
+            backoff_factor=backoff_factor
+    )
+    adapter = TimeoutHTTPAdapter(max_retries=retry,timeout=timeout)
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+    return session
+
+
 def parseConfig(args):
     '''Parses the config file for specified metrics.'''
 
@@ -42,15 +151,15 @@ def get_metrics_file_data(metrics_file, metric):
     try:
         f = open(metrics_file, 'r')
         # collect selected metrics only
-        if args.metric:
-            metrics_data = json.load(f)
-            metrics_json = {d: metrics_data[d] for d in metrics_data.keys() if d in metric}
+        if metric:
+            _metrics_data = json.load(f)
+            _metrics_json = {d: metrics_data[d] for d in metrics_data.keys() if d in metric}
         # collect all default metrics
         else:
-            metrics_json = json.load(f)
+            _metrics_json = json.load(f)
     except Exception as e:
         logger.error('Error while loading metrics::%s', e)
-    return metrics_json
+    return _metrics_json
 
 
 def set_logging_args(log_file, log_level):
@@ -85,70 +194,8 @@ def start_exporter_server(port):
         start_http_server(port)
         print("Exporter is running...")
     except Exception as e:
-        logger.critical('Error while opening port: {}', format(e))
-        print(e)
-
-
-def check_nitro_access(protocol, nsip, username, password, ns_cert):
-    '''Validates if exporter is able access ADC.'''
-
-    url = '%s://%s/nitro/v1/config/' % (protocol, nsip)
-    try:
-        response = requests.get(url, verify=ns_cert, auth=HTTPBasicAuth(username, password))
-        if (response.status_code == requests.status_codes.codes.unauthorized):
-            logger.error('Invalid username or password for Citrix Adc!, Unaurthorized Err : {}'.format(response.status_code))
-            return False
-    except requests.exceptions.RequestException as err:
-        logger.error('Nitroc Access Error {}'.format(err))
-        return False
-    except Exception as e: 
-        logger.error("Unable to authenticated ADC nitro credentials {}".format(e))
-        return False
-    return True
-
-
-def get_sslcertkey_stats(protocol, nsip, username, password, nitro_timeout, ns_cert):
-    '''Validates if exporter is able fetch stats access from ADC when it's fully configured.'''
-
-    headers = {'X-NITRO-USER': username, 'X-NITRO-PASS': password}
-    url = '%s://%s/nitro/v1/config/sslcertkey' % (protocol, nsip)
-    try:
-        r = requests.get(url, headers=headers, verify=ns_cert, timeout=nitro_timeout)
-        data = r.json()
-        if data['sslcertkey'] is None:
-            return False
-        else:
-            return True
-    except Exception as e:
-        logger.warning("Unable to access stats, ADC still not fully configured")
-        return False
-    return True
-
-
-def verify_ns_session_access(nsip, ns_protocol, ns_user, ns_password, ns_cert):
-    '''Validates if exporter is able to establish session with ADC and fetch stats.'''
-
-    ns_access_success = False
-    logger.info('Attempting to connect to citrix adc with ip {}'.format(nsip))
-    while not ns_access_success:
-        ns_access_success = check_nitro_access(ns_protocol, nsip, ns_user, ns_password, ns_cert)
-        if ns_access_success is False:
-            logger.info('Retrying to connect to citrix adc with ip {}'.format(nsip))
-        time.sleep(1)
-    logger.info('Exporter connected to citrix adc {}'.format(nsip))
-
-
-def verify_ns_stats_access(nsip, ns_protocol, ns_user, ns_password, timeout, ns_cert):
-    '''Validates if exporter is able to fetch stats from ADC.'''
-
-    ns_stat_access = False
-    logger.info('Verifying stat acces for citrix adc with ip {}'.format(nsip))
-    while not ns_stat_access:
-        ns_stat_access = get_sslcertkey_stats(ns_protocol, nsip, ns_user, ns_password, timeout, ns_cert)
-        if ns_stat_access is False:
-            logger.info('Retrying to verify stat access for citrix adc with ip {}'.format(nsip))
-        time.sleep(4)
-    logger.info('Exporter able to acces stats for citrix adc {}'.format(nsip))
+        logger.critical('EXITING: error while opening port: {}', format(e))
+        sys.exit()
 
 
 def retry_cpx_password_read(ns_password):
@@ -282,25 +329,21 @@ class CitrixAdcCollector(object):
     ''' Add/Update labels for metrics using prometheus apis.'''
 
     def __init__(self, nsip, metrics, username, password, protocol, 
-                 nitro_timeout, k8s_cic_prefix, ns_cert):
+                 k8s_cic_prefix, ns_cert, ns_session):
         self.nsip = nsip
         self.metrics = metrics
         self.username = username
         self.password = password
         self.protocol = protocol
-        self.nitro_timeout = nitro_timeout
         self.k8s_cic_prefix = k8s_cic_prefix
         self.ns_cert = ns_cert
-        self.ns_session = requests.Session()
+        self.ns_session = ns_session
         self.current_session = False
         
     # Collect metrics from Citrix ADC
     def collect(self):
         nsip = self.nsip
         data = {}
-
-        if self.current_session:
-            return
 
         self.ns_session_login()
         for entity in self.metrics.keys():
@@ -471,7 +514,7 @@ class CitrixAdcCollector(object):
         '''Fetches stats from ADC using nitro using for a particular entity.'''
 
         try:
-            r = self.ns_session.get(url, verify=self.ns_cert, timeout=self.nitro_timeout)
+            r = self.ns_session.get(url, verify=self.ns_cert)
             data = r.json()
             if data['errorcode'] == 0:
                 return data
@@ -521,119 +564,37 @@ class CitrixAdcCollector(object):
 
         payload={"login": {'username': self.username, 'password': self.password}}
         url = '%s://%s/nitro/v1/config/login' % (self.protocol, self.nsip)
-        ns_login = False
-        while not ns_login:
-            try:
-                response = self.ns_session.post(url, json=payload, verify=ns_cert)
-                data = response.json() 
-                if data['errorcode'] == 0 :
-                    logger.info("ADC Session Login Successful")
-                    ns_login = True
-                    self.current_session = True
-                else:
-                    logger.error("ADC Session Login Failed")
-            except requests.exceptions.RequestException as err:
-                logger.error('Session Login Error {}'.format(err))
-            except Exception as e:
-                logger.error("Login Session Try Failed{}".format(e))
-            if ns_login is False:
-                logger.info('Retrying to Login to citrix adc')
-                time.sleep(1)
+        try:
+            response = self.ns_session.post(url, json=payload, verify=self.ns_cert)
+            data = response.json() 
+            if data['errorcode'] == 0 :
+                logger.info("ADC Session Login Successful")
+            else:
+                logger.error("ADC Session Login Failed")
+                raise SystemExit('citrix exporter exit when it cannot authenticate: ', e)
+        except requests.exceptions.RequestException as err:
+            logger.error('Session Login Error {}'.format(err))
+            raise SystemExit('citrix exporter exit when it cannot authenticate: ', err)
+        except Exception as e:
+            logger.error("Login Session Try Failed{}".format(e))
+            raise SystemExit('citrix exporter exit when it cannot authenticate: ', e)
 
     def ns_session_logout(self):
         ''' Logout of ADC session'''
 
         payload={"logout": {}}
         url = '%s://%s/nitro/v1/config/logout' % (self.protocol, self.nsip)
-        ns_logout = False
-        while not ns_logout:
-            try:
-                response = self.ns_session.post(url, json=payload, verify=ns_cert)
-                if response.status_code == 201 or response.status_code == 200:
-                     ns_logout = True
-                     self.ns_session.close()
-                     self.current_session = False
-                     logger.info("ADC Session Logout Successful")
-                     break
-                else:
-                    logger.error("ADC Session Logout Failed")
-            except requests.exceptions.RequestException as err:
-                logger.error('Session Logout Error {}'.format(err))
-            except Exception as e:
-                logger.error("Logout Session Try Failed{}".format(e))
-            if ns_logout is False:
-                logger.info('Retrying to Logout of citrix adc')
-                time.sleep(1)
- 
- 
+        try:
+            response = self.ns_session.post(url, json=payload, verify=self.ns_cert)
+            if response.status_code == 201 or response.status_code == 200:
+                self.ns_session.close()
+                logger.info("ADC Session Logout Successful")
+            else:
+                logger.error("ADC Session Logout Failed")
+        except requests.exceptions.RequestException as err:
+            logger.error('Session Logout Error {}'.format(err))
+        except Exception as e:
+            logger.error("Logout Session Try Failed{}".format(e))
+
 if __name__ == '__main__':
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--target-nsip', required=True, type=str, help='The IP of the Citrix ADC to gather metrics from. Required')
-    parser.add_argument('--start-delay', default=10, type=float, help='Start the exporter running after a delay to allow other containers to start. Default: 10s')
-    parser.add_argument('--port', required=True, type=int, help='The port for the exporter to listen on. Required')
-    parser.add_argument('--metric', required=False, action='append', type=str, help='Collect only the metrics specified here, may be used multiple times.')
-    parser.add_argument('--secure', default='yes', type=str, help='yes: Use HTTPS, no: Use HTTP. Default: no')
-    parser.add_argument('--validate-cert', required=False, type=str, help='yes: Validate Cert, no: Do not validate cert. Default: no')
-    parser.add_argument('--cacert-path', required=False, type=str, help='Certificate path for secure validation')
-    parser.add_argument('--timeout', default=15, type=float, help='Timeout for Nitro calls.')
-    parser.add_argument('--metrics-file', required=False, default='/exporter/metrics.json', type=str, help='Location of metrics.json file. Default: /exporter/metrics.json')
-    parser.add_argument('--log-file', required=False, default='/exporter/exporter.log', type=str, help='Location of exporter.log file. Default: /exporter/exporter.log')
-    parser.add_argument('--log-level', required=False, default='DEBUG', type=str, choices=['DEBUG', 'INFO', 'WARN', 'ERROR', 'CRITICAL', 'debug', 'info', 'warn', 'error', 'critical'])
-    parser.add_argument('--config-file', required=False, type=str)
-    parser.add_argument('--k8sCICprefix', required=False, default='k8s', type=str, help='Prefix for CIC configured k8s entities')
-
-    # parse arguments provided
-    args = parser.parse_args()
-
-    # set logging credentials
-    logger = set_logging_args(args.log_file, args.log_level)
-
-    # parse config file if provided as an argument
-    if args.config_file:
-        args = parseConfig(args)
-
-    # Get username and password of Citrix ADC
-    ns_user, ns_password = get_login_credentials(args)
-
-    # Wait for other containers to start.
-    logger.info('Sleeping for %s seconds.' % args.start_delay)
-    time.sleep(args.start_delay)
-
-    # Load the metrics file specifying stats to be collected
-    metrics_json = get_metrics_file_data(args.metrics_file, args.metric)
-
-    # Get protocol type to access ADC
-    ns_protocol = get_ns_session_protocol(args) 
-
-    # Get cert validation args provided 
-    ns_cert = get_cert_validation_args(args, ns_protocol) 
-
-    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-    requests.packages.urllib3.disable_warnings(SubjectAltNameWarning)
-
-    # Verify ADC session access
-    verify_ns_session_access(args.target_nsip, ns_protocol, ns_user, ns_password, ns_cert)
-
-    # Verify ADC stats access
-    verify_ns_stats_access(args.target_nsip, ns_protocol, ns_user, ns_password, args.timeout, ns_cert)
-
-    # Start the server to expose the metrics.
-    start_exporter_server(args.port)
-
-    if not args.k8sCICprefix.isalnum():
-        logger.error('Invalid k8sCICprefix : non-alphanumeric not accepted')
-
-    # Register the exporter as a stat collector
-    logger.info('Registering collector for %s' % args.target_nsip)
-
-    try:
-        REGISTRY.register(CitrixAdcCollector(nsip=args.target_nsip, metrics=metrics_json, username=ns_user,
-                                             password=ns_password, protocol=ns_protocol, 
-                                             nitro_timeout=args.timeout, k8s_cic_prefix=args.k8sCICprefix,                                                          ns_cert=ns_cert))
-    except Exception as e:
-        logger.error('Invalid arguments! could not register collector for {}::{}'.format(args.target_nsip, e))
-
-    # Forever
-    while True:
-        signal.pause()
+   main()
