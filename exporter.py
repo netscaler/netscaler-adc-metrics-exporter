@@ -103,20 +103,19 @@ class TimeoutHTTPAdapter(HTTPAdapter):
         if "max_retries" in kwargs:
             self.max_retries = kwargs["max_retries"]
             del kwargs["max_retries"]
-        super(HTTPAdapter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def get(self, request, **kwargs):
         timeout = kwargs.get("timeout")
         if timeout is None:
             kwargs["timeout"] = self.timeout
-        return super(HTTPAdapter, self).get(request, **kwargs)
+        return super().get(request, **kwargs)
     
     def post(self, request, **kwargs):
         timeout = kwargs.get("timeout")
         if timeout is None:
             kwargs["timeout"] = self.timeout
-        return super(HTTPAdapter, self).post(request, **kwargs)
-
+        return super().post(request, **kwargs)
 
 def newSession(retries=3, backoff_factor=1, timeout=None, session=None):
     session = session or requests.Session()
