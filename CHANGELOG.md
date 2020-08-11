@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 ### Added
  - Python update : 2.7 to 3.8
  - New Label: "citrixadc_interface_id" for Interface metrics
+ - Default LogLevel : INFO
 
 ### BugFixes:
  - Connection retries for ADC only on new Prometheus Requests.
