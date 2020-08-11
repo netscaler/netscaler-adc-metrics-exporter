@@ -75,7 +75,7 @@ def set_logging_args(log_file, log_level):
                 'CRITICAL': logging.CRITICAL,
             }[log_level.upper()])
     except Exception as e:
-        print(f'Error while setting logger configs::{e}')
+        print('Error while setting logger configs:: %s', e)
     logging.getLogger("requests").setLevel(logging.WARNING)
     logging.getLogger("urllib3").setLevel(logging.WARNING)
     logger = logging.getLogger('citrix_adc_metrics_exporter')
@@ -131,7 +131,7 @@ def get_cpx_credentials(ns_user, ns_password):
     try:
         ns_password = read_cpx_credentials(ns_password)
     except RetryError as e:
-        logger.error("SIDECAR Mode: Unable to fetch CPX credentials {e}")
+        logger.error(f'SIDECAR Mode: Unable to fetch CPX credentials {e}')
 
     if ns_password is not None:
         ns_user = 'nsroot'
