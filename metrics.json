@@ -297,7 +297,8 @@
         ],
 
         "labels": [
-            ["interfacealias", "citrixadc_interface_alias"]
+            ["interfacealias", "citrixadc_interface_alias"],
+            ["id", "citrixadc_interface_id"]
         ]
     },
 
@@ -449,7 +450,6 @@
             ["aaacuricaconn", "citrixadc_aaa_cur_ica_conn"],
             ["aaacurtmsessions", "citrixadc_aaa_cur_tm_sessions"],
             ["aaacursessions", "citrixadc_aaa_cur_sessions"],
-            ["aaacuricasessions", "citrixadc_aaa_cur_ica_sessions"],
             ["aaaauthsuccessrate", "citrixadc_aaa_auth_success_rate"],
             ["aaaauthfailrate", "citrixadc_aaa_auth_fail_rate"],
             ["aaaauthonlyhttpsuccessrate", "citrixadc_aaa_auth_only_http_success_rate"],

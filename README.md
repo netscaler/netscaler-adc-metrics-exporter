@@ -28,13 +28,20 @@ The exporter can be run as a standalone python script, built into a container or
 <summary>Usage as a Python Script</summary>
 <br>
 
-To use the exporter as a python script, the ```prometheus_client``` and ```requests``` package needs to be installed. This can be done using 
+To use the exporter as a python3 script, few packages needs to be installed. This can be done using
 ```
-pip install prometheus_client
-pip install requests
-pip install PyYAML
-pip install retrying
+pip3 install -r pip_requirements.txt
 ```
+Contents of requirements.txt
+
+```
+prometheus-client==0.8.0
+requests==2.23.0
+PyYAML==5.3.1
+tenacity==6.2.0
+urllib3==1.25.9
+```
+
 Now, create a folder ```/exporter``` and copy the ```metrics.json``` file to the folder. 
 Finally, the exporter can be run as a python script using;
 ```
@@ -49,10 +56,10 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 --metric         | Provide a specific metric to load from metrics.json file (eg: 'lbvserver', 'protocolhttp', etc). If not provided, all metric entities from metrics.json will be loaded
 --secure         | Ensures HTTPS connection to ADC. Option 'no'(HTTP) can be provided to collect metrics from Citrix ADC. Default: 'yes'.
 --start-delay    | Specify time for which exporter should sleep before starting metric collection. Default: 10s
---timeout        | Specify timeout period for exporter to obtain response from target Citrix ADCs. Default: 15s
+--timeout        | Specify timeout period for exporter to obtain response from target Citrix ADCs. Default: 10s
 --metrics-file   | The location of metrics.json file. Default: /exporter/metrics.json
 --log-file       | The location of exporter.log file. Default: /exporter/exporter.log
---log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: DEBUG
+--log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: INFO
 --config-file    | File with configs such as ```username```, ```password```, ```validate-cert```, ```cacert-path```, etc. Helps supply username and password through file rather than CLI.
 --validate-cert. | Specify if ca certifcate is to be validated to access Citrix ADC. Default: 'no'. Valid value: 'yes'
 --cacert-path.   | Provide valid cert path if "-validate-cert" set to 'yes'. cert path will only be considered if '--validate-cert' is set to 'yes'.
@@ -91,15 +98,15 @@ For this:
 <summary>Usage as a Container</summary>
 <br>
 
-In order to use the exporter as a container, the image ```quay.io/citrix/citrix-adc-metrics-exporter:1.4.4``` will need to be pulled using;
+In order to use the exporter as a container, the image ```quay.io/citrix/citrix-adc-metrics-exporter:1.4.5``` will need to be pulled using;
 ```
-docker pull quay.io/citrix/citrix-adc-metrics-exporter:1.4.4
+docker pull quay.io/citrix/citrix-adc-metrics-exporter:1.4.5
 ```
 **NOTE:** It can also be build locally using ```docker build -f Dockerfile -t <image_name>:<tag> ./```
 
 Now, the exporter can be run using:
 ```
-docker run -dt -p <host_port>:<container_port> --mount type=bind,source=<host-path-for-config-file>,target=/exporter/config.yaml quay.io/citrix/citrix-adc-metrics-exporter:1.4.4 [flags] --config-file=/exporter/config.yaml
+docker run -dt -p <host_port>:<container_port> --mount type=bind,source=<host-path-for-config-file>,target=/exporter/config.yaml quay.io/citrix/citrix-adc-metrics-exporter:1.4.5 [flags] --config-file=/exporter/config.yaml
 ```
 where the flags are:
 
@@ -110,10 +117,10 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 --metric         | Provide a specific metric to load from metrics.json file (eg: 'lbvserver', 'protocolhttp', etc). If not provided, all metric entities from metrics.json will be loaded
 --secure         | Ensures HTTPS connection to ADC. Option 'no'(HTTP) can be provided to collect metrics from Citrix ADC. Default: 'yes'.
 --start-delay    | Specify time for which exporter should sleep before starting metric collection. Default: 10s
---timeout        | Specify timeout period for exporter to obtain response from target Citrix ADC. Default: 15s
+--timeout        | Specify timeout period for exporter to obtain response from target Citrix ADC. Default: 10s
 --metrics-file   | The location of metrics.json file. Default: /exporter/metrics.json
 --log-file       | The location of exporter.log file. Default: /exporter/exporter.log
---log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: DEBUG
+--log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: INFO
 --config-file    | File with configs such as ```username```, ```password```, ```validate-cert``, ```cacert-path```, etc. Helps supply username and password through file rather than CLI for secure deployment.
 --validate-cert  | Specify if ca certifcate is to be validated to access Citrix ADC. Default: 'no'. Valid value: 'yes'
 --cacert-path    | Provide valid cert path if "--validate-cert" set to 'yes'. cert path will only be considered if '--validate-cert' is set to 'yes'.
@@ -122,7 +129,7 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 
 To setup the exporter as given in the diagram, the following command can be used:
 ```
-docker run -dt -p 8888:8888 --mount type=bind,source=/path/to/config.yaml,target=/exporter/config.yaml --name citrix-adc-exporter quay.io/citrix/citrix-adc-metrics-exporter:1.4.4 --target-nsip=10.0.0.1 --port=8888 --config-file=/exporter/config.yaml
+docker run -dt -p 8888:8888 --mount type=bind,source=/path/to/config.yaml,target=/exporter/config.yaml --name citrix-adc-exporter quay.io/citrix/citrix-adc-metrics-exporter:1.4.5 --target-nsip=10.0.0.1 --port=8888 --config-file=/exporter/config.yaml
 ```
 This directs the exporter container to scrape the 10.0.0.1 IP, and the expose the stats it collects on port 8888.
 
@@ -149,7 +156,7 @@ For this:
 Certificate should then be mounted at the '--cacert-path' provided. For instance, if cert is 'cacert.pem' and '--cacert-path' provided in 'config.yaml' is '/exporter/cacert.pem'
 
 ```
-docker run -dt -p 8888:8888 --mount type=bind,source=/path/to/config.yaml,target=/exporter/config.yaml --mount type=bind,source=/path/to/cacert.pem,target=/exporter/cacert.pem --name citrix-adc-exporter quay.io/citrix/citrix-adc-metrics-exporter:1.4.4 --target-nsip=10.0.0.1 --port=8888 --config-file=/exporter/config.yaml
+docker run -dt -p 8888:8888 --mount type=bind,source=/path/to/config.yaml,target=/exporter/config.yaml --mount type=bind,source=/path/to/cacert.pem,target=/exporter/cacert.pem --name citrix-adc-exporter quay.io/citrix/citrix-adc-metrics-exporter:1.4.5 --target-nsip=10.0.0.1 --port=8888 --config-file=/exporter/config.yaml
 ``` 
 Cert validation options can also be provided using environment variables using NS_VALIDATE_CERT, NS_CACERT_PATH. Thoughconfig file input is the preferred method.
 
@@ -178,7 +185,7 @@ metadata:
 spec:
   containers:
     - name: exporter
-      image: quay.io/citrix/citrix-adc-metrics-exporter:1.4.4
+      image: quay.io/citrix/citrix-adc-metrics-exporter:1.4.5
       args:
         - "--target-nsip=10.0.0.1"
         - "--port=8888"
@@ -221,10 +228,10 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 --metric         | Provide a specific metric to load from metrics.json file (eg: 'lbvserver', 'protocolhttp', etc). If not provided, all metric entities from metrics.json will be loaded
 --secure         | Ensures HTTPS connection to ADC. Option 'no'(HTTP) can be provided to collect metrics from Citrix ADC. Default: 'yes'.
 --start-delay    | Specify time for which exporter should sleep before starting metric collection. Default: 10s
---timeout        | Specify timeout period for exporter to obtain response from target Citrix ADC. Default: 15s
+--timeout        | Specify timeout period for exporter to obtain response from target Citrix ADC. Default: 10s
 --metrics-file   | The location of metrics.json file. Default: /exporter/metrics.json
 --log-file       | The location of exporter.log file. Default: /exporter/exporter.log
---log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: DEBUG
+--log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: INFO
 --config-file    | File with configs such as ```username```, ```password```, ```validate-cert```, ```cacert-path```, etc. Helps supply username and password through file rather than CLI.
 --validate-cert  | Specify if ca certifcate is to be validated to access Citrix ADC. Default: 'no'. Valid value: 'yes'
 --cacert-path    | Provide valid cert path if "--validate-cert" set to 'yes'. cert path will only be considered if '--validate-cert' is set to 'yes'.
@@ -255,7 +262,7 @@ metadata:
 spec:
   containers:
     - name: exporter
-      image: quay.io/citrix/citrix-adc-metrics-exporter:1.4.4
+      image: quay.io/citrix/citrix-adc-metrics-exporter:1.4.5
       args:
         - "--target-nsip=10.0.0.1"
         - "--port=8888"

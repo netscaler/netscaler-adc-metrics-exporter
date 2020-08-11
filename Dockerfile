@@ -1,8 +1,9 @@
-FROM alpine:latest
+FROM alpine:3.11
 RUN apk update
-RUN apk add python py-pip
+RUN apk add python3
 RUN apk add curl iputils
-RUN pip install prometheus_client requests pyyaml retrying
+COPY pip_requirements.txt .
+RUN pip3 install -r pip_requirements.txt
 COPY version/VERSION /exporter/
 COPY exporter.py /exporter/
 COPY metrics.json /exporter/
@@ -11,4 +12,4 @@ RUN ln -sf /dev/stdout /exporter/exporter.log
 USER nobody
 
 
-ENTRYPOINT ["python", "/exporter/exporter.py" ]
+ENTRYPOINT ["python3", "/exporter/exporter.py" ]
