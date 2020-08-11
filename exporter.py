@@ -36,7 +36,7 @@ def parseConfig(args):
             for key in config.keys():
                 args.__setattr__(key.replace('-', '_'), config[key])
     except Exception as e:
-        logger.error(f'Error while reading config file::{e}')
+        logger.error('Error while reading config file::%s', e)
         print(e)
     return args
 
@@ -54,7 +54,7 @@ def get_metrics_file_data(metrics_file, metric):
         else:
             _metrics_json = json.load(f)
     except Exception as e:
-        logger.error(f'Error while loading metrics::{e}')
+        logger.error('Error while loading metrics::%s', e)
     return _metrics_json
 
 
@@ -85,12 +85,12 @@ def set_logging_args(log_file, log_level):
 def start_exporter_server(port):
     ''' Sets an http server for prometheus client requests.'''
 
-    logger.info(f'Starting the exporter on port {port}.')
+    logger.info('Starting the exporter on port %s.' % port)
     try:
         start_http_server(port)
         print("Exporter is running...")
     except Exception as e:
-        logger.critical(f'Error while opening port: {e}')
+        logger.critical('Error while opening port: {}'.format(e))
         print(e)
 
 
@@ -131,7 +131,7 @@ def get_cpx_credentials(ns_user, ns_password):
     try:
         ns_password = read_cpx_credentials(ns_password)
     except RetryError as e:
-        logger.error(f'SIDECAR Mode: Unable to fetch CPX credentials {e}')
+        logger.error('SIDECAR Mode: Unable to fetch CPX credentials {}'.format(e))
 
     if ns_password is not None:
         ns_user = 'nsroot'
@@ -159,16 +159,14 @@ def get_login_credentials(args):
                 with open(NS_USERNAME_FILE, 'r') as f:
                     ns_user = f.read().rstrip()
             except Exception as e:
-                logger.error(
-                    f'Error while reading secret. Verify if secret is property mounted:{e}')
+                logger.error('Error while reading secret. Verify if secret is properly mounted:{}'.format(e))
 
         if os.path.isfile(NS_PASSWORD_FILE):
             try:
                 with open(NS_PASSWORD_FILE, 'r') as f:
                     ns_password = f.read().rstrip()
             except Exception as e:
-                logger.error(
-                    f'Error while reading secret. Verify if secret is property mounted:{e}')
+                logger.error('Error while reading secret. Verify if secret is property mounted:{}'.format(e))
 
         if ns_user is None and ns_password is None:
             if deployment_mode.lower() == DEPLOYMENT_WITH_CPX:
@@ -214,13 +212,11 @@ def get_ns_cert_path(args):
         ns_cacert_path = os.environ.get("NS_CACERT_PATH", None)
 
     if not ns_cacert_path:
-        logger.error(
-            'EXITING : Certificate Validation enabled but cert path not provided')
+        logger.error('EXITING : Certificate Validation enabled but cert path not provided')
         sys.exit()
 
     if not os.path.isfile(ns_cacert_path):
-        logger.error(
-            f'EXITING: ADC Cert validation enabled but CA cert does not exist {ns_cacert_path}')
+        logger.error('EXITING: ADC Cert validation enabled but CA cert does not exist {}'.format(ns_cacert_path))
         sys.exit()
 
     logger.info('CA certificate path found for validation')
@@ -239,8 +235,7 @@ def get_cert_validation_args(args, ns_protocol):
             logger.info('Cert Validation Enabled')
             ns_cert = get_ns_cert_path(args)
         else:
-            logger.error(
-                'EXITING: Cert validation enabled on insecure session')
+            logger.error('EXITING: Cert validation enabled on insecure session')
             sys.exit()
     else:
         ns_cert = False  # Set ns_sert as False for no cert validation
@@ -279,11 +274,11 @@ class CitrixAdcCollector(object):
         data = {}
         self.stats_access_pending = True
         for entity in self.metrics.keys():
-            logger.debug(f'Collecting metric {entity} for {self.nsip}')
+            logger.debug('Collecting metric {} for {}'.format(entity, self.nsip))
             try:
                 status, entity_data = self.collect_data(entity)
             except Exception as e:
-                logger.error(f'Could not collect metric :{entity}')
+                logger.error('Could not collect metric :{}'.format(entity))
 
             if status == self.FAILURE:
                 self.ns_session_clear()
@@ -315,8 +310,7 @@ class CitrixAdcCollector(object):
                         continue
 
                     if ns_metric_name not in data_item.keys():
-                        logger.info(
-                            f'Counter stats "{ns_metric_name}" not enabled for entity: {entity_name}')
+                        logger.info('Counter stats {} not enabled for entity: {}'.format(ns_metric_name, entity_name))
                         break
 
                     if('labels' in entity.keys()):
@@ -340,8 +334,7 @@ class CitrixAdcCollector(object):
                         c.add_metric(label_values, float(
                             data_item[ns_metric_name]))
                     except Exception as e:
-                        logger.error(
-                            f'Caught exception while adding counter {ns_metric_name} to {entity_name}: {e}')
+                        logger.error('Caught exception while adding counter %s to %s: %s' % (ns_metric_name, entity_name, str(e)))
 
                 yield c
 
@@ -355,8 +348,7 @@ class CitrixAdcCollector(object):
                         continue
 
                     if ns_metric_name not in data_item.keys():
-                        logger.info(
-                            f'Gauge stat "{ns_metric_name}" not enabled for entity: {entity_name}')
+                        logger.info('Gauge stat {} not enabled for entity: {}'.format(ns_metric_name, entity_name))
                         break
 
                     if('labels' in entity.keys()):
@@ -381,8 +373,7 @@ class CitrixAdcCollector(object):
                         g.add_metric(label_values, float(
                             data_item[ns_metric_name]))
                     except Exception as e:
-                        logger.error(
-                            f'Caught exception while adding counter {ns_metric_name} to {entity_name}: {e}')
+                        logger.error('Caught exception while adding counter {} to {}: {}'.format(ns_metric_name, entity_name, str(e)))
 
                 yield g
         self.stats_access_pending = False
@@ -404,28 +395,27 @@ class CitrixAdcCollector(object):
             return self.get_svc_grp_services_stats()
 
         if(entity != 'nscapacity' and entity != 'sslcertkey'):
-            url = f'{self.protocol}://{self.nsip}/nitro/v1/stat/{entity}'
+            url = '%s://%s/nitro/v1/stat/%s' % (self.protocol, self.nsip, entity)
         else:
-            url = f'{self.protocol}://{self.nsip}/nitro/v1/config/{entity}'
+            url = '%s://%s/nitro/v1/config/%s' % (self.protocol, self.nsip, entity)
         try:
             status, data = self.get_entity_stat(url)
             if data:
                 if entity in data:
                     return status, data[entity]
                 else:
-                    logger.info(
-                        f'No metric data available for entity: {entity}')
+                    logger.info('No metric data available for entity: {}'.format(entity))
                     return status, None
             else:
-                logger.warning(f'Unable to fetch data for entity: {entity}')
+                logger.warning('Unable to fetch data for entity: {}'.format(entity))
                 return status, None
         except Exception as e:
-            logger.error(f'Error in fetching entity {e}')
+            logger.error('Error in fetching entity {}'.format(e))
 
     def get_svc_grp_services_stats(self):
         '''Fetches stats for services'''
 
-        url = f'{self.protocol}://{self.nsip}/nitro/v1/stat/servicegroup'
+        url = '%s://%s/nitro/v1/stat/servicegroup' % (self.protocol, self.nsip)
         # get dict with all servicegroups
         status, servicegroup_list_ds = self.get_entity_stat(url)
         if status == self.FAILURE:
@@ -433,16 +423,16 @@ class CitrixAdcCollector(object):
 
         if servicegroup_list_ds:
             if 'servicegroup' not in servicegroup_list_ds:
-                logger.info(f'No metric data available for servicegroup')
+                logger.info('No metric data available for servicegroup')
                 return status, None
         else:
-            logger.warning(f'Unable to fetch data for servicegroup')
+            logger.warning('Unable to fetch data for servicegroup')
             return status, None
 
         servicegroup_data = []
         for servicegroups_ds in servicegroup_list_ds['servicegroup']:
             _servicegroup_name = servicegroups_ds['servicegroupname']
-            url = f'{self.protocol}://{self.nsip}/nitro/v1/stat/servicegroup/{_servicegroup_name}?statbindings=yes'
+            url = '%s://%s/nitro/v1/stat/servicegroup/%s?statbindings=yes' % (self.protocol, self.nsip, _servicegroup_name)
             status, data_tmp = self.get_entity_stat(url)
             if status == self.FAILURE:
                 return status, None
@@ -463,17 +453,17 @@ class CitrixAdcCollector(object):
     def get_lbvs_bindings_status(self):
         '''Fetches percentage of lbvs bindings up status'''
 
-        url_lbvserver = f'{self.protocol}://{self.nsip}/nitro/v1/stat/lbvserver'
+        url_lbvserver = '%s://%s/nitro/v1/stat/lbvserver' % (self.protocol, self.nsip)
         status, rlbvserver = self.get_entity_stat(url_lbvserver)
         if status == self.FAILURE:
             return status, None
 
         if rlbvserver:
             if 'lbvserver' not in rlbvserver:
-                logger.info(f'No metric data available for lbvserver bindings')
+                logger.info('No metric data available for lbvserver bindings')
                 return status, None
         else:
-            logger.warning(f'Unable to fetch data for lbvserver bindings')
+            logger.warning('Unable to fetch data for lbvserver bindings')
             return status, None
 
         lbvserver_binding_status_up = {'lbvserver_binding': []}
@@ -508,9 +498,9 @@ class CitrixAdcCollector(object):
                 else:
                     return self.FAILURE, None
         except requests.exceptions.RequestException as err:
-            logger.error(f'Stat Access Error {err}')
+            logger.error('Stat Access Error {}'.format(err))
         except Exception as e:
-            logger.error(f'Unable to access stats from ADC {e}')
+            logger.error('Unable to access stats from ADC {}'.format(e))
         return self.FAILURE, None
 
     def get_entity_stat(self, url):
@@ -518,9 +508,9 @@ class CitrixAdcCollector(object):
         try:
             return self.ns_session_get(url)
         except RetryError as e:
-            logger.error(f'Get Retries Exhausted {e}')
+            logger.error('Get Retries Exhausted {}'.format(e))
         except Exception as e:
-            logger.error(f'Stat Access Failed {e}')
+            logger.error('Stat Access Failed {}'.format(e))
         return self.FAILURE, None
 
     def update_lbvs_label(self, label_values, ns_metric_name, log_prefix_match):
@@ -551,13 +541,12 @@ class CitrixAdcCollector(object):
                     return True
                 else:
                     if log_prefix_match:
-                        logger.debug(
-                            f'k8s_cic_ingress_service_stat Ingress dashboard cannot be used for CIC prefix "{cur_prefix}"')
+                        logger.debug('k8s_cic_ingress_service_stat Ingress dashboard cannot be used for CIC prefix "%s"', cur_prefix)
                     return False
             else:
                 return False
         except Exception as e:
-            logger.error(f'Unable to update k8s label: {e}')
+            logger.error('Unable to update k8s label: {}'.format(e))
             return False
 
     def ns_session_clear(self):
@@ -574,9 +563,9 @@ class CitrixAdcCollector(object):
             if self.ns_session_login() == self.SUCCESS:
                 return True
         except RetryError as e:
-            logger.error(f'Login Retries Exhausted {e}')
+            logger.error('Login Retries Exhausted {}'.format(e))
         except Exception as e:
-            logger.error(f'Login Session Failed {e}')
+            logger.error('Login Session Failed {}'.format(e))
 
         self.ns_session_clear()
         return False
@@ -601,11 +590,11 @@ class CitrixAdcCollector(object):
                 logger.error("ADC Session Login Failed: Retrying")
                 return 'retry'
             elif data['errorcode'] in [NSERR_NOUSER, NSERR_INVALPASSWD]:
-                logger.error(f'Invalid username or password for ADC')
+                logger.error('Invalid username or password for ADC')
         except requests.exceptions.RequestException as err:
-            logger.error(f'Session Login Error {err}')
+            logger.error('Session Login Error {}'.format(err))
         except Exception as e:
-            logger.error(f'Login Session Failed : {e}')
+            logger.error('Login Session Failed : {}'.format(e))
         return self.FAILURE
 
 
@@ -652,7 +641,7 @@ def main():
     ns_user, ns_password = get_login_credentials(args)
 
     # Wait for other containers to start.
-    logger.info(f'Sleeping for {args.start_delay} seconds.')
+    logger.info('Sleeping for %s seconds.' % args.start_delay)
     time.sleep(args.start_delay)
 
     # Load the metrics file specifying stats to be collected
@@ -674,15 +663,14 @@ def main():
         logger.error('Invalid k8sCICprefix : non-alphanumeric not accepted')
 
     # Register the exporter as a stat collector
-    logger.info(f'Registering collector for {args.target_nsip}')
+    logger.info('Registering collector for %s' % args.target_nsip)
 
     try:
         REGISTRY.register(CitrixAdcCollector(nsip=args.target_nsip, metrics=metrics_json, username=ns_user,
                                              password=ns_password, protocol=ns_protocol,
                                              nitro_timeout=args.timeout, k8s_cic_prefix=args.k8sCICprefix,                                                          ns_cert=ns_cert))
     except Exception as e:
-        logger.error(
-            f'Invalid arguments! could not register collector for {args.target_nsip}::{e}')
+        logger.error('Invalid arguments! could not register collector for {}::{}'.format(args.target_nsip, e))
 
     while True:
         signal.pause()
