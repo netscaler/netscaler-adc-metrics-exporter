@@ -36,7 +36,7 @@ def parseConfig(args):
             for key in config.keys():
                 args.__setattr__(key.replace('-', '_'), config[key])
     except Exception as e:
-        logger.error('Error while reading config file::%s', e)
+        logger.error('Error while reading config file: {}'.format(e))
         print(e)
     return args
 
@@ -54,7 +54,7 @@ def get_metrics_file_data(metrics_file, metric):
         else:
             _metrics_json = json.load(f)
     except Exception as e:
-        logger.error('Error while loading metrics::%s', e)
+        logger.error('Error while loading metrics: {}'.format(e))
     return _metrics_json
 
 
@@ -166,7 +166,7 @@ def get_login_credentials(args):
                 with open(NS_PASSWORD_FILE, 'r') as f:
                     ns_password = f.read().rstrip()
             except Exception as e:
-                logger.error('Error while reading secret. Verify if secret is property mounted:{}'.format(e))
+                logger.error('Error while reading secret. Verify if secret is properly mounted:{}'.format(e))
 
         if ns_user is None and ns_password is None:
             if deployment_mode.lower() == DEPLOYMENT_WITH_CPX:
@@ -541,7 +541,7 @@ class CitrixAdcCollector(object):
                     return True
                 else:
                     if log_prefix_match:
-                        logger.debug('k8s_cic_ingress_service_stat Ingress dashboard cannot be used for CIC prefix "%s"', cur_prefix)
+                        logger.debug('k8s_cic_ingress_service_stat Ingress dashboard cannot be used for CIC prefix {}'.format(cur_prefix))
                     return False
             else:
                 return False
