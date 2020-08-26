@@ -247,6 +247,7 @@ class CitrixAdcCollector(object):
 
     SUCCESS = 'SUCCESS'
     FAILURE = 'FAILURE'
+    INVALID = 'INVALID'
 
     def __init__(self, nsip, metrics, username, password, protocol,
                  nitro_timeout, k8s_cic_prefix, ns_cert):
@@ -274,7 +275,7 @@ class CitrixAdcCollector(object):
         data = {}
         self.stats_access_pending = True
         for entity in self.metrics.keys():
-            logger.debug('Collecting metric {} for {}'.format(entity, self.nsip))
+            logger.debug('Collecting metric {}'.format(entity))
             try:
                 status, entity_data = self.collect_data(entity)
             except Exception as e:
@@ -405,12 +406,16 @@ class CitrixAdcCollector(object):
                     return status, data[entity]
                 else:
                     logger.info('No metric data available for entity: {}'.format(entity))
+                    if status == self.INVALID:
+                        logger.debug('Invalid metric fetch for entity "{}" ' \
+                                      'with errorcode:{} '.format(entity,data['errorcode']))
                     return status, None
             else:
                 logger.warning('Unable to fetch data for entity: {}'.format(entity))
                 return status, None
         except Exception as e:
             logger.error('Error in fetching entity {}'.format(e))
+            return self.FAILURE, None
 
     def get_svc_grp_services_stats(self):
         '''Fetches stats for services'''
@@ -489,14 +494,20 @@ class CitrixAdcCollector(object):
             r = self.ns_session.get(
                 url, verify=self.ns_cert, timeout=self.nitro_timeout)
             data = r.json()
-            if data['errorcode'] == 0:
-                return self.SUCCESS, data
-            elif data['errorcode'] in [NSERR_SESSION_EXPIRED, NSERR_AUTHTIMEOUT]:
-                self.ns_session_clear()
-                if self.login():
-                    return 'retry', None
-                else:
-                    return self.FAILURE, None
+            if data:
+                if 'errorcode' in data:
+                    if data['errorcode'] == 0:
+                        return self.SUCCESS, data
+                    elif data['errorcode'] in [NSERR_SESSION_EXPIRED, NSERR_AUTHTIMEOUT]:
+                        self.ns_session_clear()
+                        if self.login():
+                           return 'retry', None
+                        else:
+                           return self.FAILURE, None
+                    else:
+                        return self.INVALID, data
+            else:
+                return self.FAILURE, None
         except requests.exceptions.RequestException as err:
             logger.error('Stat Access Error {}'.format(err))
         except Exception as e:
