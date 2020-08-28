@@ -279,7 +279,7 @@ class CitrixAdcCollector(object):
             try:
                 status, entity_data = self.collect_data(entity)
             except Exception as e:
-                logger.error('Could not collect metric :{}'.format(entity))
+                logger.error('Could not collect metric :{}'.format(e))
 
             if status == self.FAILURE:
                 self.ns_session_clear()
@@ -287,6 +287,18 @@ class CitrixAdcCollector(object):
 
             if entity_data:
                 data[entity] = entity_data
+
+        if 'k8s_ingress_lbvs' in self.metrics and \
+                os.environ.get('KUBERNETES_SERVICE_HOST') is not None:
+            lbvs_dict = None
+            try:
+                 status, lbvs_dict = self.collect_lbvs_config()
+            except Exception as e:
+                 logger.error('Could not collect config entries for lbvs: {}'.format(e))
+
+            if status == self.FAILURE:
+                self.ns_session_clear()
+                return
 
         # Add labels to metrics and provide to Prometheus
         log_prefix_match = True
@@ -322,7 +334,7 @@ class CitrixAdcCollector(object):
                         if entity_name == "k8s_ingress_lbvs":
                             if os.environ.get('KUBERNETES_SERVICE_HOST') is not None:
                                 prefix_match = self.update_lbvs_label(
-                                    label_values, ns_metric_name, log_prefix_match)
+                                    label_values, lbvs_dict, log_prefix_match)
                                 if not prefix_match:
                                     log_prefix_match = False
                                     continue
@@ -335,7 +347,7 @@ class CitrixAdcCollector(object):
                         c.add_metric(label_values, float(
                             data_item[ns_metric_name]))
                     except Exception as e:
-                        logger.error('Caught exception while adding counter %s to %s: %s' % (ns_metric_name, entity_name, str(e)))
+                        logger.error('Caught exception while adding counter {} to {}: {}'.format(ns_metric_name, entity_name, str(e)))
 
                 yield c
 
@@ -360,7 +372,7 @@ class CitrixAdcCollector(object):
                         if entity_name == "k8s_ingress_lbvs":
                             if os.environ.get('KUBERNETES_SERVICE_HOST') is not None:
                                 prefix_match = self.update_lbvs_label(
-                                    label_values, ns_metric_name, log_prefix_match)
+                                    label_values, lbvs_dict, log_prefix_match)
                                 if not prefix_match:
                                     log_prefix_match = False
                                     continue
@@ -388,8 +400,11 @@ class CitrixAdcCollector(object):
             return self.get_lbvs_bindings_status()
 
         # this is to fetch lb status for ingress/services in k8s enviroment
-        if(entity == 'k8s_ingress_lbvs'):
-            entity = 'lbvserver'
+        if (entity == 'k8s_ingress_lbvs'):
+            if os.environ.get('KUBERNETES_SERVICE_HOST') is not None:
+                entity = 'lbvserver'
+            else:
+                return self.SUCCESS, None
 
         # nitro call for all entities except 'services' (ie. servicegroups)
         if (entity == 'services'):
@@ -429,6 +444,9 @@ class CitrixAdcCollector(object):
         if servicegroup_list_ds:
             if 'servicegroup' not in servicegroup_list_ds:
                 logger.info('No metric data available for servicegroup')
+                if status == self.INVALID:
+                    logger.debug('Invalid metric fetch for servicegroup' \
+                                  'with errorcode:{} '.format(servicegroup_list_ds['errorcode']))
                 return status, None
         else:
             logger.warning('Unable to fetch data for servicegroup')
@@ -524,7 +542,7 @@ class CitrixAdcCollector(object):
             logger.error('Stat Access Failed {}'.format(e))
         return self.FAILURE, None
 
-    def update_lbvs_label(self, label_values, ns_metric_name, log_prefix_match):
+    def update_lbvs_label(self, label_values, lbvs_dict, log_prefix_match):
         '''Updates lbvserver lables for ingress and services for k8s_cic_ingress_service_stat dashboard.'''
         try:
             # If lbvs name ends with expected _svc, then label values are updated with ingress/service info.
@@ -536,8 +554,8 @@ class CitrixAdcCollector(object):
                     # return if ingress name as a service
                     if label_values[0].split("_")[3] == 'svc':
                         if log_prefix_match:
-                            logger.debug(
-                                'k8s_ingress_service_stat Ingress dashboard cannot be used without ingress with CIC')
+                            logger.debug('k8s_ingress_service_stat dashboard' \
+                                        ' cannot be used without ingress with CIC')
                         return False
                     # update label "citrixadc_k8s_ing_lb_ingress_name" with ingress name
                     label_values[0] = label_values[0].split(
@@ -552,7 +570,32 @@ class CitrixAdcCollector(object):
                     return True
                 else:
                     if log_prefix_match:
-                        logger.debug('k8s_cic_ingress_service_stat Ingress dashboard cannot be used for CIC prefix {}'.format(cur_prefix))
+                        logger.debug('k8s_cic_ingress_service_stat dashboard' \
+                                    ' cannot be used for CIC prefix {}'.format(cur_prefix))
+                    return False
+            elif lbvs_dict:
+                cur_prefix = str(label_values[0].split("_")[
+                                 0].split("-", 1)[0])
+                # update lables only if prefix provided is same as CIC prefix used
+                if cur_prefix == self.k8s_cic_prefix:
+                    comments = lbvs_dict[label_values[0]]
+                    comments = comments.split(',')
+                    if comments[0].split(':')[0] == 'lbsvc':
+                        if log_prefix_match:
+                            logger.debug('k8s_ingress_service_stat dashboard' \
+                                        ' cannot be used without ingress with CIC')
+                        return False
+
+                    if comments[0].split(':')[0] == 'ing':
+                        label_values[0] = comments[0].split(':')[1]
+                        label_values[1] = comments[1].split(':')[1]
+                        label_values[2] = comments[3].split(':')[1]
+                        label_values[3] = comments[4].split(':')[1]
+                    return True
+                else:
+                    if log_prefix_match:
+                        logger.debug('k8s_cic_ingress_service_stat dashboard' \
+                                    ' cannot be used for CIC prefix {}'.format(cur_prefix))
                     return False
             else:
                 return False
@@ -607,6 +650,32 @@ class CitrixAdcCollector(object):
         except Exception as e:
             logger.error('Login Session Failed : {}'.format(e))
         return self.FAILURE
+
+    def collect_lbvs_config(self):
+        ''' This method get lbvs config entries for k8s prefix'''
+        url = '%s://%s/nitro/v1/config/lbvserver?filter=name:%%2f^%s%%2f&attrs=name,comment' % (self.protocol, self.nsip, self.k8s_cic_prefix)
+        try:
+            status, data = self.get_entity_stat(url)
+            if data:
+                if 'lbvserver' in data:
+                    lbvs_dict = {}
+                    lbvs_list = list(data['lbvserver'])
+                    for item in lbvs_list:
+                        if 'comment' in item:
+                            lbvs_dict.update({item['name']:item['comment']})
+                    return status, lbvs_dict
+                else:
+                    logger.debug('No lbvs config for ingress dashboard with k8s prefix "{}"'.format(self.k8s_cic_prefix))
+                    if status == self.INVALID:
+                        logger.debug('Invalid metric fetch for lbvs' \
+                                      'with errorcode:{} '.format(data['errorcode']))
+                    return status, None
+            else:
+                logger.warning('Unable to fetch data for entity lbvserver')
+                return status, None
+        except Exception as e:
+            logger.error('Error in fetching lbvs config entries {}'.format(e))
+            return self.FAILURE, None
 
 
 def main():

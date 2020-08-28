@@ -18,3 +18,11 @@ All notable changes to this project will be documented in this file.
 ### BugFixes:
  - Connection retries for ADC only on new Prometheus Requests.
  - Single Login Session.
+
+## [1.4.6] - 2020-08-28
+### Added
+ - Ingress dashboard as per modifications in naming in CIC
+ - Logging changes
+
+### BugFixes:
+ - Error handling modification
