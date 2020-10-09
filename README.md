@@ -71,7 +71,7 @@ nohup python exporter.py --target-nsip=10.0.0.1 --port 8888 --config-file=config
 ```
 This directs the exporter container to scrape 10.0.0.1 IP, and the expose the stats it collects on port 8888.
 
-Note: If default port to connect with ADC is not 80/443 for HTTP/HTTPS respectively, then append --target-nsip with port. For instance, if port for ADC is 9080 then use: --target-nsip=10.0.0.1:9080
+**NOTE:** If default port to connect with ADC is not 80/443 for HTTP/HTTPS respectively, then append --target-nsip with port. For instance, if port for ADC is 9080 then use: --target-nsip=10.0.0.1:9080
 
 File 'config.yaml' should contain username and password of the ADC to which exporter connects to. For reference, refer config.yaml.example which specifies the format for providing the login credentials. 
 
@@ -135,7 +135,7 @@ docker run -dt -p 8888:8888 --mount type=bind,source=/path/to/config.yaml,target
 ```
 This directs the exporter container to scrape the 10.0.0.1 IP, and the expose the stats it collects on port 8888.
 
-Note: If default port to connect with ADC is not 80/443 for HTTP/HTTPS respectively, then append --target-nsip with port. For instance, if port for ADC is 9080 then use: --target-nsip=10.0.0.1:9080
+**NOTE:** If default port to connect with ADC is not 80/443 for HTTP/HTTPS respectively, then append --target-nsip with port. For instance, if port for ADC is 9080 then use: --target-nsip=10.0.0.1:9080
 
 File 'config.yaml' should contain username and password of the ADC to which exporter connects to. For reference, refer config.yaml.example which specifies the format for providing the login credentials. Config.yaml file then needs to be mounted to the container at fixed target specified('/exporter/config.yaml') only.
 
@@ -162,7 +162,7 @@ Certificate should then be mounted at the '--cacert-path' provided. For instance
 ```
 docker run -dt -p 8888:8888 --mount type=bind,source=/path/to/config.yaml,target=/exporter/config.yaml --mount type=bind,source=/path/to/cacert.pem,target=/exporter/cacert.pem --name citrix-adc-exporter quay.io/citrix/citrix-adc-metrics-exporter:1.4.6 --target-nsip=10.0.0.1 --port=8888 --config-file=/exporter/config.yaml
 ``` 
-Note: If default port to connect with ADC is not 80/443 for HTTP/HTTPS respectively, then append --target-nsip with port. For instance, if port for ADC is 9080 then use: --target-nsip=10.0.0.1:9080
+**NOTE:** If default port to connect with ADC is not 80/443 for HTTP/HTTPS respectively, then append --target-nsip with port. For instance, if port for ADC is 9080 then use: --target-nsip=10.0.0.1:9080
 
 Cert validation options can also be provided using environment variables using NS_VALIDATE_CERT, NS_CACERT_PATH. Thoughconfig file input is the preferred method.
 
@@ -223,7 +223,7 @@ spec:
     app: exporter
 ```
 
-Note: If default port to connect with ADC is not 80/443 for HTTP/HTTPS respectively, then append --target-nsip with port. For instance, if port for ADC is 9080 then use: --target-nsip=10.0.0.1:9080
+**NOTE:** If default port to connect with ADC is not 80/443 for HTTP/HTTPS respectively, then append --target-nsip with port. For instance, if port for ADC is 9080 then use: --target-nsip=10.0.0.1:9080
 
 Login Credentials can also be provided using environment variables NS_USER, NS_PASSWORD. Though, secret volume is the preffered method for security.
 
@@ -309,7 +309,7 @@ spec:
   selector:
     app: exporter
 ```
-Note: If default port to connect with ADC is not 80/443 for HTTP/HTTPS respectively, then append --target-nsip with port. For instance, if port for ADC is 9080 then use: --target-nsip=10.0.0.1:9080
+**NOTE:** If default port to connect with ADC is not 80/443 for HTTP/HTTPS respectively, then append --target-nsip with port. For instance, if port for ADC is 9080 then use: --target-nsip=10.0.0.1:9080
 
 Cert Credentials can also be provided using environment variables NS_VALIDATE_CERT, NS_CACERT_PATH instead of args '--validate-cert', '--cacert-path' respectively.
 
