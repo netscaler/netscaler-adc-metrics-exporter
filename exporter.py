@@ -267,13 +267,16 @@ class CitrixAdcCollector(object):
     def collect(self):
 
         if self.stats_access_pending or self.ns_session_pending:
+            yield self.populate_probe_status(self.FAILURE)
             return
 
         if not self.login():
+            yield self.populate_probe_status(self.FAILURE)
             return
 
         data = {}
         self.stats_access_pending = True
+        status = self.INVALID
         for entity in self.metrics.keys():
             logger.debug('Collecting metric {}'.format(entity))
             try:
@@ -283,6 +286,7 @@ class CitrixAdcCollector(object):
 
             if status == self.FAILURE:
                 self.ns_session_clear()
+                yield self.populate_probe_status(status)
                 return
 
             if entity_data:
@@ -298,6 +302,7 @@ class CitrixAdcCollector(object):
 
             if status == self.FAILURE:
                 self.ns_session_clear()
+                yield self.populate_probe_status(status)
                 return
 
         # Add labels to metrics and provide to Prometheus
@@ -390,6 +395,7 @@ class CitrixAdcCollector(object):
 
                 yield g
         self.stats_access_pending = False
+        yield self.populate_probe_status(status)
 
     # Function to fire nitro commands and collect data from NS
     def collect_data(self, entity):
@@ -677,6 +683,16 @@ class CitrixAdcCollector(object):
             logger.error('Error in fetching lbvs config entries {}'.format(e))
             return self.FAILURE, None
 
+    def populate_probe_status(self, status):
+        label_names = []
+        label_names.append('nsip')
+        g = GaugeMetricFamily("citrixadc_probe_success", "probe_success", labels=label_names)
+        if status == self.FAILURE:
+            g.add_metric([self.nsip], int("0"))
+        else:
+            g.add_metric([self.nsip], int("1"))
+
+        return g
 
 def main():
     parser = argparse.ArgumentParser()

@@ -427,7 +427,8 @@
 
     "ns": {
         "gauges": [
-            ["rxmbitsrate", "citrixadc_throughput_rx_mbits_rate"]
+            ["rxmbitsrate", "citrixadc_throughput_rx_mbits_rate"],
+            ["txmbitsrate", "citrixadc_throughput_tx_mbits_rate"]
         ]
     },
 

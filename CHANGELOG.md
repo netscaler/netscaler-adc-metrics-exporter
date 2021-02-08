@@ -26,3 +26,9 @@ All notable changes to this project will be documented in this file.
 
 ### BugFixes:
  - Error handling modification
+
+
+## [1.4.7] - 2021-01-28
+### Added
+ - Added adc_probe_success metric to indicate successful/Failed scrape
+ - Added new metric "citrixadc_throughput_tx_mbits_rate"
