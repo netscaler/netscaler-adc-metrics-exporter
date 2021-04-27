@@ -364,6 +364,7 @@ Sl. No. |     STATS                 | NS nitro name
 12      | System info stats         | "system"
 13      | System cpu stats          | "systemcpu"
 14      | AAA stats                 | "aaa"
+15      | ADC Probe success          | "1" if successful, else "0"
 
 
 Exporting Additional Stats which are not Included by Default:
