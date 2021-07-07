@@ -106,7 +106,7 @@ docker pull quay.io/citrix/citrix-adc-metrics-exporter:1.4.7
 ```
 **NOTE:** It can also be build locally using ```docker build -f Dockerfile -t <image_name>:<tag> ./```
 
-Now, the exporter can be run using:
+Now, exporter can be run using:
 ```
 docker run -dt -p <host_port>:<container_port> --mount type=bind,source=<host-path-for-config-file>,target=/exporter/config.yaml quay.io/citrix/citrix-adc-metrics-exporter:1.4.7 [flags] --config-file=/exporter/config.yaml
 ```
