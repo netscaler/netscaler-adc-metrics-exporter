@@ -32,3 +32,8 @@ All notable changes to this project will be documented in this file.
 ### Added
  - Added adc_probe_success metric to indicate successful/Failed scrape
  - Added new metric "citrixadc_throughput_tx_mbits_rate"
+
+## [1.4.8] - 2021-07-07
+### Added
+ - Added fix for lightweight-CPX not working with CME.
+ - Updated pip requirements.
