@@ -644,6 +644,8 @@ class CitrixAdcCollector(object):
             data = response.json()
             if data['errorcode'] == 0:
                 logger.info("ADC Session Login Successful")
+                sessionid = data['sessionid']
+                self.ns_session.headers.update({'Set-Cookie': "sessionid=" + sessionid})
                 self.ns_session_pending = False
                 return self.SUCCESS
             elif data['errorcode'] in [NSERR_SESSION_EXPIRED, NSERR_AUTHTIMEOUT]:
