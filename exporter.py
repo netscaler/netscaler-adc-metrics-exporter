@@ -584,6 +584,8 @@ class CitrixAdcCollector(object):
                                  0].split("-", 1)[0])
                 # update lables only if prefix provided is same as CIC prefix used
                 if cur_prefix == self.k8s_cic_prefix:
+                    if label_values[0] not in lbvs_dict:
+                        return False
                     comments = lbvs_dict[label_values[0]]
                     comments = comments.split(',')
                     if comments[0].split(':')[0] == 'lbsvc':

@@ -37,3 +37,7 @@ All notable changes to this project will be documented in this file.
 ### Added
  - Added fix for lightweight-CPX not working with CME.
  - Updated pip requirements.
+
+## [1.4.9] - 2021-10-05
+### Added
+ - Added fix to handle ERROR message for lbvs added by CIC.
