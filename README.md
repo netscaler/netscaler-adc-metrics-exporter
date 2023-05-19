@@ -11,6 +11,10 @@ This is a simple server that scrapes [Citrix ADC](https://www.citrix.com/product
 To monitor stats and counters of Citrix ADC instances, citrix-adc-metric-exporter can be run as a container or script. It collects Citrix ADC stats such as total hits to a vserver, http request rate, ssl encryption-decryption rate, etc from the Citrix ADC instances and holds them until the Prometheus server pulls the stats and stores them with a timestamp. Grafana can then be pointed to the Prometheus server to fetch the stats, plot them, set alarms, create heat maps, generate tables, etc as needed to analyse the Citrix ADC stats. 
 
    Details about setting up the exporter to work in an environment as given in the figure is provided in the following sections. A note on which Citrix ADC entities/metrics the exporter scrapes by default and how to modify it is also explained.
+   
+**Note:**
+You can now directly export the metrics from NetScaler (Citrix ADC) to Prometheus without deploying Citrix ADC metrics exporter.
+For more information, see [Monitoring NetScaler, applications, and application security using Prometheus](https://docs.netscaler.com/en-us/citrix-adc/current-release/ns-ag-appflow-intro-wrapper-con/prometheus-integration.html).   
 
 #### Participate:
 
