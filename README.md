@@ -13,8 +13,8 @@ To monitor stats and counters of Citrix ADC instances, citrix-adc-metric-exporte
    Details about setting up the exporter to work in an environment as given in the figure is provided in the following sections. A note on which Citrix ADC entities/metrics the exporter scrapes by default and how to modify it is also explained.
    
 **Note:**
-You can now directly export the metrics from NetScaler (Citrix ADC) to Prometheus without deploying Citrix ADC metrics exporter.
-For more information, see [Monitoring NetScaler, applications, and application security using Prometheus](https://docs.netscaler.com/en-us/citrix-adc/current-release/ns-ag-appflow-intro-wrapper-con/prometheus-integration.html).   
+
+For more information on directly exporting the metrics from NetScaler (Citrix ADC) to Prometheus without deploying Citrix ADC metrics exporter see [Monitoring NetScaler, applications, and application security using Prometheus](https://docs.netscaler.com/en-us/citrix-adc/current-release/ns-ag-appflow-intro-wrapper-con/prometheus-integration.html).   
 
 #### Participate:
 
