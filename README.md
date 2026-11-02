@@ -67,10 +67,10 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 --timeout        | Specify timeout period for exporter to obtain response from target Citrix ADCs. Default: 10s
 --metrics-file   | The location of metrics.json file. Default: /exporter/metrics.json
 --log-file       | The location of exporter.log file. Default: /exporter/exporter.log
---log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: INFO
+--log-level      | The level of logging. DEBUG, INFO, WARN, ERROR or CRITICAL Default: INFO
 --config-file    | File with configs such as ```username```, ```password```, ```validate-cert```, ```cacert-path```, etc. Helps supply username and password through file rather than CLI.
---validate-cert. | Specify if ca certifcate is to be validated to access Citrix ADC. Default: 'no'. Valid value: 'yes'
---cacert-path.   | Provide valid cert path if "-validate-cert" set to 'yes'. cert path will only be considered if '--validate-cert' is set to 'yes'.
+--validate-cert. | Whether the ADC certificate is validated. 'auto' (default): validate whenever the session is HTTPS, using --cacert-path when supplied and the container trust store otherwise. 'yes': validate, and --cacert-path becomes mandatory. 'no': do not validate the ADC certificate (not recommended).
+--cacert-path.   | CA certificate used to validate the ADC. Mandatory when '--validate-cert' is 'yes'. Optional when '--validate-cert' is 'auto': the exporter falls back to the container trust store instead of exiting. Expect no warning in the default case of no path configured at all, which is reported at INFO; a path that is configured but names no existing file is reported at CRITICAL, because the anchor the operator asked for is not the one in effect. A path that does exist but is unreadable or is not a valid PEM is used as-is, and every ADC call then fails; the exporter never downgrades to an unverified session.
 --k8sCICprefix   | Provide the prefix if exporter is used in kubernetes enviroment with Citrix ingress controller, "k8s_ingress_service_stats" dashboard can be used only if correct CICprefix is provided and CIC version is 1.2.0 and above. Default prefix is "K8s"  
 
 The exporter can be setup as given in the diagram using;
@@ -83,6 +83,8 @@ This directs the exporter container to scrape 10.0.0.1 IP, and the expose the st
 
 File 'config.yaml' should contain username and password of the ADC to which exporter connects to. For reference, refer config.yaml.example which specifies the format for providing the login credentials. 
 
+Keys in config.yaml may be written with or without their leading dashes ('--validate-cert' and 'validate-cert' both work). Precedence is **command line > config.yaml > environment variable > default**: a setting given on the command line is kept and the config.yaml key for it is ignored, with a warning in the exporter log.
+
 Login credentials can also be provided using environment variables using NS_USER, NS_PASSWORD.Though config file input is the preferred method for security concerns.
 
 The user can then access the exported metrics directly thorugh port 8888 on the machine where the exporter is running, or Prometheus and Grafana can be setup to view the exported metrics though their GUI.
@@ -92,11 +94,11 @@ As an optional configuration, Citrix ADC exporter allows you to validate the SSL
 
 For this:
 
--- In config.yaml, '--validate-cert' option should be set to 'yes', and certificate path should be provided using'--cacert-path' argument. 
+-- In config.yaml, '--validate-cert' option should be set to 'yes', and certificate path must be provided using '--cacert-path' argument. With '--validate-cert' left at its default of 'auto' the ADC certificate is validated against the container trust store and '--cacert-path' is optional. 
 
 -- Please confirm that certificate and '--cert-path' provided is valid.
 
--- Additionaly, '--validate-cert(default='no')' and '--secure(default='yes')' options should be set to 'yes'.
+-- Since 1.7.0 the defaults are '--validate-cert=auto' and '--secure=yes', so the ADC certificate is validated out of the box. '--validate-cert=no' turns validation off (not recommended).
 
 
 
@@ -108,15 +110,15 @@ For this:
 <summary>Usage as a Container</summary>
 <br>
 
-In order to use the exporter as a container, the image ```quay.io/citrix/citrix-adc-metrics-exporter:1.4.9``` will need to be pulled using;
+In order to use the exporter as a container, the image ```quay.io/netscaler/netscaler-adc-metrics-exporter:1.7.0``` will need to be pulled using;
 ```
-docker pull quay.io/citrix/citrix-adc-metrics-exporter:1.4.9
+docker pull quay.io/netscaler/netscaler-adc-metrics-exporter:1.7.0
 ```
 **NOTE:** It can also be build locally using ```docker build -f Dockerfile -t <image_name>:<tag> ./```
 
 Now, exporter can be run using:
 ```
-docker run -dt -p <host_port>:<container_port> --mount type=bind,source=<host-path-for-config-file>,target=/exporter/config.yaml quay.io/citrix/citrix-adc-metrics-exporter:1.4.9 [flags] --config-file=/exporter/config.yaml
+docker run -dt -p <host_port>:<container_port> --mount type=bind,source=<host-path-for-config-file>,target=/exporter/config.yaml quay.io/netscaler/netscaler-adc-metrics-exporter:1.7.0 [flags] --config-file=/exporter/config.yaml
 ```
 where the flags are:
 
@@ -130,22 +132,24 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 --timeout        | Specify timeout period for exporter to obtain response from target Citrix ADC. Default: 10s
 --metrics-file   | The location of metrics.json file. Default: /exporter/metrics.json
 --log-file       | The location of exporter.log file. Default: /exporter/exporter.log
---log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: INFO
---config-file    | File with configs such as ```username```, ```password```, ```validate-cert``, ```cacert-path```, etc. Helps supply username and password through file rather than CLI for secure deployment.
---validate-cert  | Specify if ca certifcate is to be validated to access Citrix ADC. Default: 'no'. Valid value: 'yes'
---cacert-path    | Provide valid cert path if "--validate-cert" set to 'yes'. cert path will only be considered if '--validate-cert' is set to 'yes'.
+--log-level      | The level of logging. DEBUG, INFO, WARN, ERROR or CRITICAL Default: INFO
+--config-file    | File with configs such as ```username```, ```password```, ```validate-cert```, ```cacert-path```, etc. Helps supply username and password through file rather than CLI for secure deployment.
+--validate-cert  | Whether the ADC certificate is validated. 'auto' (default): validate whenever the session is HTTPS, using --cacert-path when supplied and the container trust store otherwise. 'yes': validate, and --cacert-path becomes mandatory. 'no': do not validate the ADC certificate (not recommended).
+--cacert-path    | CA certificate used to validate the ADC. Mandatory when '--validate-cert' is 'yes'. Optional when '--validate-cert' is 'auto': the exporter falls back to the container trust store instead of exiting. Expect no warning in the default case of no path configured at all, which is reported at INFO; a path that is configured but names no existing file is reported at CRITICAL, because the anchor the operator asked for is not the one in effect. A path that does exist but is unreadable or is not a valid PEM is used as-is, and every ADC call then fails; the exporter never downgrades to an unverified session.
 --k8sCICprefix   | Provide the prefix if exporter is used in kubernetes enviroment with Citrix ingress controller, "k8s_ingress_service_stats" dashboard can be used only if correct CICprefix is provided and CIC version is 1.2.0 and above. Default prefix is "K8s"  
 
 
 To setup the exporter as given in the diagram, the following command can be used:
 ```
-docker run -dt -p 8888:8888 --mount type=bind,source=/path/to/config.yaml,target=/exporter/config.yaml --name citrix-adc-exporter quay.io/citrix/citrix-adc-metrics-exporter:1.4.9 --target-nsip=10.0.0.1 --port=8888 --config-file=/exporter/config.yaml
+docker run -dt -p 8888:8888 --mount type=bind,source=/path/to/config.yaml,target=/exporter/config.yaml --name citrix-adc-exporter quay.io/netscaler/netscaler-adc-metrics-exporter:1.7.0 --target-nsip=10.0.0.1 --port=8888 --config-file=/exporter/config.yaml
 ```
 This directs the exporter container to scrape the 10.0.0.1 IP, and the expose the stats it collects on port 8888.
 
 **NOTE:** If default port to connect with ADC is not 80/443 for HTTP/HTTPS respectively, then append --target-nsip with port. For instance, if port for ADC is 9080 then use: --target-nsip=10.0.0.1:9080
 
 File 'config.yaml' should contain username and password of the ADC to which exporter connects to. For reference, refer config.yaml.example which specifies the format for providing the login credentials. Config.yaml file then needs to be mounted to the container at fixed target specified('/exporter/config.yaml') only.
+
+Keys in config.yaml may be written with or without their leading dashes ('--validate-cert' and 'validate-cert' both work). Precedence is **command line > config.yaml > environment variable > default**: a setting given on the command line is kept and the config.yaml key for it is ignored, with a warning in the exporter log. This matters for '--validate-cert' and '--secure', where a config file that silently won over an explicit flag could downgrade the ADC session.
 
 Login credentials can also be provided using environment variables using NS_USER, NS_PASSWORD.Though config file input is the preferred method for security concerns.
 
@@ -159,20 +163,20 @@ As an optional configuration, Citrix ADC exporter allows you to validate the SSL
 
 For this:
 
--- In config.yaml, '--validate-cert' option should be set to 'yes', and certificate path should be provided using'--cacert-path' argument.
+-- In config.yaml, '--validate-cert' option should be set to 'yes', and certificate path must be provided using '--cacert-path' argument. With '--validate-cert' left at its default of 'auto' the ADC certificate is validated against the container trust store and '--cacert-path' is optional.
 
 -- Please confirm that certificate and '--cert-path' provided is valid. 
 
--- Additionaly, '--validate-cert(default='no')' and '--secure(default='yes')' options should be set to 'yes' for certificate to be considered.
+-- Since 1.7.0 the defaults are '--validate-cert=auto' and '--secure=yes', so the ADC certificate is validated out of the box. '--validate-cert=no' turns validation off (not recommended).
 
 Certificate should then be mounted at the '--cacert-path' provided. For instance, if cert is 'cacert.pem' and '--cacert-path' provided in 'config.yaml' is '/exporter/cacert.pem'
 
 ```
-docker run -dt -p 8888:8888 --mount type=bind,source=/path/to/config.yaml,target=/exporter/config.yaml --mount type=bind,source=/path/to/cacert.pem,target=/exporter/cacert.pem --name citrix-adc-exporter quay.io/citrix/citrix-adc-metrics-exporter:1.4.9 --target-nsip=10.0.0.1 --port=8888 --config-file=/exporter/config.yaml
+docker run -dt -p 8888:8888 --mount type=bind,source=/path/to/config.yaml,target=/exporter/config.yaml --mount type=bind,source=/path/to/cacert.pem,target=/exporter/cacert.pem --name citrix-adc-exporter quay.io/netscaler/netscaler-adc-metrics-exporter:1.7.0 --target-nsip=10.0.0.1 --port=8888 --config-file=/exporter/config.yaml
 ``` 
 **NOTE:** If default port to connect with ADC is not 80/443 for HTTP/HTTPS respectively, then append --target-nsip with port. For instance, if port for ADC is 9080 then use: --target-nsip=10.0.0.1:9080
 
-Cert validation options can also be provided using environment variables using NS_VALIDATE_CERT, NS_CACERT_PATH. Thoughconfig file input is the preferred method.
+Cert validation options can also be provided using environment variables using NS_VALIDATE_CERT ('yes', 'no' or 'auto'), NS_CACERT_PATH. Though config file input is the preferred method. A '--validate-cert' given on the command line or in config.yaml overrides NS_VALIDATE_CERT.
 
 
 
@@ -199,7 +203,7 @@ metadata:
 spec:
   containers:
     - name: exporter
-      image: quay.io/citrix/citrix-adc-metrics-exporter:1.4.9
+      image: quay.io/netscaler/netscaler-adc-metrics-exporter:1.7.0
       args:
         - "--target-nsip=10.0.0.1"
         - "--port=8888"
@@ -231,6 +235,8 @@ spec:
     app: exporter
 ```
 
+**NOTE:** From image 1.7.0 the exporter validates the ADC certificate by default. The example above therefore requires the ADC to present a certificate that the container trust store accepts for the value given to `--target-nsip`. If your ADC uses a self-signed or private-CA certificate, either mount the CA and add `--cacert-path=/mnt/certs/cacert.pem` as shown in the next example, or add `--validate-cert=no` to turn validation off (not recommended). Whenever validation is on ('auto' or 'yes'), including the `--cacert-path` route, the value of `--target-nsip` must match a name in the ADC certificate: a bare IP will not match a hostname-only certificate, and supplying the right CA does not waive that check. It does not apply to `--validate-cert=no`, which performs no name check at all.
+
 **NOTE:** If default port to connect with ADC is not 80/443 for HTTP/HTTPS respectively, then append --target-nsip with port. For instance, if port for ADC is 9080 then use: --target-nsip=10.0.0.1:9080
 
 Login Credentials can also be provided using environment variables NS_USER, NS_PASSWORD. Though, secret volume is the preffered method for security.
@@ -247,10 +253,10 @@ flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 --timeout        | Specify timeout period for exporter to obtain response from target Citrix ADC. Default: 10s
 --metrics-file   | The location of metrics.json file. Default: /exporter/metrics.json
 --log-file       | The location of exporter.log file. Default: /exporter/exporter.log
---log-level      | The level of logging. DEBUG, INFO, WARNING, ERROR or CRITICAL Default: INFO
+--log-level      | The level of logging. DEBUG, INFO, WARN, ERROR or CRITICAL Default: INFO
 --config-file    | File with configs such as ```username```, ```password```, ```validate-cert```, ```cacert-path```, etc. Helps supply username and password through file rather than CLI.
---validate-cert  | Specify if ca certifcate is to be validated to access Citrix ADC. Default: 'no'. Valid value: 'yes'
---cacert-path    | Provide valid cert path if "--validate-cert" set to 'yes'. cert path will only be considered if '--validate-cert' is set to 'yes'.
+--validate-cert  | Whether the ADC certificate is validated. 'auto' (default): validate whenever the session is HTTPS, using --cacert-path when supplied and the container trust store otherwise. 'yes': validate, and --cacert-path becomes mandatory. 'no': do not validate the ADC certificate (not recommended).
+--cacert-path    | CA certificate used to validate the ADC. Mandatory when '--validate-cert' is 'yes'. Optional when '--validate-cert' is 'auto': the exporter falls back to the container trust store instead of exiting. Expect no warning in the default case of no path configured at all, which is reported at INFO; a path that is configured but names no existing file is reported at CRITICAL, because the anchor the operator asked for is not the one in effect. A path that does exist but is unreadable or is not a valid PEM is used as-is, and every ADC call then fails; the exporter never downgrades to an unverified session.
 --k8sCICprefix   | Provide the prefix if exporter is used in kubernetes enviroment with Citrix ingress controller, "k8s_ingress_service_stats" dashboard can be used only if correct CICprefix is provided and CIC version is 1.2.0 and above. Default prefix is "K8s"  
 
 
@@ -262,11 +268,11 @@ User need to first mount the secret at any valid path inside pod. For instance, 
 kubectl create secret generic exp-ca-cert --from-file=./cacert.pem"
 ```
 
--- In args section of yaml, '--validate-cert' option should be set to 'yes', and certificate path should be provided using'--cacert-path' argument.
+-- In args section of yaml, '--validate-cert' option should be set to 'yes', and certificate path must be provided using '--cacert-path' argument. With '--validate-cert' left at its default of 'auto' the ADC certificate is validated against the container trust store and '--cacert-path' is optional.
 
 -- Please confirm that mounted certificate and '--cert-path' provided are valid. 
 
--- Additionaly, '--validate-cert(default='no')' and '--secure(default='yes')' options should be set to 'yes' for certificate to be considered.
+-- Since 1.7.0 the defaults are '--validate-cert=auto' and '--secure=yes', so the ADC certificate is validated out of the box. '--validate-cert=no' turns validation off (not recommended).
  
 ```
 apiVersion: v1
@@ -278,7 +284,7 @@ metadata:
 spec:
   containers:
     - name: exporter
-      image: quay.io/citrix/citrix-adc-metrics-exporter:1.4.9
+      image: quay.io/netscaler/netscaler-adc-metrics-exporter:1.7.0
       args:
         - "--target-nsip=10.0.0.1"
         - "--port=8888"
@@ -319,7 +325,7 @@ spec:
 ```
 **NOTE:** If default port to connect with ADC is not 80/443 for HTTP/HTTPS respectively, then append --target-nsip with port. For instance, if port for ADC is 9080 then use: --target-nsip=10.0.0.1:9080
 
-Cert Credentials can also be provided using environment variables NS_VALIDATE_CERT, NS_CACERT_PATH instead of args '--validate-cert', '--cacert-path' respectively.
+Cert Credentials can also be provided using environment variables NS_VALIDATE_CERT ('yes', 'no' or 'auto'), NS_CACERT_PATH instead of args '--validate-cert', '--cacert-path' respectively. An arg given on the command line overrides the environment variable.
 
 
 </details>
